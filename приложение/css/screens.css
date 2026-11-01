@@ -1,0 +1,175 @@
+/* ▪ Файл css/screens.css: вид экранов: продажа, плитки, списки, возврат, перемещения, заказы, касса, отчёты, расходы, клиенты, люди, настройки. Подключается в index.html по порядку, порядок важен. */
+/* ===== Экран «Продажа» (образец «Одно число» из веера 1) ===== */
+.sale-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.cols { display: grid; gap: var(--s5); min-width: 0; }
+.cols > * { min-width: 0; }
+@container c (min-width: 640px) { .cols { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+.hero-sum { container-type: inline-size; }
+.hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .9; letter-spacing: -0.04em; font-size: clamp(44px, 22cqi, 96px); margin-top: var(--s2); white-space: nowrap; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { font-size: 13px; color: var(--muted); }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+
+/* ===== Плитки утра (образец из веера 1, вариант 4), сжимаются по ширине контента ===== */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.tile { container-type: inline-size; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); align-content: space-between; min-width: 0; }
+.tile.s2 { grid-column: span 2; }
+.tile.inv { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tile.inv .t-label { color: inherit; opacity: .7; }
+.tile.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+.tile .t-mid { white-space: nowrap; font-size: clamp(14px, 14cqi, 22px); }
+.tile .t-big { white-space: nowrap; font-size: clamp(20px, 11cqi, 32px); }
+.tile .t-seller { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: clamp(14px, 6cqi, 18px); }
+.tile-hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(34px, 17cqi, 84px); font-weight: 800; line-height: .9; letter-spacing: -0.035em; white-space: nowrap; }
+@container c (min-width: 560px) {
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tile.hero { grid-column: span 2; grid-row: span 2; }
+}
+
+/* ===== Список товара ===== */
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; gap: var(--s3); align-items: center; width: 100%; min-height: 64px; padding: var(--s3) 0; background: transparent; border: 0; border-bottom: 1px solid var(--line); text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.prow > .ic { width: 20px; height: 20px; color: var(--muted); }
+.prow:last-child { border-bottom: 0; }
+.prow b { font-weight: 700; }
+.prow .sub { display: block; font-size: 13px; color: var(--muted); }
+.prow .r { display: grid; justify-items: end; gap: 4px; }
+.prow .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.empty { text-align: center; display: grid; justify-items: center; gap: var(--s3); padding: var(--s6) var(--s4); }
+.empty .ic { width: 40px; height: 40px; color: var(--muted); stroke-width: 1.5; }
+.empty p { color: var(--muted); max-width: 34ch; }
+#userBtn { justify-self: end; }
+/* Экран «Ещё»: список разделов, которых нет в нижнем меню */
+.mrow { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 56px; padding: 0 var(--s1); background: transparent; border: 0; border-bottom: 1px solid var(--line); text-align: left; cursor: pointer; font-weight: 500; }
+.mrow:last-child { border-bottom: 0; }
+.mrow .grow { flex: 1; }
+.mrow .ic:last-child { width: 20px; height: 20px; color: var(--muted); }
+/* Карточка товара (образец «Сначала магазин» из веера 4) */
+.top-row { display: flex; align-items: center; gap: var(--s3); }
+.pricebar { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.shops { display: grid; gap: var(--s2); }
+.shop { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); }
+.shop.own { border-color: var(--line-strong); }
+.shop-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.pills { display: grid; gap: var(--s2); }
+.pill { background: var(--surface-2); border-radius: var(--r-field); padding: var(--s2) 0; display: grid; justify-items: center; gap: 2px; min-width: 0; }
+.pill .t-label { font-size: 12px; line-height: 1; }
+.pill .num { font-size: 20px; font-weight: 700; line-height: 1.1; }
+.pill.z { background: transparent; border: 1px dashed var(--line); }
+.pill.z .num { color: var(--muted); font-weight: 500; }
+/* Экран «Возврат» (образец «Из чека» из веера 5) */
+.rs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.rs button { min-height: 56px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; line-height: 1.2; padding: 0 6px; cursor: pointer; }
+.rs button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tog { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 56px; padding: 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--surface); text-align: left; font-weight: 500; cursor: pointer; }
+.tog .box { width: 24px; height: 24px; border-radius: var(--r-chip); border: 1.5px solid var(--line-strong); display: grid; place-items: center; flex: none; }
+.tog[aria-pressed="true"] .box { background: var(--accent); color: var(--on-accent); }
+.tog .box .ic { width: 16px; height: 16px; stroke-width: 2.5; visibility: hidden; }
+.tog[aria-pressed="true"] .box .ic { visibility: visible; }
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); background: var(--surface-2); border-radius: var(--r-field); font-size: 14px; }
+.notice .ic { width: 20px; height: 20px; margin-top: 1px; }
+.chk { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s1); }
+.chk-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.cl { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 0 var(--s3); align-items: center; width: 100%; min-height: 64px; padding: var(--s2) 0; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.cl .rad { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line-strong); display: grid; place-items: center; grid-row: span 2; }
+.cl[aria-pressed="true"] .rad::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.cl .name { font-weight: 700; }
+.cl .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; grid-row: span 2; }
+.cl .meta { font-size: 13px; color: var(--muted); }
+.linkbtn { min-height: 48px; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; cursor: pointer; justify-self: start; padding: 0 var(--s1); }
+/* Перемещения (образец «Всё сошлось» из веера 6) */
+.fchips.tabs { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); overflow: visible; }
+.fchips.tabs .fchip { display: grid; justify-items: center; gap: 2px; min-height: 56px; padding: var(--s2) var(--s1); font-size: 13px; }
+.fchips.tabs .fchip .num { font-size: 18px; font-weight: 800; line-height: 1; }
+/* Заказы и доставки (веер 7: менеджер вариант 1, курьер вариант 3) */
+a.btn { text-decoration: none; }
+.btn-sm { min-height: 48px; }
+.fchips.wrap { flex-wrap: wrap; overflow: visible; }
+.seg.stack { grid-template-columns: minmax(0, 1fr); }
+.prog { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s1); }
+.prog i { height: 4px; border-radius: 2px; background: var(--line); }
+.prog i.on { background: var(--accent); }
+.dcard { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s3); min-width: 0; }
+.dmini { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.dmini .ttl { display: grid; gap: 2px; min-width: 0; }
+.dmini .r2 { display: grid; justify-items: end; gap: 4px; flex: none; }
+.dmini .r2 .amt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.dtwo { display: grid; grid-template-columns: 1fr 1.3fr; gap: var(--s2); }
+.dcard .seg button { font-size: 14px; padding: 0 2px; }
+/* Касса и смена (веер 8: закрытие по шагам, расхождение: формула сверху и хронология) */
+.notice.bad { background: var(--bad-bg); color: var(--bad); }
+.prog.p2 { grid-template-columns: repeat(2, 1fr); }
+.big-in { display: flex; align-items: baseline; gap: var(--s2); border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-field); padding: var(--s3) var(--s4); }
+.big-in:focus-within { border-color: var(--line-strong); }
+.big-in input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; outline: 0; font-family: var(--font-num); font-weight: 800; font-size: 40px; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
+.big-in input::placeholder { color: var(--muted); }
+.big-in .cur { font-family: var(--font-num); font-weight: 800; font-size: 28px; color: var(--muted); }
+.seg.stack button { text-align: left; font-size: 14px; padding: 0 var(--s3); }
+.done { display: grid; justify-items: center; gap: var(--s3); text-align: center; padding: var(--s5) var(--s2); }
+.done .okc { width: 64px; height: 64px; border-radius: 50%; background: var(--good-bg); color: var(--good); display: grid; place-items: center; }
+.done .okc .ic { width: 32px; height: 32px; stroke-width: 2.5; }
+.formula { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); }
+.frow { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.frow .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; white-space: nowrap; }
+.frow.res { border-top: 1px solid var(--line-strong); padding-top: var(--s3); }
+.led { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.led:last-child { border-bottom: 0; }
+.led .tm { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); font-weight: 500; }
+.led .tx { font-weight: 500; }
+.led .tx .sub { display: block; font-size: 13px; color: var(--muted); }
+.led .amt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; white-space: nowrap; }
+.led .bal { grid-column: 3; text-align: right; font-size: 12px; color: var(--muted); font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.notice.good { background: var(--good-bg); color: var(--good); }
+.ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.ln:last-child { border-bottom: 0; }
+.ln .name { font-weight: 700; }
+.ln .meta { font-size: 13px; color: var(--muted); }
+.ln .qty { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; grid-row: span 2; text-align: right; }
+.ln.diff .name, .ln.diff .qty { color: var(--bad); }
+.stp { display: flex; align-items: center; grid-row: span 2; }
+.stp button { width: 44px; height: 48px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+.stp button:first-child { border-radius: var(--r-btn) 0 0 var(--r-btn); }
+.stp button:last-child { border-radius: 0 var(--r-btn) var(--r-btn) 0; }
+.stp .v { min-width: 40px; height: 48px; display: grid; place-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); font-family: var(--font-num); font-weight: 800; font-size: 20px; }
+
+/* Отчёты (веер 9: «Из каждых 100 ₽» и магазины с полосками и сортировкой) */
+.fchips.eq { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); overflow: visible; }
+.fchips.eq .fchip { min-height: 48px; padding: 0 var(--s1); font-size: 13px; }
+.rep-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.rep-acc { background: var(--accent); } .rep-mut { background: var(--muted); } .rep-good { background: var(--good); }
+.rep-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.rep-bar i { display: block; height: 100%; border-radius: 4px; }
+.rep-shop { display: grid; gap: var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.rep-shop:last-child { border-bottom: 0; }
+.rep-shop .h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.rep-shop .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; white-space: nowrap; }
+.rep-stack { display: flex; height: 40px; border-radius: var(--r-field); overflow: hidden; gap: 2px; }
+.rep-stack i { display: block; height: 100%; }
+.rep-leg { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: var(--s3); align-items: center; min-height: 44px; border-bottom: 1px solid var(--line); }
+.rep-leg:last-child { border-bottom: 0; }
+.rep-leg .sw { width: 12px; height: 12px; border-radius: 3px; }
+.rep-leg .pc { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--muted); font-size: 13px; text-align: right; min-width: 36px; }
+.rep-leg .am { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+
+/* Расходы, клиенты, люди, настройки (шаг 2.4) */
+.narrow { max-width: 560px; }
+.mrow.srow { min-height: 64px; padding: var(--s2) var(--s1); }
+.srow .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.stp.w .v { min-width: 76px; padding: 0 var(--s2); white-space: nowrap; }
+.togs { display: grid; gap: var(--s2); }
+@container c (min-width: 640px) { .togs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tog.multi { padding: var(--s2) var(--s4); }
+.tog.multi .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.prow .r .t-label { font-size: 12px; }
+.dtwo.even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dtwo.even .btn { padding: 0 var(--s3); }
+a.iconbtn { color: var(--text); }
+@container c (max-width: 440px) { .fchips.eq.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.callrow { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 64px; border-bottom: 1px solid var(--line); }
+.callrow:last-child { border-bottom: 0; }
+.callrow .sub { display: block; font-size: 13px; color: var(--muted); }
+

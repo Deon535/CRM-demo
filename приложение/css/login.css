@@ -1,0 +1,25 @@
+/* ▪ Файл css/login.css: окно входа и выбор роли. Подключается в index.html по порядку, порядок важен. */
+/* ===== Окно входа ===== */
+.modal { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: var(--s4); opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility 0s .25s; }
+.modal.open { opacity: 1; visibility: visible; transition: opacity .25s var(--ease); }
+.modal .back { position: absolute; inset: 0; background: var(--scrim); }
+.card { position: relative; width: 100%; max-width: 380px; max-height: 100%; overflow-y: auto; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); transform: translateY(12px); transition: transform .3s var(--ease); }
+.modal.open .card { transform: none; }
+.card-h { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.lbl { display: grid; gap: var(--s1); font-size: 13px; font-weight: 500; color: var(--muted); }
+.inp { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); width: 100%; outline: 0; }
+.inp:focus { border-color: var(--line-strong); }
+.inp::placeholder { color: var(--muted); }
+.rp-btn { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); width: 100%; min-height: 48px; padding: 0 var(--s3) 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--bg); cursor: pointer; text-align: left; }
+.rp-btn .rp-val { flex: 1; font-weight: 700; }
+.rp-btn .ic { width: 20px; height: 20px; color: var(--muted); transition: transform .2s var(--ease); }
+.rp-btn[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.rp-list { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s var(--ease); }
+.rp-list.open { grid-template-rows: 1fr; }
+.rp-inner { overflow: hidden; border-radius: var(--r-field); }
+.rp-list.open .rp-inner { border: 1px solid var(--line); margin-top: var(--s1); }
+.opt { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 var(--s4); border-bottom: 1px solid var(--line); cursor: pointer; font-weight: 500; background: transparent; width: 100%; border-left: 0; border-right: 0; border-top: 0; text-align: left; }
+.opt:last-child { border-bottom: 0; }
+.opt[aria-pressed="true"] { font-weight: 800; }
+.opt .ic { width: 20px; height: 20px; visibility: hidden; }
+.opt[aria-pressed="true"] .ic { visibility: visible; }

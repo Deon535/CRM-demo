@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 4: Карточка товара</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; white-space: nowrap; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; border: 1px solid transparent; width: 100%; background: var(--accent); color: var(--on-accent); cursor: pointer; }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.fchips { display: flex; gap: var(--s2); }
+.fchip { flex: none; min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+
+/* Карточка товара: общая шапка */
+.top { display: flex; align-items: center; gap: var(--s3); }
+.pricebar { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.scr { display: grid; gap: var(--s4); min-width: 0; }
+
+/* Вариант 1: таблица размер × магазин */
+.tbl { display: grid; }
+.th, .tr { display: grid; grid-template-columns: minmax(0, 1.5fr) repeat(4, minmax(0, 1fr)); align-items: center; min-height: 48px; padding: 0 var(--s2); }
+.th { min-height: 40px; font-size: 13px; font-weight: 500; color: var(--muted); border-bottom: 1px solid var(--line-strong); }
+.th span:not(:first-child), .tr span:not(:first-child) { text-align: center; }
+.tr { border-bottom: 1px solid var(--line); }
+.tr .sn { font-weight: 500; }
+.tr.own { background: var(--surface-2); border-radius: var(--r-field); border-bottom-color: transparent; }
+.tr.own .sn { font-weight: 800; }
+.tr .num { font-size: 18px; font-weight: 700; }
+.num.z { color: var(--muted); font-weight: 500; }
+.tr.tot { border-top: 1px solid var(--line-strong); border-bottom: 0; }
+.tr.tot .sn { color: var(--muted); font-size: 13px; }
+.tr.mute { color: var(--muted); font-size: 13px; }
+.tr.mute .span4 { grid-column: span 4; text-align: left !important; }
+
+/* Вариант 2: сначала размер */
+.sizes { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s2); }
+.sz { min-height: 64px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); display: grid; place-items: center; align-content: center; gap: 2px; cursor: pointer; }
+.sz b { font-family: var(--font-num); font-size: 20px; font-weight: 800; line-height: 1; }
+.sz .t-label { line-height: 1; }
+.sz[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sz[aria-pressed="true"] .t-label { color: inherit; opacity: .7; }
+.where { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 56px; border-bottom: 1px solid var(--line); }
+.where:last-child { border-bottom: 0; }
+.where .nm { display: flex; align-items: center; gap: var(--s2); font-weight: 700; flex-wrap: wrap; }
+.where .cnt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 24px; font-weight: 800; letter-spacing: -0.02em; }
+.where.zero { color: var(--muted); }
+.where.zero .nm { font-weight: 500; }
+
+/* Вариант 3: сначала магазин */
+.shops { display: grid; gap: var(--s2); }
+.shop { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); }
+.shop.own { border-color: var(--line-strong); }
+.shop-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.shop-h b { font-weight: 700; }
+.pills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--s2); }
+.pill { background: var(--surface-2); border-radius: var(--r-field); padding: var(--s2) 0; display: grid; justify-items: center; gap: 2px; }
+.pill .t-label { font-size: 12px; line-height: 1; }
+.pill .num { font-size: 20px; font-weight: 700; line-height: 1.1; }
+.pill.z { background: transparent; border: 1px dashed var(--line); }
+.pill.z .num { color: var(--muted); font-weight: 500; }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s3); }
+.about b { font-weight: 700; }
+.note { font-size: 13px; color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.col { width: 375px; max-width: 100%; }
+.col > .t-h2 { margin-bottom: var(--s3); }
+.ph { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1 Таблица</button>
+    <button class="pick" data-k="v" data-val="2">2 Сначала размер</button>
+    <button class="pick" data-k="v" data-val="3">3 Сначала магазин</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Роль</b>
+    <button class="pick" data-k="r" data-val="Продавец">Продавец (Дербент)</button>
+    <button class="pick" data-k="r" data-val="Владелец">Владелец</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var N = function (s) { return String(s).replace(/ /g, ' '); };
+var SHOPS = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
+var SIZES = ['S', 'M', 'L', 'XL'];
+var ROWS = [[1, 3, 2, 0], [0, 1, 1, 0], [0, 2, 0, 1], [1, 0, 1, 0]];   // как в каркасе, «Рубашка Oxford»: доступно, магазины по порядку
+var ROLE = { 'Продавец': { own: 2 }, 'Владелец': { own: -1 } };
+var V = {
+  '1': { name: '1. Таблица', how: 'Магазины строками, размеры столбцами, свой магазин подсвечен. Всё видно одним взглядом.', plus: 'Лучший обзор: сразу видно, где что лежит и где дыры. Ничего не нужно нажимать.', minus: 'Мелкая сетка: на 5 размерах (S–XXL) и длинных названиях магазинов на телефоне станет тесно.' },
+  '2': { name: '2. Сначала размер', how: 'Нажимаешь размер, ниже список магазинов, где он есть: свой первым, потом по убыванию.', plus: 'Отвечает ровно на вопрос покупателя: «есть M, и где?». Крупные числа и крупные нажимаемые зоны.', minus: 'Чтобы увидеть всю картину, нужно пройти по размерам по одному.' },
+  '3': { name: '3. Сначала магазин', how: 'Карточка на каждый магазин, внутри размеры крупными числами. Свой магазин с чёрной рамкой.', plus: 'Отвечает на «что есть у нас на полке?». Хорошо читается, зоны большие.', minus: 'Самый длинный по высоте: 4 магазина и склад это много прокрутки.' }
+};
+var st = { v: 'all', t: 'light', r: 'Продавец', size: 1 };
+var own = function () { return ROLE[st.r].own; };
+var cell = function (c) { return c ? '<span class="num">' + c + '</span>' : '<span class="num z">&ndash;</span>'; };
+var colSum = function (j) { return ROWS.reduce(function (a, r) { return a + r[j]; }, 0); };
+var total = ROWS.reduce(function (a, r) { return a + r.reduce(function (x, y) { return x + y; }, 0); }, 0);
+
+function head() {
+  return '<div class="top"><span class="iconbtn"><svg class="ic"><use href="#i-chevron-left"/></svg></span><span class="t-label">Товар / Рубашки</span></div>' +
+    '<div><div class="t-h1">Рубашка Oxford</div><div class="t-label" style="margin-top:6px">Артикул OX-WH / белый / S–XL</div></div>' +
+    '<div class="pricebar"><span class="t-big">' + N('4 990 ₽') + '</span><span class="chip chip-good">в сети <span class="num">' + total + '</span></span></div>' +
+    '<div class="fchips"><span class="fchip" aria-pressed="true">Белый</span><span class="fchip" aria-pressed="false">Голубой</span><span class="fchip" aria-pressed="false">Серый</span></div>';
+}
+function foot() {
+  var owner = st.r === 'Владелец';
+  var money = owner ?
+    '<div><div class="sec-h"><span class="t-h2">Закупка и прибыль</span></div>' +
+    '<div class="rowline"><span class="t-label">Закупка, последняя партия</span><span class="num" style="font-weight:700">' + N('2 600 ₽') + '</span></div>' +
+    '<div class="rowline"><span class="t-label">Прибыль с вещи</span><span class="num good" style="font-weight:800">' + N('2 390 ₽') + '</span></div></div>' : '';
+  var btns = owner ?
+    '<button class="btn btn-second">Переместить между магазинами</button>' :
+    '<button class="btn">Положить в чек</button><button class="btn btn-second">Забронировать</button>';
+  var legend = '<div class="note">Числа это «доступно»: на полке минус бронь. В брони <span class="num">1</span> шт (M, Махачкала).' + (own() >= 0 ? ' Ваш магазин выделен.' : '') + '</div>';
+  return legend + money + '<div style="display:grid;gap:var(--s2)">' + btns + '</div>';
+}
+
+function stock1() {
+  var rows = SHOPS.map(function (s, i) {
+    return '<div class="tr' + (i === own() ? ' own' : '') + '"><span class="sn">' + s + '</span>' + ROWS[i].map(function (c) { return '<span>' + cell(c) + '</span>'; }).join('') + '</div>';
+  }).join('');
+  return '<div class="tbl"><div class="th"><span></span>' + SIZES.map(function (s) { return '<span>' + s + '</span>'; }).join('') + '</div>' + rows +
+    '<div class="tr mute"><span class="sn">Склад</span><span class="span4">остатки не заведены</span></div>' +
+    '<div class="tr tot"><span class="sn">Всего</span>' + SIZES.map(function (s, j) { return '<span>' + cell(colSum(j)) + '</span>'; }).join('') + '</div></div>';
+}
+function stock2() {
+  var j = st.size, list = SHOPS.map(function (s, i) { return { s: s, i: i, c: ROWS[i][j] }; });
+  list.sort(function (a, b) { var ao = a.i === own() ? 1 : 0, bo = b.i === own() ? 1 : 0; if ((a.c > 0) !== (b.c > 0)) return a.c > 0 ? -1 : 1; if (ao !== bo) return bo - ao; return b.c - a.c; });
+  var have = list.filter(function (x) { return x.c > 0; }).length;
+  var sizes = '<div class="sizes">' + SIZES.map(function (s, k) { return '<button class="sz" data-size="' + k + '" aria-pressed="' + (k === j) + '"><b>' + s + '</b><span class="t-label"><span class="num">' + colSum(k) + '</span> шт</span></button>'; }).join('') + '</div>';
+  var summary = '<div class="t-label">Размер ' + SIZES[j] + ': есть в <b class="num">' + have + '</b> из <span class="num">4</span> магазинов, всего <span class="num">' + colSum(j) + '</span> шт</div>';
+  var rows = list.map(function (x) {
+    return '<div class="where' + (x.c ? '' : ' zero') + '"><span class="nm">' + x.s + (x.i === own() ? '<span class="chip chip-neutral">ваш магазин</span>' : '') + '</span>' +
+      (x.c ? '<span class="cnt">' + x.c + '</span>' : '<span class="t-label">нет</span>') + '</div>';
+  }).join('');
+  return '<div style="display:grid;gap:var(--s3)">' + sizes + summary + '<div>' + rows + '</div><div class="t-label">Склад: остатки не заведены</div></div>';
+}
+function stock3() {
+  var cards = SHOPS.map(function (s, i) {
+    var sum = ROWS[i].reduce(function (a, b) { return a + b; }, 0);
+    return '<div class="shop' + (i === own() ? ' own' : '') + '"><div class="shop-h"><b>' + s + '</b>' + (i === own() ? '<span class="chip chip-neutral">ваш магазин</span>' : '<span class="t-label"><span class="num">' + sum + '</span> шт</span>') + '</div>' +
+      '<div class="pills">' + ROWS[i].map(function (c, j) { return '<div class="pill' + (c ? '' : ' z') + '"><span class="t-label">' + SIZES[j] + '</span><span class="num">' + (c || '&ndash;') + '</span></div>'; }).join('') + '</div></div>';
+  }).join('');
+  return '<div class="shops">' + cards + '<div class="t-label" style="padding:var(--s1) 2px">Склад: остатки не заведены</div></div>';
+}
+var STOCK = { '1': stock1, '2': stock2, '3': stock3 };
+
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var list = st.v === 'all' ? ['1', '2', '3'] : [st.v];
+  document.getElementById('stage').innerHTML = '<div class="pair">' + list.map(function (v) {
+    return '<div class="col"><div class="t-h2">' + V[v].name + '</div><div class="ph"><div class="scr">' + head() + STOCK[v]() + foot() + '</div></div></div>';
+  }).join('') + '</div>';
+  document.getElementById('about').innerHTML = list.map(function (v) {
+    return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="note">Плюс:</span> ' + V[v].plus + '<br><span class="note">Минус:</span> ' + V[v].minus + '</div>';
+  }).join('') + '<div class="note">Образец: цвета «Голубой» и «Серый» не переключаются, числа из таблицы остатков каркаса. Закупка 2 600 ₽ придумана для демо.</div>';
+  document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+}
+document.addEventListener('click', function (e) {
+  var p = e.target.closest('.pick'); if (p) { st[p.dataset.k] = p.dataset.val; render(); return; }
+  var z = e.target.closest('.sz'); if (z) { st.size = +z.dataset.size; render(); }
+});
+render();
+</script>
+</body>
+</html>

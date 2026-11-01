@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 9: Прибыль</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s4); border-radius: var(--r-btn); font-weight: 700; border: 1px solid var(--line-strong); width: 100%; background: transparent; color: var(--text); white-space: nowrap; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.fchips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.fchip { min-height: 40px; padding: 0 var(--s3); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); min-height: 44px; padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+.scr { display: grid; gap: var(--s4); min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.top-row { display: flex; align-items: center; gap: var(--s3); }
+
+/* Плитка «Модульной сетки»: главная, чёрная */
+.tile { container-type: inline-size; background: var(--accent); color: var(--on-accent); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s2); min-width: 0; }
+.tile .t-label { color: inherit; opacity: .7; }
+.tile-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .9; letter-spacing: -0.035em; font-size: clamp(34px, 17cqi, 84px); white-space: nowrap; }
+
+/* Полосы */
+.bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.bar i { display: block; height: 100%; border-radius: 4px; }
+.f-acc { background: var(--accent); } .f-mut { background: var(--muted); } .f-good { background: var(--good); }
+.stp { display: grid; gap: var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.stp:last-child { border-bottom: 0; }
+.stp .h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.stp .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; letter-spacing: -0.015em; white-space: nowrap; }
+.shop { display: grid; gap: var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.shop:last-child { border-bottom: 0; }
+.shop .h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.shop .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; white-space: nowrap; }
+.stack { display: flex; height: 40px; border-radius: var(--r-field); overflow: hidden; gap: 2px; background: var(--bg); }
+.stack i { display: block; height: 100%; }
+.leg { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: var(--s3); align-items: center; min-height: 44px; border-bottom: 1px solid var(--line); }
+.leg:last-child { border-bottom: 0; }
+.leg .sw { width: 12px; height: 12px; border-radius: 3px; }
+.leg .pc { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--muted); font-size: 13px; text-align: right; min-width: 40px; }
+.leg .am { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s3); }
+.note { font-size: 13px; color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.col { width: 375px; max-width: 100%; }
+.col > .t-h2 { margin-bottom: var(--s3); }
+.ph { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; grid-template-columns: minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1 Ступени</button>
+    <button class="pick" data-k="v" data-val="2">2 Магазины</button>
+    <button class="pick" data-k="v" data-val="3">3 Из 100 ₽</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var fmt = function (n) { return (n < 0 ? '−' : '') + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; };
+var pct = function (a, b) { return Math.round(100 * a / b); };
+
+/* ===== Данные: последние 30 дней (придуманы для демо; сходятся с «Сегодня»: прибыль 1 236 800, расходы 486 500) ===== */
+var RENT = { 'Махачкала': 70000, 'Каспийск': 50000, 'Дербент': 40000, 'Хасавюрт': 30000 };   // аренда сидит в своём магазине (190 000)
+var SHARED = 296500;                                                                         // остальные расходы делятся по доле выручки
+var SH = [
+  { n: 'Махачкала', rev: 1507800, cogs: 780000 },
+  { n: 'Каспийск', rev: 861600, cogs: 450000 },
+  { n: 'Дербент', rev: 718000, cogs: 380000 },
+  { n: 'Хасавюрт', rev: 502600, cogs: 256700 }
+];
+var REV = SH.reduce(function (a, s) { return a + s.rev; }, 0), COGS = SH.reduce(function (a, s) { return a + s.cogs; }, 0);
+SH.forEach(function (s) { s.exp = RENT[s.n] + Math.round(SHARED * s.rev / REV); s.profit = s.rev - s.cogs - s.exp; s.margin = pct(s.profit, s.rev); s.mx = s.profit / s.rev; });
+var EXP = SH.reduce(function (a, s) { return a + s.exp; }, 0), PROFIT = REV - COGS - EXP;
+var CATS = [['Аренда', 190000], ['Зарплата (оклады)', 100000], ['Реклама', 95000], ['Доставка', 42000], ['Коммуналка', 38500], ['Прочее', 13000], ['Интернет', 8000]];
+
+var V = {
+  '1': { name: '1. Ступени', how: 'Выручка, минус закупка проданного, минус расходы, равно прибыль: четыре строки, у каждой полоса от выручки. Ниже прибыль по магазинам.', plus: 'Показывает, как прибыль получилась, формулу видно глазами; ничего не нужно знать заранее.', minus: 'Какой магазин сильнее, видно только ниже; полосы закупки и расходов однотипные.' },
+  '2': { name: '2. Магазины в центре', how: 'Сразу рейтинг магазинов по прибыли с полосками и маржой; формула мелко внизу. Сортировка по прибыли, выручке или марже.', plus: 'Отвечает на главный вопрос владельца с четырьмя магазинами: кто зарабатывает.', minus: 'Откуда взялась общая сумма, видно только внизу и мелко.' },
+  '3': { name: '3. Из каждых 100 ₽', how: 'Одна полоса из трёх частей (закупка, расходы, прибыль) и подпись «с каждых 100 ₽ остаётся 34 ₽». Ниже расходы по статьям и магазины.', plus: 'Самое понятное для людей без бухгалтерии; сразу видно, где «съедается» выручка.', minus: 'Проценты округлены; сравнивать магазины приходится в нижнем списке.' }
+};
+var st = { v: 'all', t: 'light', sort: 'profit' };
+
+function head() { return '<div class="top-row"><span class="iconbtn"><svg class="ic"><use href="#i-chevron-left"/></svg></span><span class="t-label">Отчёты</span></div><div><div class="t-h1">Прибыль</div><div class="t-label" style="margin-top:6px">Весь бизнес / последние <span class="num">30</span> дней</div></div>'; }
+function tile() { return '<div class="tile"><span class="t-label">Прибыль</span><span class="tile-num">' + fmt(PROFIT) + '</span><span class="t-label">маржа <span class="num">' + pct(PROFIT, REV) + '%</span> от выручки</span></div>'; }
+function exportBtn() { return '<button class="btn"><svg class="ic"><use href="#i-download"/></svg>Выгрузить в Excel</button>'; }
+function note() { return '<div class="t-label">Закупка товара в расходы не входит: она уже в закупочной стоимости проданного. Долги поставщикам (<span class="num">' + fmt(310000) + '</span>) это отдельный отчёт.</div>'; }
+
+function step(label, sign, val, share, cls) {
+  return '<div class="stp"><div class="h"><span><span class="t-label">' + sign + '</span> ' + label + '</span><span class="v">' + fmt(val) + '</span></div><div class="bar"><i class="' + cls + '" style="width:' + share + '%"></i></div></div>';
+}
+function shopRow(s, max, key) {
+  var main = key === 'rev' ? s.rev : key === 'margin' ? s.margin : s.profit;
+  return '<div class="shop"><div class="h"><b>' + s.n + '</b><span class="v">' + (key === 'margin' ? '<span class="num">' + s.margin + '%</span>' : fmt(main)) + '</span></div><div class="bar"><i class="f-acc" style="width:' + Math.round(100 * main / max) + '%"></i></div>' +
+    '<div class="t-label">выручка <span class="num">' + fmt(s.rev) + '</span> / ' + (key === 'profit' ? 'маржа <span class="num">' + s.margin + '%</span>' : 'прибыль <span class="num">' + fmt(s.profit) + '</span>') + '</div></div>';
+}
+
+function v1() {
+  return '<div class="scr">' + head() + tile() +
+    '<div>' + step('Выручка', '', REV, 100, 'f-acc') + step('Закупка проданного', '−', COGS, pct(COGS, REV), 'f-mut') + step('Расходы', '−', EXP, pct(EXP, REV), 'f-mut') + step('Прибыль', '=', PROFIT, pct(PROFIT, REV), 'f-good') + '</div>' +
+    '<div><div class="sec-h"><span class="t-h2">По магазинам</span></div>' + SH.map(function (s) { return '<div class="rowline"><span>' + s.n + '</span><b class="num">' + fmt(s.profit) + '</b></div>'; }).join('') + '</div>' + note() + exportBtn() + '</div>';
+}
+function v2() {
+  var key = st.sort, list = SH.slice().sort(function (a, b) { return (key === 'rev' ? b.rev - a.rev : key === 'margin' ? b.mx - a.mx : b.profit - a.profit); });
+  var max = Math.max.apply(null, list.map(function (s) { return key === 'rev' ? s.rev : key === 'margin' ? s.margin : s.profit; }));
+  var chips = '<div class="fchips">' + [['profit', 'По прибыли'], ['rev', 'По выручке'], ['margin', 'По марже']].map(function (x) { return '<button class="fchip" data-sort="' + x[0] + '" aria-pressed="' + (key === x[0]) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  return '<div class="scr">' + head() + tile() + chips + '<div>' + list.map(function (s) { return shopRow(s, max, key); }).join('') + '</div>' +
+    '<div><div class="sec-h"><span class="t-h2">Как считается</span></div><div class="rowline"><span class="t-label">Выручка</span><b class="num">' + fmt(REV) + '</b></div><div class="rowline"><span class="t-label">Закупка проданного</span><b class="num">' + fmt(-COGS) + '</b></div><div class="rowline"><span class="t-label">Расходы</span><b class="num">' + fmt(-EXP) + '</b></div><div class="rowline"><span class="t-label">Прибыль</span><b class="num good">' + fmt(PROFIT) + '</b></div></div>' + note() + exportBtn() + '</div>';
+}
+function v3() {
+  var pc = pct(COGS, REV), pe = pct(EXP, REV), pp = 100 - pc - pe;
+  return '<div class="scr">' + head() + tile() +
+    '<div style="display:grid;gap:var(--s3)"><div class="t-h2">С каждых <span class="num">100 ₽</span> выручки остаётся <span class="num good">' + pp + ' ₽</span></div>' +
+    '<div class="stack"><i class="f-mut" style="width:' + pc + '%"></i><i class="f-acc" style="width:' + pe + '%"></i><i class="f-good" style="width:' + pp + '%"></i></div>' +
+    '<div><div class="leg"><span class="sw f-mut"></span><span>Закупка проданного</span><span class="pc">' + pc + '%</span><span class="am">' + fmt(COGS) + '</span></div><div class="leg"><span class="sw f-acc"></span><span>Расходы</span><span class="pc">' + pe + '%</span><span class="am">' + fmt(EXP) + '</span></div><div class="leg"><span class="sw f-good"></span><span>Прибыль</span><span class="pc">' + pp + '%</span><span class="am">' + fmt(PROFIT) + '</span></div></div></div>' +
+    '<div><div class="sec-h"><span class="t-h2">Расходы по статьям</span><span class="t-label"><span class="num">' + fmt(EXP) + '</span></span></div>' + CATS.map(function (c) { return '<div class="rowline"><span>' + c[0] + '</span><b class="num">' + fmt(c[1]) + '</b></div>'; }).join('') + '</div>' +
+    '<div><div class="sec-h"><span class="t-h2">По магазинам</span></div>' + SH.map(function (s) { return '<div class="rowline"><span>' + s.n + '</span><b class="num">' + fmt(s.profit) + '</b></div>'; }).join('') + '</div>' + note() + exportBtn() + '</div>';
+}
+var VIEW = { '1': v1, '2': v2, '3': v3 };
+
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var list = st.v === 'all' ? ['1', '2', '3'] : [st.v];
+  document.getElementById('stage').innerHTML = '<div class="pair">' + list.map(function (v) { return '<div class="col"><div class="t-h2">' + V[v].name + '</div><div class="ph">' + VIEW[v]() + '</div></div>'; }).join('') + '</div>';
+  document.getElementById('about').innerHTML = list.map(function (v) { return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="note">Плюс:</span> ' + V[v].plus + '<br><span class="note">Минус:</span> ' + V[v].minus + '</div>'; }).join('') +
+    '<div class="note">Образец глазами владельца: выручка <span class="num">' + fmt(REV) + '</span> − закупка проданного <span class="num">' + fmt(COGS) + '</span> − расходы <span class="num">' + fmt(EXP) + '</span> = прибыль <span class="num">' + fmt(PROFIT) + '</span> (как плитка «Прибыль за месяц» на «Сегодня»). Аренда сидит в своём магазине, остальные расходы <span class="num">' + fmt(SHARED) + '</span> делятся по доле выручки (ТЗ 7.4). Цифры придуманы для демо. Бухгалтеру итоговую прибыль по умолчанию не показываем (уточнить с Магомедом).</div>';
+  document.querySelectorAll('.pick[data-k]').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+}
+document.addEventListener('click', function (e) {
+  var p = e.target.closest('.pick[data-k]'); if (p) { st[p.dataset.k] = p.dataset.val; render(); return; }
+  var s = e.target.closest('[data-sort]'); if (s) { st.sort = s.dataset.sort; render(); }
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 3: Сегодня и Продажа</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.bad { color: var(--bad); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; border: 1px solid transparent; width: 100%; background: var(--accent); color: var(--on-accent); }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); color: var(--muted); }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.seg span { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; display: grid; place-items: center; }
+.seg span.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { font-size: 13px; color: var(--muted); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+
+/* Плитки утра */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.tile { container-type: inline-size; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); align-content: space-between; min-width: 0; }
+.s2 { grid-column: span 2; }
+.tile.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+.tile .t-mid { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; letter-spacing: -0.015em; line-height: 1.1; white-space: nowrap; font-size: clamp(14px, 14cqi, 22px); }
+.tile .t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; letter-spacing: -0.025em; line-height: 1; white-space: nowrap; font-size: clamp(20px, 11cqi, 32px); }
+
+/* Герой-число: один компонент на обоих экранах, три оформления */
+.hero { container-type: inline-size; display: grid; gap: var(--s2); align-content: space-between; min-width: 0; min-height: 150px; }
+.hnum { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .9; letter-spacing: -0.035em; white-space: nowrap; font-size: clamp(34px, 17cqi, 84px); }
+.hero .t-label { color: inherit; opacity: .7; }
+.btn-inv { background: var(--on-accent); color: var(--accent); margin-top: var(--s2); }
+/* Вариант 1: чёрная плитка и на «Сегодня», и на «Продаже» (кнопка внутри плитки) */
+[data-v="1"] .hero { background: var(--accent); color: var(--on-accent); border-radius: var(--r-card); padding: var(--s4); }
+/* Вариант 2: голое число везде, сверху строгая линия */
+[data-v="2"] .hero { padding: var(--s3) 0 var(--s2); border-top: 1px solid var(--line-strong); min-height: 0; gap: var(--s3); }
+[data-v="2"] .hero .t-label { color: var(--muted); opacity: 1; }
+/* Вариант 3: белая плитка с чёрной рамкой, чёрным остаются только кнопки */
+[data-v="3"] .hero { background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-card); padding: var(--s4); }
+[data-v="3"] .hero .t-label { color: var(--muted); opacity: 1; }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s2); }
+.about b { font-weight: 700; }
+.group { margin-bottom: var(--s6); }
+.group > .t-h2 { margin-bottom: var(--s3); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.ph { width: 375px; max-width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; }
+.cap { font-size: 12px; color: var(--muted); margin-bottom: var(--s2); }
+.scr { display: grid; gap: var(--s4); min-width: 0; }
+.sale-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1 Чёрная плитка</button>
+    <button class="pick" data-k="v" data-val="2">2 Голое число</button>
+    <button class="pick" data-k="v" data-val="3">3 Рамка</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var N = function (s) { return s.replace(/ /g, ' '); };
+var V = {
+  '1': { name: '1. Чёрная плитка везде', how: 'Главное число лежит в чёрной плитке на обоих экранах. На «Продаже» кнопка «Продано» стоит внутри плитки и светлая (инверсия).', plus: 'Утро остаётся таким, как ты выбрал; одно правило на оба экрана: главное число всегда в чёрной плитке. Красное и зелёное на продаже по-прежнему сразу видны.', minus: 'Светлая кнопка внутри тёмной плитки выглядит как «вторая», хотя она главная.' },
+  '2': { name: '2. Голое число везде', how: 'Главное число без плитки, сверху строгая линия, на обоих экранах. Остальные плитки утра остаются карточками. На «Продаже» чёрная только кнопка.', plus: 'Самый «швейцарский» вариант; чёрным остаётся только то, на что нажимают.', minus: 'Утро теряет якорь: плитки-карточки вокруг выглядят тяжелее, чем главное число. Это отход от выбранного утра.' },
+  '3': { name: '3. Рамка', how: 'Главное число в белой плитке с чёрной рамкой на обоих экранах. Чёрными остаются только кнопки и полоса «Новая продажа».', plus: 'Чёрный цвет значит только «нажми»; один способ выделения (рамка).', minus: 'Меньше контраста и веса, чем у чёрной плитки; утро становится заметно спокойнее и «шаблоннее».' }
+};
+var st = { v: 'all', t: 'light' };
+
+function hero(cls, label, val, foot, extra) {
+  return '<div class="hero ' + cls + '"><span class="t-label">' + label + '</span><span class="hnum">' + val + '</span>' + (foot ? '<span class="t-label">' + foot + '</span>' : '') + (extra || '') + '</div>';
+}
+function mid(label, val) { return '<div class="tile"><span class="t-label">' + label + '</span><span class="t-mid">' + val + '</span></div>'; }
+function today() {
+  return '<div class="scr"><div class="t-h1">Сегодня</div><div class="tiles">' +
+    hero('s2', 'Выручка сегодня', N('343 400 ₽'), '<span class="num">+7%</span> к вчера') +
+    mid('Прибыль за месяц', N('1 236 800 ₽')) + mid('Долги поставщикам', N('310 000 ₽')) +
+    '<div class="tile bad s2"><span class="t-label" style="color:inherit">Касса Каспийск</span><span class="t-big">' + N('−1 200 ₽') + '</span></div>' +
+    '</div></div>';
+}
+function sale(v) {
+  var btn = '<button class="btn' + (v === '1' ? ' btn-inv' : '') + '">Продано</button>';
+  return '<div class="scr"><div class="sale-head"><div class="t-h1">Продажа</div><span class="iconbtn"><svg class="ic"><use href="#i-close"/></svg></span></div>' +
+    '<div class="field"><svg class="ic"><use href="#i-search"/></svg><span>Название или артикул</span></div>' +
+    '<div><div class="sec-h"><span class="t-h2">Чек</span><span class="t-label"><span class="num">2</span> вещи</span></div>' +
+    '<div class="item"><span class="name">Рубашка Oxford</span><span class="price">' + N('4 990 ₽') + '</span><span class="meta"><span class="num">M</span> / рост <span class="num">182</span> / белый</span><span class="chip chip-good" style="justify-self:end">в наличии <span class="num">3</span></span></div>' +
+    '<div class="item"><span class="name">Брюки чинос</span><span class="price">' + N('5 490 ₽') + '</span><span class="meta"><span class="num">50</span> / синий</span><span class="chip chip-bad" style="justify-self:end">осталось <span class="num">1</span></span></div></div>' +
+    '<div class="rowline"><span class="t-label">Скидка <span class="num">5%</span> / ваш предел: до 5%</span><span class="num bad" style="font-weight:700">' + N('−524 ₽') + '</span></div>' +
+    '<div class="seg"><span>Наличные</span><span class="on">Карта</span><span>Перевод</span></div>' +
+    (v === '1' ? hero('', 'Итого', N('9 956 ₽'), '', btn) : hero('', 'Итого', N('9 956 ₽')) + btn) +
+    '</div>';
+}
+function pair(v) {
+  return '<div class="group" data-v="' + v + '"><div class="t-h2">' + V[v].name + '</div><div class="pair">' +
+    '<div><div class="cap">Сегодня (владелец)</div><div class="ph">' + today() + '</div></div>' +
+    '<div><div class="cap">Продажа</div><div class="ph">' + sale(v) + '</div></div></div></div>';
+}
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var list = st.v === 'all' ? ['1', '2', '3'] : [st.v];
+  document.getElementById('stage').innerHTML = list.map(pair).join('');
+  document.getElementById('about').innerHTML = list.map(function (v) {
+    return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="t-label">Плюс:</span> ' + V[v].plus + '<br><span class="t-label">Минус:</span> ' + V[v].minus + '</div>';
+  }).join('');
+  document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+}
+document.addEventListener('click', function (e) {
+  var p = e.target.closest('.pick'); if (!p) return;
+  st[p.dataset.k] = p.dataset.val; render();
+});
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,21 @@
+/* ▪ Файл css/tokens.css: цвета, шрифты, отступы, скругления (светлая и тёмная тема). Подключается в index.html по порядку, порядок важен. */
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --scrim: rgba(14, 14, 14, .45);
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --strip-h: 44px; --side-w: 240px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+  --scrim: rgba(0, 0, 0, .6);
+}

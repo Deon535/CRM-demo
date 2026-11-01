@@ -1,0 +1,417 @@
+# =====================================================================
+# .gitignore: универсальный, для проекта CRM и почти любых других
+# Что здесь указано, git не сохраняет и не отправляет на GitHub.
+# Строка с # в начале — комментарий. Строка с ! — исключение (ВСЁ-ТАКИ сохранять).
+# Важно: если файл уже был сохранён в git раньше, .gitignore его не уберёт.
+# =====================================================================
+
+
+# ---------------------------------------------------------------------
+# 1. СЕКРЕТЫ (самое важное: пароли, ключи, токены. Никогда не в git!)
+# ---------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+secrets/
+secret/
+credentials.json
+service-account*.json
+*-credentials.json
+*.secret
+*.secrets
+.npmrc
+.pypirc
+.netrc
+.htpasswd
+auth.json
+token.json
+tokens.json
+config.local.*
+*.local.json
+*.local.yml
+*.local.yaml
+*.local.toml
+*.local.js
+*.local.ts
+
+
+# ---------------------------------------------------------------------
+# 2. БАЗЫ ДАННЫХ, ДАМПЫ И РЕЗЕРВНЫЕ КОПИИ (реальные данные клиентов — не в git)
+#    Демо-данные для показа храним текстом (seed.sql, seed.json), они сохраняются.
+#    Если когда-нибудь решим хранить готовую демо-базу, уберём нужную строку.
+# ---------------------------------------------------------------------
+*.sqlite
+*.sqlite3
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.mdb
+*.accdb
+*.dump
+*.bak
+*.backup
+*.sql.gz
+*.sql.zip
+*.sql.bz2
+backups/
+backup/
+dumps/
+pgdata/
+postgres-data/
+mysql-data/
+mongo-data/
+redis-data/
+data/db/
+*.rdb
+
+
+# ---------------------------------------------------------------------
+# 3. ЗАГРУЗКИ ПОЛЬЗОВАТЕЛЕЙ, ЛОГИ, ВРЕМЕННОЕ
+# ---------------------------------------------------------------------
+uploads/
+upload/
+storage/app/
+storage/logs/
+public/uploads/
+user-content/
+logs/
+log/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+bun-debug.log*
+tmp/
+temp/
+.tmp/
+.temp/
+scratch/
+.scratch/
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+*.orig
+*.rej
+*.pid
+*.seed
+*.pid.lock
+
+
+# ---------------------------------------------------------------------
+# 4. ЗАВИСИМОСТИ (скачиваются заново командой установки, хранить незачем)
+# ---------------------------------------------------------------------
+# JavaScript / TypeScript / Node
+node_modules/
+jspm_packages/
+bower_components/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.npm/
+.pnpm-store/
+.eslintcache
+.stylelintcache
+.parcel-cache/
+*.tsbuildinfo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.nox/
+.hypothesis/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+.ipynb_checkpoints/
+
+# PHP
+vendor/
+composer.phar
+
+# Ruby
+.bundle/
+
+# Go
+# (vendor/ уже выше)
+
+# Rust
+target/
+
+# Java / Kotlin / Gradle / Maven
+.gradle/
+.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+
+# .NET / C#
+bin/
+obj/
+*.user
+*.suo
+*.userprefs
+
+
+# ---------------------------------------------------------------------
+# 5. СОБРАННЫЙ КОД (получается автоматически из исходников, хранить не нужно)
+# ---------------------------------------------------------------------
+dist/
+build/
+out/
+.output/
+.next/
+.nuxt/
+.svelte-kit/
+.astro/
+.vite/
+.turbo/
+.vercel/
+.netlify/
+.cache/
+.angular/
+.expo/
+.docusaurus/
+.serverless/
+.fusebox/
+.dynamodb/
+.webpack/
+storybook-static/
+*.min.js.map
+.sass-cache/
+.nyc_output/
+coverage/
+lcov-report/
+*.lcov
+.coverage
+htmlcov/
+public/build/
+public/hot
+public/storage
+
+
+# ---------------------------------------------------------------------
+# 6. ТЕСТЫ И ПРОВЕРКИ: отчёты, скриншоты, видео запусков
+# ---------------------------------------------------------------------
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+cypress/videos/
+cypress/screenshots/
+junit.xml
+.lighthouseci/
+
+
+# ---------------------------------------------------------------------
+# 7. ОБЛАКО, ХОСТИНГ, КОНТЕЙНЕРЫ, ИНФРАСТРУКТУРА
+# ---------------------------------------------------------------------
+.vercel
+.netlify
+.firebase/
+.firebaserc.local
+firebase-debug.log
+firebase-debug.*.log
+.wrangler/
+.dev.vars
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+!example.tfvars
+crash.log
+.docker/
+docker-compose.override.yml
+*.tar
+.supabase/
+
+
+# ---------------------------------------------------------------------
+# 8. ПРОГРАММЫ, КОТОРЫМИ ТЫ ПОЛЬЗУЕШЬСЯ: редакторы и системы
+# ---------------------------------------------------------------------
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+*.stackdump
+[Dd]esktop.ini
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+
+# Linux
+.directory
+.Trash-*
+.nfs*
+
+# VS Code (общие настройки команды сохраняем, личные нет)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+!.vscode/*.code-snippets
+*.code-workspace
+.history/
+.ionide/
+
+# JetBrains (WebStorm, PyCharm, IntelliJ)
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+cmake-build-*/
+
+# Остальные редакторы
+*.sublime-workspace
+*.sublime-project
+.vs/
+.fleet/
+.cursor/
+.windsurf/
+.zed/
+.project
+.classpath
+.settings/
+*.launch
+.c9/
+nbproject/
+Session.vim
+.netrwhist
+tags
+
+
+# ---------------------------------------------------------------------
+# 9. CLAUDE CODE, СКИЛЛЫ И ИИ-ИНСТРУМЕНТЫ
+#    Сохраняем то, что описывает проект и правила работы:
+#      CLAUDE.md, .claude/skills/, .claude/agents/, .claude/commands/,
+#      .claude/settings.json, .mcp.json, DESIGN.md, статус.md, ТЗ.md
+#    Не сохраняем личное, временное и то, что может содержать секреты.
+#    Внимание: в .mcp.json не клади ключи и токены, только ссылки на переменные.
+# ---------------------------------------------------------------------
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/settings.local.*
+.claude/*.local.*
+.claude/worktrees/
+.claude/projects/
+.claude/plans/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/ide/
+.claude/cache/
+.claude/logs/
+.claude/scratch/
+.claude/tmp/
+.claude/history*
+.claude/credentials*
+.claude/.credentials*
+.mcp.local.json
+.claude-flow/
+.swarm/
+.hive-mind/
+.roo/
+.aider*
+.continue/
+.cline/
+.codeium/
+.cursorrules.local
+.impeccable/live/
+.impeccable/tmp/
+.impeccable/cache/
+.superpowers/
+.agent-scratch/
+*.transcript.jsonl
+transcripts/
+
+
+# ---------------------------------------------------------------------
+# 10. ДИЗАЙН-ИСХОДНИКИ И БОЛЬШИЕ ФАЙЛЫ
+#     Картинки, шрифты и макеты сохраняем (они нужны проекту).
+#     Не сохраняем только временные экспорты, архивы и тяжёлые видео.
+# ---------------------------------------------------------------------
+*.psd.tmp
+*.ai.tmp
+*.sketch.tmp
+*.fig.tmp
+~$*
+.~lock.*
+*.zip
+*.rar
+*.7z
+*.tgz
+*.tar.gz
+*.iso
+*.dmg
+*.exe
+*.msi
+*.apk
+*.ipa
+*.mov
+*.mkv
+exports/
+renders/
+screenshots-tmp/
+recordings/
+*.webm
+
+
+# ---------------------------------------------------------------------
+# 11. ПРОЧЕЕ
+# ---------------------------------------------------------------------
+.sass-cache/
+*.pyc
+.terraform.lock.hcl.bak
+.husky/_
+.lefthook-local.yml
+.pre-commit-cache/

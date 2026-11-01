@@ -1,0 +1,1652 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Каркас CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --scrim: rgba(14, 14, 14, .45);
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  --strip-h: 44px; --side-w: 240px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+  --scrim: rgba(0, 0, 0, .6);
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-mid { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+.t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.chip-demo { border: 1px solid var(--line-strong); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; border: 1px solid transparent; width: 100%; white-space: nowrap; }
+.btn-main { background: var(--accent); color: var(--on-accent); }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; flex: none; }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); color: var(--muted); min-width: 0; }
+.field:focus-within { border-color: var(--line-strong); }
+.field input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--text); outline: 0; }
+.field input::placeholder { color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.seg button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; padding: 0 var(--s1); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* ===== Панель страницы ===== */
+.fan { max-width: 1360px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { background: var(--bg); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
+@media (min-width: 700px) and (min-height: 800px) { .fan-bar { position: sticky; top: 0; z-index: 50; padding-top: var(--s3); } }
+.fan-row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.fan-row b { font-size: 12px; color: var(--muted); font-weight: 500; width: 64px; flex: none; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; }
+.stage { overflow-x: auto; padding-bottom: var(--s2); }
+
+/* ===== Рамка приложения ===== */
+.frame { container: f / inline-size; position: relative; width: 100%; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.frame[data-w="phone"] { max-width: 375px; border-radius: 28px; height: 780px; }
+.frame[data-w="desk"] { max-width: 1280px; min-width: 760px; border-radius: 20px; height: 740px; }
+.app { position: relative; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.frame[data-w="desk"] .app { grid-template-rows: auto minmax(0, 1fr); }
+
+.strip { display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s4); height: var(--strip-h); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.strip b { color: var(--text); font-weight: 700; }
+.strip span, .strip button { white-space: nowrap; }
+.strip .gap { flex: 1; }
+.strip button { background: transparent; border: 0; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 40px; padding: 0 var(--s1); color: var(--muted); }
+
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; transition: margin-left .32s var(--ease); }
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s2); padding: var(--s3) var(--s4) var(--s2); flex: none; transition: padding-left .32s var(--ease); }
+.top .fchips { grid-column: 1 / -1; }
+.btn-sale-d { display: none; min-height: 48px; width: auto; }
+.frame[data-w="desk"] .top { grid-template-columns: minmax(0, 1fr) auto auto; padding: var(--s4) var(--s5) var(--s2); }
+.frame[data-w="desk"] .btn-sale-d { display: inline-flex; }
+.frame[data-w="desk"] .btn-sale-d[hidden] { display: none; }
+.fchips { display: flex; gap: var(--s2); overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.fchips::-webkit-scrollbar { display: none; }
+.fchip { flex: none; min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.content { container: c / inline-size; flex: 1; min-height: 0; overflow-y: auto; padding: var(--s3) var(--s4) var(--s5); }
+.frame[data-w="desk"] .content { padding: var(--s3) var(--s5) var(--s5); }
+.scr { display: grid; gap: var(--s4); min-width: 0; }
+
+/* ===== Боковая панель: закреплена, скрыта, выглядывает ===== */
+.side { display: none; }
+.sbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; flex: none; color: var(--text); }
+.sbtn:hover { border-color: var(--line-strong); }
+.sbtn-out { display: none; }
+.frame[data-w="desk"] .side { display: flex; flex-direction: column; gap: var(--s3); position: absolute; z-index: 25; left: 0; top: var(--strip-h); bottom: 0; width: var(--side-w); padding: var(--s3); background: var(--bg); border-right: 1px solid var(--line); overflow-y: auto; transform: translateX(-100%); transition: transform .32s var(--ease), box-shadow .32s var(--ease), background-color .32s var(--ease); }
+.frame[data-w="desk"] .sbtn-out { display: grid; position: absolute; z-index: 24; left: var(--s3); top: calc(var(--strip-h) + var(--s3)); opacity: 0; pointer-events: none; transition: opacity .2s var(--ease); }
+.frame[data-w="desk"][data-sb="pinned"] .side { transform: none; }
+.frame[data-w="desk"][data-sb="pinned"] .main, .frame[data-w="desk"][data-peek] .main { margin-left: var(--side-w); }
+.frame[data-w="desk"][data-sb="collapsed"] .sbtn-out { opacity: 1; pointer-events: auto; }
+.frame[data-w="desk"][data-sb="collapsed"] .top { padding-left: 68px; }
+.frame[data-w="desk"][data-peek] .top { padding-left: var(--s5); }
+.frame[data-w="desk"][data-peek] .side { transform: none; }
+.frame[data-w="desk"][data-peek] .sbtn-out { opacity: 0; }
+.sb-head { display: flex; align-items: center; gap: var(--s3); height: 40px; }
+.brand { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.navv { display: grid; gap: var(--s1); }
+.nav-i { display: flex; align-items: center; gap: var(--s3); min-height: 48px; padding: 0 var(--s3); border-radius: var(--r-btn); color: var(--muted); font-weight: 500; cursor: pointer; background: transparent; border: 0; width: 100%; text-align: left; }
+.nav-i:hover { background: var(--surface-2); color: var(--text); }
+.nav-i[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.nav-g { font-size: 12px; color: var(--muted); padding: var(--s3) var(--s3) var(--s1); }
+
+/* Нижнее меню и полоса «Новая продажа» (телефон) */
+.tabbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s1); background: var(--surface); border-top: 1px solid var(--line); padding: var(--s2) var(--s2) var(--s3); }
+.frame[data-w="desk"] .tabbar { display: none; }
+.tab { display: grid; justify-items: center; gap: 2px; padding: var(--s2) 0; border-radius: var(--r-btn); color: var(--muted); font-size: 11px; font-weight: 500; min-height: 52px; cursor: pointer; background: transparent; border: 0; }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.salebar { display: flex; align-items: center; gap: var(--s3); min-height: 56px; padding: 0 var(--s3) 0 var(--s4); margin: 0 var(--s2); background: var(--accent); color: var(--on-accent); border: 0; border-radius: var(--r-card) var(--r-card) 0 0; cursor: pointer; text-align: left; font-weight: 700; }
+.salebar .grow { flex: 1; font-size: 16px; }
+.salebar .sq { width: 36px; height: 36px; border-radius: 10px; border: 1px solid currentColor; display: grid; place-items: center; opacity: .9; }
+.frame[data-w="desk"] .salebar { display: none; }
+
+/* ===== Экран «Продажа» (образец «Одно число» из веера 1) ===== */
+.sale-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.cols { display: grid; gap: var(--s5); min-width: 0; }
+.cols > * { min-width: 0; }
+@container c (min-width: 640px) { .cols { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+.hero-sum { container-type: inline-size; }
+.hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .9; letter-spacing: -0.04em; font-size: clamp(44px, 22cqi, 96px); margin-top: var(--s2); white-space: nowrap; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { font-size: 13px; color: var(--muted); }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+
+/* ===== Плитки утра (образец из веера 1, вариант 4), сжимаются по ширине контента ===== */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.tile { container-type: inline-size; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); align-content: space-between; min-width: 0; }
+.tile.s2 { grid-column: span 2; }
+.tile.inv { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tile.inv .t-label { color: inherit; opacity: .7; }
+.tile.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+.tile .t-mid { white-space: nowrap; font-size: clamp(14px, 14cqi, 22px); }
+.tile .t-big { white-space: nowrap; font-size: clamp(20px, 11cqi, 32px); }
+.tile .t-seller { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; font-size: clamp(14px, 6cqi, 18px); }
+.tile-hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(34px, 17cqi, 84px); font-weight: 800; line-height: .9; letter-spacing: -0.035em; white-space: nowrap; }
+@container c (min-width: 560px) {
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tile.hero { grid-column: span 2; grid-row: span 2; }
+}
+
+/* ===== Список товара ===== */
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; gap: var(--s3); align-items: center; width: 100%; min-height: 64px; padding: var(--s3) 0; background: transparent; border: 0; border-bottom: 1px solid var(--line); text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.prow > .ic { width: 20px; height: 20px; color: var(--muted); }
+.prow:last-child { border-bottom: 0; }
+.prow b { font-weight: 700; }
+.prow .sub { display: block; font-size: 13px; color: var(--muted); }
+.prow .r { display: grid; justify-items: end; gap: 4px; }
+.prow .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.empty { text-align: center; display: grid; justify-items: center; gap: var(--s3); padding: var(--s6) var(--s4); }
+.empty .ic { width: 40px; height: 40px; color: var(--muted); stroke-width: 1.5; }
+.empty p { color: var(--muted); max-width: 34ch; }
+#userBtn { justify-self: end; }
+/* Экран «Ещё»: список разделов, которых нет в нижнем меню */
+.mrow { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 56px; padding: 0 var(--s1); background: transparent; border: 0; border-bottom: 1px solid var(--line); text-align: left; cursor: pointer; font-weight: 500; }
+.mrow:last-child { border-bottom: 0; }
+.mrow .grow { flex: 1; }
+.mrow .ic:last-child { width: 20px; height: 20px; color: var(--muted); }
+/* Карточка товара (образец «Сначала магазин» из веера 4) */
+.top-row { display: flex; align-items: center; gap: var(--s3); }
+.pricebar { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); }
+.shops { display: grid; gap: var(--s2); }
+.shop { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s2); }
+.shop.own { border-color: var(--line-strong); }
+.shop-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.pills { display: grid; gap: var(--s2); }
+.pill { background: var(--surface-2); border-radius: var(--r-field); padding: var(--s2) 0; display: grid; justify-items: center; gap: 2px; min-width: 0; }
+.pill .t-label { font-size: 12px; line-height: 1; }
+.pill .num { font-size: 20px; font-weight: 700; line-height: 1.1; }
+.pill.z { background: transparent; border: 1px dashed var(--line); }
+.pill.z .num { color: var(--muted); font-weight: 500; }
+/* Экран «Возврат» (образец «Из чека» из веера 5) */
+.rs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.rs button { min-height: 56px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; line-height: 1.2; padding: 0 6px; cursor: pointer; }
+.rs button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tog { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 56px; padding: 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--surface); text-align: left; font-weight: 500; cursor: pointer; }
+.tog .box { width: 24px; height: 24px; border-radius: var(--r-chip); border: 1.5px solid var(--line-strong); display: grid; place-items: center; flex: none; }
+.tog[aria-pressed="true"] .box { background: var(--accent); color: var(--on-accent); }
+.tog .box .ic { width: 16px; height: 16px; stroke-width: 2.5; visibility: hidden; }
+.tog[aria-pressed="true"] .box .ic { visibility: visible; }
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); background: var(--surface-2); border-radius: var(--r-field); font-size: 14px; }
+.notice .ic { width: 20px; height: 20px; margin-top: 1px; }
+.chk { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s1); }
+.chk-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.cl { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 0 var(--s3); align-items: center; width: 100%; min-height: 64px; padding: var(--s2) 0; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.cl .rad { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line-strong); display: grid; place-items: center; grid-row: span 2; }
+.cl[aria-pressed="true"] .rad::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.cl .name { font-weight: 700; }
+.cl .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; grid-row: span 2; }
+.cl .meta { font-size: 13px; color: var(--muted); }
+.linkbtn { min-height: 48px; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; cursor: pointer; justify-self: start; padding: 0 var(--s1); }
+/* Перемещения (образец «Всё сошлось» из веера 6) */
+.fchips.tabs { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); overflow: visible; }
+.fchips.tabs .fchip { display: grid; justify-items: center; gap: 2px; min-height: 56px; padding: var(--s2) var(--s1); font-size: 13px; }
+.fchips.tabs .fchip .num { font-size: 18px; font-weight: 800; line-height: 1; }
+/* Заказы и доставки (веер 7: менеджер вариант 1, курьер вариант 3) */
+a.btn { text-decoration: none; }
+.btn-sm { min-height: 48px; }
+.fchips.wrap { flex-wrap: wrap; overflow: visible; }
+.seg.stack { grid-template-columns: minmax(0, 1fr); }
+.prog { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s1); }
+.prog i { height: 4px; border-radius: 2px; background: var(--line); }
+.prog i.on { background: var(--accent); }
+.dcard { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s3); min-width: 0; }
+.dmini { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--s3); }
+.dmini .ttl { display: grid; gap: 2px; min-width: 0; }
+.dmini .r2 { display: grid; justify-items: end; gap: 4px; flex: none; }
+.dmini .r2 .amt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.dtwo { display: grid; grid-template-columns: 1fr 1.3fr; gap: var(--s2); }
+.dcard .seg button { font-size: 14px; padding: 0 2px; }
+/* Касса и смена (веер 8: закрытие по шагам, расхождение: формула сверху и хронология) */
+.notice.bad { background: var(--bad-bg); color: var(--bad); }
+.prog.p2 { grid-template-columns: repeat(2, 1fr); }
+.big-in { display: flex; align-items: baseline; gap: var(--s2); border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-field); padding: var(--s3) var(--s4); }
+.big-in:focus-within { border-color: var(--line-strong); }
+.big-in input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; outline: 0; font-family: var(--font-num); font-weight: 800; font-size: 40px; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; color: var(--text); }
+.big-in input::placeholder { color: var(--muted); }
+.big-in .cur { font-family: var(--font-num); font-weight: 800; font-size: 28px; color: var(--muted); }
+.seg.stack button { text-align: left; font-size: 14px; padding: 0 var(--s3); }
+.done { display: grid; justify-items: center; gap: var(--s3); text-align: center; padding: var(--s5) var(--s2); }
+.done .okc { width: 64px; height: 64px; border-radius: 50%; background: var(--good-bg); color: var(--good); display: grid; place-items: center; }
+.done .okc .ic { width: 32px; height: 32px; stroke-width: 2.5; }
+.formula { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); }
+.frow { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.frow .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; white-space: nowrap; }
+.frow.res { border-top: 1px solid var(--line-strong); padding-top: var(--s3); }
+.led { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.led:last-child { border-bottom: 0; }
+.led .tm { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); font-weight: 500; }
+.led .tx { font-weight: 500; }
+.led .tx .sub { display: block; font-size: 13px; color: var(--muted); }
+.led .amt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; white-space: nowrap; }
+.led .bal { grid-column: 3; text-align: right; font-size: 12px; color: var(--muted); font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.notice.good { background: var(--good-bg); color: var(--good); }
+.ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.ln:last-child { border-bottom: 0; }
+.ln .name { font-weight: 700; }
+.ln .meta { font-size: 13px; color: var(--muted); }
+.ln .qty { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; grid-row: span 2; text-align: right; }
+.ln.diff .name, .ln.diff .qty { color: var(--bad); }
+.stp { display: flex; align-items: center; grid-row: span 2; }
+.stp button { width: 44px; height: 48px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; }
+.stp button:first-child { border-radius: var(--r-btn) 0 0 var(--r-btn); }
+.stp button:last-child { border-radius: 0 var(--r-btn) var(--r-btn) 0; }
+.stp .v { min-width: 40px; height: 48px; display: grid; place-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); font-family: var(--font-num); font-weight: 800; font-size: 20px; }
+
+/* Отчёты (веер 9: «Из каждых 100 ₽» и магазины с полосками и сортировкой) */
+.fchips.eq { display: grid; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); overflow: visible; }
+.fchips.eq .fchip { min-height: 48px; padding: 0 var(--s1); font-size: 13px; }
+.rep-two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.rep-acc { background: var(--accent); } .rep-mut { background: var(--muted); } .rep-good { background: var(--good); }
+.rep-bar { height: 8px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+.rep-bar i { display: block; height: 100%; border-radius: 4px; }
+.rep-shop { display: grid; gap: var(--s2); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.rep-shop:last-child { border-bottom: 0; }
+.rep-shop .h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.rep-shop .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; white-space: nowrap; }
+.rep-stack { display: flex; height: 40px; border-radius: var(--r-field); overflow: hidden; gap: 2px; }
+.rep-stack i { display: block; height: 100%; }
+.rep-leg { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: var(--s3); align-items: center; min-height: 44px; border-bottom: 1px solid var(--line); }
+.rep-leg:last-child { border-bottom: 0; }
+.rep-leg .sw { width: 12px; height: 12px; border-radius: 3px; }
+.rep-leg .pc { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--muted); font-size: 13px; text-align: right; min-width: 36px; }
+.rep-leg .am { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; white-space: nowrap; }
+
+/* Расходы, клиенты, люди, настройки (шаг 2.4) */
+.narrow { max-width: 560px; }
+.mrow.srow { min-height: 64px; padding: var(--s2) var(--s1); }
+.srow .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.stp.w .v { min-width: 76px; padding: 0 var(--s2); white-space: nowrap; }
+.togs { display: grid; gap: var(--s2); }
+@container c (min-width: 640px) { .togs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.tog.multi { padding: var(--s2) var(--s4); }
+.tog.multi .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.prow .r .t-label { font-size: 12px; }
+.dtwo.even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.dtwo.even .btn { padding: 0 var(--s3); }
+a.iconbtn { color: var(--text); }
+@container c (max-width: 440px) { .fchips.eq.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.callrow { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 64px; border-bottom: 1px solid var(--line); }
+.callrow:last-child { border-bottom: 0; }
+.callrow .sub { display: block; font-size: 13px; color: var(--muted); }
+
+/* ===== Окно входа ===== */
+.modal { position: absolute; inset: 0; z-index: 30; display: grid; place-items: center; padding: var(--s4); opacity: 0; visibility: hidden; transition: opacity .25s var(--ease), visibility 0s .25s; }
+.modal.open { opacity: 1; visibility: visible; transition: opacity .25s var(--ease); }
+.modal .back { position: absolute; inset: 0; background: var(--scrim); }
+.card { position: relative; width: 100%; max-width: 380px; max-height: 100%; overflow-y: auto; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); transform: translateY(12px); transition: transform .3s var(--ease); }
+.modal.open .card { transform: none; }
+.card-h { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.lbl { display: grid; gap: var(--s1); font-size: 13px; font-weight: 500; color: var(--muted); }
+.inp { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); width: 100%; outline: 0; }
+.inp:focus { border-color: var(--line-strong); }
+.inp::placeholder { color: var(--muted); }
+.rp-btn { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); width: 100%; min-height: 48px; padding: 0 var(--s3) 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--bg); cursor: pointer; text-align: left; }
+.rp-btn .rp-val { flex: 1; font-weight: 700; }
+.rp-btn .ic { width: 20px; height: 20px; color: var(--muted); transition: transform .2s var(--ease); }
+.rp-btn[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.rp-list { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .25s var(--ease); }
+.rp-list.open { grid-template-rows: 1fr; }
+.rp-inner { overflow: hidden; border-radius: var(--r-field); }
+.rp-list.open .rp-inner { border: 1px solid var(--line); margin-top: var(--s1); }
+.opt { display: flex; justify-content: space-between; align-items: center; min-height: 48px; padding: 0 var(--s4); border-bottom: 1px solid var(--line); cursor: pointer; font-weight: 500; background: transparent; width: 100%; border-left: 0; border-right: 0; border-top: 0; text-align: left; }
+.opt:last-child { border-bottom: 0; }
+.opt[aria-pressed="true"] { font-weight: 800; }
+.opt .ic { width: 20px; height: 20px; visibility: hidden; }
+.opt[aria-pressed="true"] .ic { visibility: visible; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-sale" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2 .7 3.5 2.6 3.5 5.7"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7h15a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 7l12-3v3"/><path d="M16 13.5h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m5 15 7-7 7 7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 7h16m-4-4 4 4-4 4"/><path d="M20 17H4m4-4-4 4 4 4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <div class="fan-row"><b>Вид</b>
+      <button class="pick" data-k="w" data-val="phone">Телефон</button>
+      <button class="pick" data-k="w" data-val="desk">Компьютер</button>
+      <span style="width:12px"></span><b style="width:auto">Панель слева</b>
+      <button class="pick" data-k="sb" data-val="pinned">Закреплена</button>
+      <button class="pick" data-k="sb" data-val="collapsed">Скрыта</button>
+      <span style="width:12px"></span><b style="width:auto">Тема</b>
+      <button class="pick" data-k="t" data-val="light">Светлая</button>
+      <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+      <span style="width:12px"></span>
+      <button class="pick" data-act="login">Окно входа</button>
+    </div>
+  </div>
+
+  <div class="about">На компьютере нажми на квадратик с черточкой слева вверху: панель скроется. Наведи на этот квадратик: панель выедет, а экран плавно сожмётся. Убери курсор: всё вернётся. Пока панель выехала, нажми на квадратик или на саму панель: она закрепится. Нажимай прямо на экране: человечек справа вверху (там смена роли: у каждой роли своё меню и свой «Сегодня»), чипы магазинов, поиск, «Новая продажа» (только у старшего продавца и продавца; владелец продаёт через пункт «Продажа»). Каждый раздел это отдельный экран. Магазины работают на экране «Товар», на «Сегодня» цифры пока по всей сети.</div>
+
+  <div class="stage">
+  <div class="frame" id="frame" data-w="phone" data-sb="pinned">
+    <div class="app">
+      <div class="strip"><span class="chip chip-demo">ДЕМО</span><span>Роль: <b id="roleLabel">Владелец</b></span><span class="gap"></span><button id="reset">Сбросить демо</button></div>
+
+      <aside class="side" id="side" aria-label="Разделы">
+        <div class="sb-head"><button class="sbtn" id="sbIn" aria-label="Скрыть боковую панель"><svg class="ic"><use href="#i-sidebar"/></svg></button><span class="brand" id="brand">CRM</span></div>
+        <nav class="navv" id="sideNav"></nav>
+      </aside>
+      <button class="sbtn sbtn-out" id="sbOut" aria-label="Показать боковую панель"><svg class="ic"><use href="#i-sidebar"/></svg></button>
+
+      <div class="main" id="main">
+        <header class="top">
+          <label class="field"><svg class="ic"><use href="#i-search"/></svg><input id="q" placeholder="Поиск по всей CRM" autocomplete="off"><svg class="ic"><use href="#i-scan"/></svg></label>
+          <button class="btn btn-main btn-sale-d" id="saleBtnD" data-go="sale"><svg class="ic"><use href="#i-plus"/></svg>Новая продажа</button>
+          <button class="iconbtn" id="userBtn" aria-label="Войти или сменить роль"><svg class="ic"><use href="#i-person"/></svg></button>
+          <div class="fchips" id="shopChips"></div>
+        </header>
+        <div class="content" id="content"></div>
+      </div>
+
+      <button class="salebar" id="saleBar" data-go="sale"><span class="grow">Новая продажа</span><span class="sq"><svg class="ic"><use href="#i-plus"/></svg></span></button>
+      <nav class="tabbar" id="tabbar"></nav>
+    </div>
+
+    <div class="modal" id="login" role="dialog" aria-modal="true" aria-labelledby="loginT">
+      <div class="back" id="loginBack"></div>
+      <div class="card">
+        <div class="card-h"><span class="t-h2" id="loginT">Вход</span><button class="iconbtn" id="loginX" aria-label="Закрыть"><svg class="ic"><use href="#i-close"/></svg></button></div>
+        <p class="t-label">В демо пароль не нужен, роль можно сменить без выхода.</p>
+        <label class="lbl">Логин<input class="inp" placeholder="Например, ruslan" autocomplete="off"></label>
+        <label class="lbl">Пароль<input class="inp" type="password" placeholder="В демо не нужен" autocomplete="off"></label>
+        <div>
+          <button class="rp-btn" id="rpBtn" aria-expanded="false"><span class="t-label">Войти как</span><span class="rp-val" id="rpVal">Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+          <div class="rp-list" id="rpList"><div class="rp-inner" id="rpInner"></div></div>
+        </div>
+        <button class="btn btn-main" id="doLogin">Войти</button>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<template id="tpl-today">
+  <div class="tiles">
+    <div class="tile inv hero s2" style="min-height:150px"><span class="t-label">Выручка сегодня</span><span class="tile-hero-num">343 400 ₽</span><span class="t-label"><span class="num">+7%</span> к вчера</span></div>
+    <div class="tile"><span class="t-label">Прибыль за 30 дней</span><span class="t-mid">{{profit}}</span></div>
+    <div class="tile"><span class="t-label">Долги поставщикам</span><span class="t-mid">{{debt}}</span></div>
+    <div class="tile bad s2"><span class="t-label" style="color:inherit">Касса Каспийск</span><span class="t-big">−1 200 ₽</span></div>
+    <div class="tile"><span class="t-label">Возвраты</span><span class="t-mid">3 / 12 480 ₽</span></div>
+    <div class="tile"><span class="t-label">Обмены / брак</span><span class="t-mid">2 / 1</span></div>
+    <div class="tile s2">
+      <span class="t-label">Продавцы сегодня</span>
+      <div><div class="rowline"><span>Руслан</span><span class="t-seller">71 200 ₽</span></div><div class="rowline"><span>Заур</span><span class="t-seller">58 600 ₽</span></div><div class="rowline"><span>Али</span><span class="t-seller">49 300 ₽</span></div></div>
+    </div>
+    <div class="tile s2"><span class="t-label">Не продаётся <span class="num">60+</span> дней</span><span class="t-big"><span class="num">14</span> позиций</span></div>
+  </div>
+</template>
+
+<script>
+var nb = function (s) { return String(s).replace(/ /g, ' '); };
+var money = function (n) { return (n < 0 ? '−' : '') + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; };
+// Меню и главный экран каждой роли (ТЗ раздел 2). bar: есть ли «Новая продажа» (полоса на телефоне, кнопка на компьютере).
+// Пункт «Продажа» в боковой панели и в «Ещё» есть везде, где продажа разрешена (у владельца без полосы).
+var ROLE_NAMES = ['Владелец', 'Старший продавец', 'Продавец', 'Онлайн-менеджер', 'Курьер', 'Бухгалтер'];
+var ROLE = {
+  'Владелец': { bar: false, limit: 'без ограничений', search: true, home: 'today', tabs: ['today', 'products', 'clients', 'orders', 'more'], side: ['today', 'sale', 'return', 'products', 'transfers', 'clients', 'orders', 'cash', 'expenses', 'reports', 'people', 'settings'] },
+  'Старший продавец': { bar: true, limit: 'до 10%', search: true, home: 'today', shop: 'Каспийск', shopIn: 'Каспийске', tabs: ['today', 'products', 'clients', 'orders', 'more'], side: ['today', 'sale', 'return', 'products', 'transfers', 'clients', 'orders', 'cash'] },
+  'Продавец': { bar: true, limit: 'до 5%', search: true, home: 'today', shop: 'Дербент', shopIn: 'Дербенте', tabs: ['today', 'products', 'clients', 'orders', 'more'], side: ['today', 'sale', 'return', 'products', 'clients', 'orders', 'cash'] },
+  'Онлайн-менеджер': { bar: false, search: true, home: 'orders', tabs: ['orders', 'products', 'clients', 'more'], side: ['orders', 'products', 'clients'] },
+  'Курьер': { bar: false, search: false, home: 'deliveries', tabs: ['deliveries', 'more'], side: ['deliveries'] },
+  'Бухгалтер': { bar: false, search: false, home: 'today', tabs: ['today', 'reports', 'expenses', 'more'], side: ['today', 'reports', 'expenses'] }
+};
+var SHOPS = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
+var CHIPS = ['Все'].concat(SHOPS, ['Склад']);
+// id экрана: [подпись, иконка, группа в боковой панели]
+var ITEMS = {
+  today: ['Сегодня', 'i-today', 'Работа'], sale: ['Продажа', 'i-sale', 'Работа'], return: ['Возврат', 'i-return', 'Работа'], transfers: ['Перемещения', 'i-transfer', 'Работа'], products: ['Товар', 'i-box', 'Работа'],
+  clients: ['Клиенты', 'i-users', 'Работа'], orders: ['Заказы', 'i-truck', 'Работа'], deliveries: ['Доставки', 'i-truck', 'Работа'],
+  cash: ['Касса', 'i-wallet', 'Деньги'], reports: ['Отчёты', 'i-chart', 'Деньги'], expenses: ['Расходы', 'i-receipt', 'Деньги'],
+  people: ['Люди', 'i-person', 'Команда'], settings: ['Настройки', 'i-gear', 'Команда'], more: ['Ещё', 'i-menu', '']
+};
+var CATS = ['Все', 'Рубашки', 'Брюки', 'Куртки', 'Аксессуары'];
+var DATA = [
+  { n: 'Рубашка Oxford', cat: 'Рубашки', meta: 'белый / S–XL', price: '4 990 ₽', rows: [[1, 3, 2, 0], [0, 1, 1, 0], [0, 2, 0, 1], [1, 0, 1, 0]] },
+  { n: 'Брюки чинос', cat: 'Брюки', meta: 'синий / 48–52', price: '5 490 ₽', rows: [[0, 1, 2], [1, 0, 0], [0, 2, 0], [0, 0, 1]] },
+  { n: 'Куртка зимняя', cat: 'Куртки', meta: 'серый / M–XL', price: '12 900 ₽', rows: [[1, 2, 1], [0, 1, 0], [0, 0, 1], [0, 0, 0]] },
+  { n: 'Ремень кожаный', cat: 'Аксессуары', meta: 'чёрный / 90–110', price: '1 990 ₽', rows: [[4, 5, 3], [2, 1, 0], [1, 2, 1], [1, 1, 1]] },
+  { n: 'Носки хлопок', cat: 'Аксессуары', meta: 'хлопок / 39–46', price: '390 ₽', rows: [[40, 38], [10, 8], [12, 10], [12, 10]] }
+];
+function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+// Дополнение к DATA (тот же порядок): артикул, размеры по столбцам остатков, цена и закупка числами, бронь. Закупки придуманы для демо.
+var EXTRA = [
+  { art: 'OX-WH', sizes: ['S', 'M', 'L', 'XL'], price: 4990, cost: 2600, hold: { shop: 0, size: 1, n: 1 } },
+  { art: 'CH-BL', sizes: ['48', '50', '52'], price: 5490, cost: 2800 },
+  { art: 'JK-GR', sizes: ['M', 'L', 'XL'], price: 12900, cost: 6500 },
+  { art: 'BL-BK', sizes: ['90', '100', '110'], price: 1990, cost: 800 },
+  { art: 'SK-CT', sizes: ['39–42', '43–46'], price: 390, cost: 150 }
+];
+
+// Закрытые смены (демо). Ожидаемая касса = начало + наличные продажи − выдачи; насчитанное вводит продавец вслепую.
+var SHIFTS_BASE = [
+  { id: 6, shop: 'Каспийск', day: 'Сегодня', by: 'Заур', closed: '21:00', start: 20000, n1: 2, sales1: 12400, n2: 4, sales2: 19400, outs: [['Хозрасходы', 500, '10:40', 'Заур'], ['Передано Руслану', 4500, '15:30', 'Заур']], counted: 45600, reason: null },
+  { id: 5, shop: 'Махачкала', day: 'Сегодня', by: 'Руслан', closed: '21:00', start: 35000, n1: 9, sales1: 38200, n2: 11, sales2: 52900, outs: [['Передано Магомеду', 60000, '16:20', 'Руслан']], counted: 66100, reason: null },
+  { id: 4, shop: 'Хасавюрт', day: 'Сегодня', by: 'Тимур', closed: '21:00', start: 12000, n1: 3, sales1: 6200, n2: 4, sales2: 8100, outs: [], counted: 26300, reason: null },
+  { id: 3, shop: 'Каспийск', day: 'Вчера', by: 'Мурад', closed: '21:00', start: 18500, n1: 3, sales1: 11000, n2: 5, sales2: 16900, outs: [['Передано Руслану', 6000, '17:00', 'Мурад']], counted: 40400, reason: null },
+  { id: 2, shop: 'Дербент', day: 'Вчера', by: 'Али', closed: '21:00', start: 14000, n1: 2, sales1: 8000, n2: 3, sales2: 12400, outs: [], counted: 34700, reason: null }
+];
+// Открытая смена продавца Али (Дербент): её закрывает пользователь с ролью «Продавец».
+var SELLER_SHIFT = { shop: 'Дербент', day: 'Сегодня', by: 'Али', closed: '21:00', start: 15000, n1: 1, sales1: 5500, n2: 3, sales2: 9600, outs: [['Хозрасходы', 1000, '11:10', 'Али']] };
+function cloneShifts() { return JSON.parse(JSON.stringify(SHIFTS_BASE)); }
+function newSc() { return { step: 1, outs: JSON.parse(JSON.stringify(SELLER_SHIFT.outs)), amt: '', add: null }; }
+// Заказы (демо): один набор данных и для менеджера, и для курьера. Курьер К1 это тот, кто входит ролью «Курьер».
+function O(id, stage, who, city, addr, lines, x) {
+  var o = { id: id, st: stage, who: who, city: city, addr: addr, lines: lines.map(function (l) { return { n: l[0], meta: l[1], qty: l[2], price: l[3] }; }), prepaid: 0, courier: null, pay: null, reason: null, left: null, urgent: false };
+  for (var k in x) o[k] = x[k];
+  return o;
+}
+var ORD_BASE = [
+  O(1055, 'new', 'Аслан К.', 'Махачкала', 'ул. Ленина, 40', [['Куртка зимняя', 'L / серый', 1, 12900]], {}),
+  O(1054, 'new', 'Мадина Г.', 'Каспийск', 'ул. Кирова, 8', [['Рубашка Oxford', 'M / белый', 2, 4990]], {}),
+  O(1053, 'chat', 'Заур М.', 'Дербент', 'ул. Гагарина, 3', [['Ремень кожаный', '100 / чёрный', 1, 1990]], {}),
+  O(1052, 'chat', 'Патимат А.', 'Хасавюрт', 'ул. Мира, 15', [['Брюки чинос', '48 / синий', 1, 5490]], {}),
+  O(1051, 'chat', 'Рашид Б.', 'Махачкала', 'пр. Акушинского, 9', [['Рубашка Oxford', 'L / белый', 1, 4990], ['Ремень кожаный', '90 / чёрный', 1, 1990]], {}),
+  O(1050, 'pay', 'Камиль Х.', 'Каспийск', 'ул. Алферова, 21', [['Куртка зимняя', 'L / серый', 1, 12900]], { left: '18 ч' }),
+  O(1049, 'pay', 'Залина Р.', 'Махачкала', 'ул. Шамиля, 7', [['Брюки чинос', '52 / синий', 1, 5490]], { left: '3 ч', urgent: true }),
+  O(1048, 'paid', 'Ильяс Д.', 'Махачкала', 'ул. Гаджиева, 18', [['Рубашка Oxford', 'M / белый', 1, 4990]], { prepaid: 4990 }),
+  O(1047, 'paid', 'Амина Ш.', 'Каспийск', 'ул. Хуршилова, 4', [['Носки хлопок', '39–42 / хлопок', 6, 390]], { prepaid: 2340 }),
+  O(1045, 'paid', 'Гасан О.', 'Дербент', 'ул. Тагирова, 11', [['Брюки чинос', '50 / синий', 1, 5490], ['Ремень кожаный', '100 / чёрный', 1, 1990]], { prepaid: 7480 }),
+  O(1046, 'way', 'Руслан Т.', 'Махачкала', 'ул. Дахадаева, 5', [['Рубашка Oxford', 'M / белый', 1, 4990]], { courier: 'К1' }),
+  O(1044, 'way', 'Хадижат Ю.', 'Махачкала', 'ул. Ермошкина, 2', [['Ремень кожаный', '90 / чёрный', 1, 1990]], { courier: 'К2' }),
+  O(1043, 'way', 'Мадина Р.', 'Махачкала', 'пр. Гамидова, 30', [['Брюки чинос', '50 / синий', 1, 5490]], { courier: 'К1' }),
+  O(1041, 'way', 'Аслан Г.', 'Махачкала', 'ул. Ленина, 12, кв. 7', [['Куртка зимняя', 'L / серый', 1, 12900]], { courier: 'К1', prepaid: 12900 }),
+  O(1042, 'done', 'Шамиль И.', 'Махачкала', 'ул. Пушкина, 6', [['Рубашка Oxford', 'L / белый', 1, 4990]], { courier: 'К1', pay: 'Карта' }),
+  O(1040, 'done', 'Камилла Н.', 'Махачкала', 'ул. Батырая, 14', [['Носки хлопок', '39–42 / хлопок', 4, 390]], { courier: 'К1', pay: 'Наличные' }),
+  O(1039, 'no', 'Муса Л.', 'Махачкала', 'ул. Коркмасова, 3', [['Брюки чинос', '52 / синий', 1, 5490]], { courier: 'К2', reason: 'Не подошло' }),
+  O(1038, 'no', 'Асият В.', 'Дербент', 'ул. Советская, 9', [['Рубашка Oxford', 'S / белый', 1, 4990]], { courier: 'К2', reason: 'Передумал' })
+];
+function cloneOrd() { return JSON.parse(JSON.stringify(ORD_BASE)); }
+// Перемещения в пути и принятые (демо). Цены розничные, как в карточке товара.
+var TR_BASE = [
+  { id: 118, from: 'Махачкала', to: 'Каспийск', by: 'Руслан', status: 'transit', got: null, lines: [{ n: 'Рубашка Oxford', meta: 'M / белый', sent: 2, price: 4990 }, { n: 'Рубашка Oxford', meta: 'L / белый', sent: 1, price: 4990 }, { n: 'Ремень кожаный', meta: '100 / чёрный', sent: 2, price: 1990 }] },
+  { id: 119, from: 'Каспийск', to: 'Дербент', by: 'Вы', status: 'transit', got: null, lines: [{ n: 'Брюки чинос', meta: '48 / синий', sent: 1, price: 5490 }, { n: 'Куртка зимняя', meta: 'L / серый', sent: 1, price: 12900 }] },
+  { id: 117, from: 'Хасавюрт', to: 'Каспийск', by: 'Тимур', status: 'done', got: [10], lines: [{ n: 'Носки хлопок', meta: '39–42 / хлопок', sent: 10, price: 390 }] },
+  { id: 116, from: 'Дербент', to: 'Каспийск', by: 'Али', status: 'done', got: [1], lines: [{ n: 'Ремень кожаный', meta: '100 / чёрный', sent: 2, price: 1990 }] }
+];
+function cloneTr() { return JSON.parse(JSON.stringify(TR_BASE)); }
+// ===== Данные шага 2.4 (всё придумано для демо; «сегодня» в демо это воскресенье 1 ноября 2026) =====
+var SUB_OF = { client: 'clients', 'client-new': 'clients', person: 'people', 'person-edit': 'people', setting: 'settings', 'expense-new': 'expenses' };   // подэкран → пункт меню
+var MONTHS = ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'нояб', 'дек'];
+var DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+var dateOf = function (ago) { var d = new Date(2026, 10, 1 - ago); return d.getDate() + ' ' + MONTHS[d.getMonth()]; };
+var dayNum = function (ago) { return new Date(2026, 10, 1 - ago).getDate(); };
+var agoText = function (n) { return n === 0 ? 'сегодня' : n === 1 ? 'вчера' : n < 30 ? n + ' ' + plural(n, 'день', 'дня', 'дней') + ' назад' : Math.round(n / 30) + ' мес. назад'; };
+// Выручка и закупка магазинов за 30 дней (отчёт «Прибыль», веер 9): [магазин, выручка, закупка проданного]
+var SHOP_BASE = [['Махачкала', 1507800, 780000], ['Каспийск', 861600, 450000], ['Дербент', 718000, 380000], ['Хасавюрт', 502600, 256700]];
+// Сотрудники. share: вес личных продаж в выручке магазина. pct: личный процент (null: как в «Правилах»). Расходы на зарплату считаются отсюда.
+var STAFF = [
+  { id: 1, n: 'Руслан Алиев', role: 'Старший продавец', shop: 'Махачкала', phone: '+7 928 555-02-01', age: 34, since: 'март 2021', salary: 15000, share: 0.46, pct: null, adv: 0, fine: 0 },
+  { id: 2, n: 'Заур Исаев', role: 'Старший продавец', shop: 'Каспийск', phone: '+7 928 555-02-02', age: 31, since: 'сентябрь 2021', salary: 15000, share: 0.6, pct: null, adv: 15000, fine: 0 },
+  { id: 3, n: 'Мурад Омаров', role: 'Продавец', shop: 'Каспийск', phone: '+7 928 555-02-03', age: 26, since: 'июнь 2023', salary: 10000, share: 0.4, pct: null, adv: 0, fine: 0 },
+  { id: 4, n: 'Али Гасанов', role: 'Продавец', shop: 'Дербент', phone: '+7 928 555-02-04', age: 24, since: 'февраль 2024', salary: 10000, share: 0.56, pct: null, adv: 10000, fine: 0 },
+  { id: 5, n: 'Рашид Магомедов', role: 'Продавец', shop: 'Дербент', phone: '+7 928 555-02-05', age: 28, since: 'май 2023', salary: 10000, share: 0.44, pct: null, adv: 0, fine: 1000 },
+  { id: 6, n: 'Тимур Рамазанов', role: 'Продавец', shop: 'Хасавюрт', phone: '+7 928 555-02-06', age: 29, since: 'январь 2022', salary: 10000, share: 1, pct: null, adv: 0, fine: 0 },
+  { id: 7, n: 'Камиль Абдулаев', role: 'Продавец', shop: 'Махачкала', phone: '+7 928 555-02-07', age: 25, since: 'август 2024', salary: 10000, share: 0.54, pct: null, adv: 5000, fine: 0 },
+  { id: 8, n: 'Патимат Алиева', role: 'Онлайн-менеджер', shop: 'Все', phone: '+7 928 555-02-08', age: 27, since: 'апрель 2023', salary: 10000, share: 0, pct: null, adv: 0, fine: 0 },
+  { id: 9, n: 'Исмаил Хасанов', role: 'Курьер', shop: 'Все', phone: '+7 928 555-02-09', age: 30, since: 'октябрь 2022', salary: 10000, share: 0, pct: null, adv: 0, fine: 0 }
+];
+var STAFF_ROLES = ['Старший продавец', 'Продавец', 'Онлайн-менеджер', 'Курьер'];
+var PLANS = { 'Махачкала': 1400000, 'Каспийск': 900000, 'Дербент': 700000, 'Хасавюрт': 550000 };   // план магазина на месяц (ТЗ 8.7)
+function cloneStaff() { return JSON.parse(JSON.stringify(STAFF)); }
+// График смен: два слота недели (эта и следующая), в каждом 7 дней, в дне список id работающих. Выходные: сотрудник → номера дней (0 это понедельник).
+var OFF_DAYS = [{ 1: [2], 2: [1], 3: [4], 4: [3], 5: [6, 1], 6: [], 7: [6, 1], 8: [5], 9: [2] }, { 1: [2], 2: [1], 3: [4], 4: [3], 5: [6, 1], 6: [3], 7: [6, 1], 8: [5], 9: [2] }];
+function schedBuild() { return OFF_DAYS.map(function (off) { return DAYS.map(function (d, di) { return STAFF.filter(function (p) { return (off[p.id] || []).indexOf(di) < 0; }).map(function (p) { return p.id; }); }); }); }
+// Журнал расходов за 30 дней: ручные записи. Зарплата и доставка добавляются сами (autoExp). Запись с настоящим магазином идёт в его расходы, остальное делится по доле выручки.
+var EXP_ORDER = ['Аренда', 'Зарплата', 'Реклама', 'Доставка', 'Коммуналка', 'Прочее', 'Интернет'];
+var EXP_AUTO = { 'Зарплата': 'считается из раздела «Люди»', 'Доставка': 'считается из заказов' };
+var EXP_MANUAL = ['Коммуналка', 'Интернет', 'Реклама', 'Прочее'];
+var EXP_BASE = [
+  { id: 3, ago: 3, n: 'Реклама у блогера, Instagram', cat: 'Реклама', shop: 'Все', amt: 60000, by: 'Магомед' },
+  { id: 4, ago: 12, n: 'Таргет, Instagram', cat: 'Реклама', shop: 'Все', amt: 35000, by: 'Магомед' },
+  { id: 5, ago: 4, n: 'Электричество', cat: 'Коммуналка', shop: 'Все', amt: 24500, by: 'Магомед' },
+  { id: 6, ago: 6, n: 'Вода и отопление', cat: 'Коммуналка', shop: 'Все', amt: 14000, by: 'Магомед' },
+  { id: 7, ago: 9, n: 'Хозтовары: вешалки, пакеты', cat: 'Прочее', shop: 'Все', amt: 5000, by: 'Магомед' },
+  { id: 8, ago: 15, n: 'Ремонт примерочных', cat: 'Прочее', shop: 'Все', amt: 8000, by: 'Магомед' },
+  { id: 9, ago: 28, n: 'Интернет, все магазины', cat: 'Интернет', shop: 'Все', amt: 8000, by: 'Магомед' },
+  { id: 10, ago: 27, n: 'Аренда, Махачкала', cat: 'Аренда', shop: 'Махачкала', amt: 70000, by: 'Магомед' },
+  { id: 11, ago: 27, n: 'Аренда, Каспийск', cat: 'Аренда', shop: 'Каспийск', amt: 50000, by: 'Магомед' },
+  { id: 12, ago: 27, n: 'Аренда, Дербент', cat: 'Аренда', shop: 'Дербент', amt: 40000, by: 'Магомед' },
+  { id: 13, ago: 29, n: 'Аренда, Хасавюрт', cat: 'Аренда', shop: 'Хасавюрт', amt: 30000, by: 'Магомед' }
+];
+function cloneExp() { return JSON.parse(JSON.stringify(EXP_BASE)); }
+// Клиенты. buys: [сколько дней назад, номер товара в DATA, размер, номер магазина в SHOPS, штук]
+var CLIENTS = [
+  { id: 1, n: 'Аслан Гаджиев', phone: '+7 928 555-03-01', city: 'Махачкала', age: 35, cloth: 'L', shoe: 43, h: 182, note: 'Любит тёмные цвета', buys: [[2, 0, 'L', 0, 1], [38, 2, 'L', 0, 1], [74, 1, '50', 0, 1]] },
+  { id: 2, n: 'Мадина Рабаданова', phone: '+7 928 555-03-02', city: 'Махачкала', age: 29, cloth: 'M', shoe: 38, h: 168, note: 'Покупает мужу, размер M', buys: [[9, 0, 'M', 0, 2], [51, 3, '100', 0, 1]] },
+  { id: 3, n: 'Камиль Хайбулаев', phone: '+7 928 555-03-03', city: 'Каспийск', age: 27, cloth: 'M', shoe: 42, h: 178, note: '', buys: [[0, 0, 'M', 1, 1], [0, 1, '48', 1, 1], [20, 4, '39–42', 1, 3]] },
+  { id: 4, n: 'Рашид Батыров', phone: '+7 928 555-03-04', city: 'Махачкала', age: 41, cloth: 'XL', shoe: 44, h: 185, note: 'Брюки только длинные, рост 185', buys: [[5, 0, 'XL', 0, 1], [5, 3, '110', 0, 1], [33, 1, '52', 0, 2], [120, 2, 'XL', 0, 1]] },
+  { id: 5, n: 'Гасан Омаров', phone: '+7 928 555-03-05', city: 'Дербент', age: 33, cloth: 'L', shoe: 43, h: 180, note: '', buys: [[14, 1, '50', 2, 1], [60, 0, 'L', 2, 2]] },
+  { id: 6, n: 'Шамиль Исмаилов', phone: '+7 928 555-03-06', city: 'Махачкала', age: 38, cloth: 'L', shoe: 43, h: 181, note: '', buys: [[1, 0, 'L', 0, 1]] },
+  { id: 7, n: 'Ильяс Дибиров', phone: '+7 928 555-03-07', city: 'Махачкала', age: 24, cloth: 'S', shoe: 40, h: 172, note: '', buys: [[6, 0, 'S', 0, 1], [6, 4, '39–42', 0, 2]] },
+  { id: 8, n: 'Амина Шамхалова', phone: '+7 928 555-03-08', city: 'Каспийск', age: 36, cloth: 'M', shoe: 39, h: 165, note: 'Берёт носки для мужа', buys: [[11, 4, '39–42', 1, 6]] },
+  { id: 9, n: 'Патимат Алиханова', phone: '+7 928 555-03-09', city: 'Хасавюрт', age: 45, cloth: 'M', shoe: 38, h: 170, note: 'Звонить после 18:00', buys: [[190, 1, '48', 3, 1]] },
+  { id: 10, n: 'Руслан Темиров', phone: '+7 928 555-03-10', city: 'Махачкала', age: 39, cloth: 'XL', shoe: 44, h: 186, note: '', buys: [[95, 0, 'XL', 0, 1], [95, 1, '52', 0, 1]] },
+  { id: 11, n: 'Заур Магомедов', phone: '+7 928 555-03-11', city: 'Дербент', age: 30, cloth: 'M', shoe: 41, h: 177, note: 'Покупает перед праздниками', buys: [[200, 0, 'M', 2, 1], [316, 2, 'M', 2, 1]] }
+];
+function cloneClients() { return JSON.parse(JSON.stringify(CLIENTS)); }
+var SEASONS = [['Все', 'Все'], ['Зима', 'Зима'], ['Весна', 'Весна'], ['Лето', 'Лето'], ['Осень', 'Осень']];
+var seasonOf = function (ago) { var m = new Date(2026, 10, 1 - ago).getMonth(); return m === 11 || m < 2 ? 'Зима' : m < 5 ? 'Весна' : m < 8 ? 'Лето' : 'Осень'; };
+var CLOTH_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+var newSale = function () { return { q: '', cid: null, done: false }; };
+// Журнал действий (ТЗ 8.9): [день, время, кто, тип, что]; новые записи добавляются сверху
+var LOG = [
+  [0, '16:05', 'Заур', 'disc', 'Скидка 10% на чек № 2431, минус 1 290 ₽'],
+  [0, '15:30', 'Заур', 'cash', 'Передал Руслану 4 500 ₽ из кассы'],
+  [0, '14:12', 'Али', 'disc', 'Скидка 5% на чек № 2429, минус 524 ₽'],
+  [0, '12:40', 'Руслан', 'ret', 'Оформил возврат 4 990 ₽, рубашка Oxford, чек № 2386'],
+  [0, '11:10', 'Али', 'cash', 'Выдача из кассы 1 000 ₽, хозрасходы'],
+  [1, '18:20', 'Тимур', 'stock', 'Принял перемещение № 117: 10 пар носков'],
+  [1, '17:05', 'Мурад', 'ret', 'Отправил старшему заявку на возврат 7 490 ₽'],
+  [1, '13:15', 'Руслан', 'stock', 'Изменил остаток: ремень кожаный, Махачкала, 5 на 4 (пересчёт)'],
+  [2, '19:45', 'Заур', 'cash', 'Закрыл смену в Каспийске, касса сошлась'],
+  [2, '12:00', 'Али', 'disc', 'Скидка 5% на чек № 2377, минус 249 ₽'],
+  [3, '16:30', 'Руслан', 'ret', 'Оформил возврат 2 490 ₽, брюки чинос']
+];
+function cloneLog() { return JSON.parse(JSON.stringify(LOG)); }
+var LOG_TYPES = [['Все', 'Все'], ['disc', 'Скидки'], ['ret', 'Возвраты'], ['stock', 'Остатки'], ['cash', 'Касса'], ['hr', 'Сотрудники']];
+// Поля ввода с перерисовкой экрана: ключ → [объект состояния или null для самого st, поле, длина для цифровых]
+var TEXT_IN = { expnote: ['expNew', 'note'], cliq: [null, 'cliQ'], setname: [null, 'shopName'], saleq: ['sale', 'q'], cname: ['cNew', 'n'], cphone: ['cNew', 'phone'], ccity: ['cNew', 'city'], cnote: ['cNew', 'note'], pname: ['pEdit', 'n'], pphone: ['pEdit', 'phone'] };
+var NUM_IN = { expamt: ['expNew', 'amt', 7], cage: ['cNew', 'age', 3], cshoe: ['cNew', 'shoe', 2], ch: ['cNew', 'h', 3], page: ['pEdit', 'age', 2], psal: ['pEdit', 'salary', 6], pmamt: ['pMoney', 'amt', 7] };
+// Настройки (ТЗ 12.2, 12.3, 12.4). Значения правил по умолчанию это решения Магомеда (ТЗ 11), магазин ставит свои.
+var RULES_BASE = { discSeller: 5, discSenior: 10, retDays: 14, retDefect: 30, hold: 3, pct: 2, bonus: 5000, prepay: 10000 };
+function cloneRules() { return JSON.parse(JSON.stringify(RULES_BASE)); }
+// ключ, название, минимум, максимум, шаг, единица, где действует
+var RULE_ROWS = [
+  ['discSeller', 'Скидка продавца, до', 5, 10, 1, '%', 'Действует на экране «Продажа»'],
+  ['discSenior', 'Скидка старшего продавца, до', 10, 20, 1, '%', 'Действует на экране «Продажа»'],
+  ['retDays', 'Срок возврата', 10, 30, 1, ' дн.', 'Действует на экране «Возврат»'],
+  ['retDefect', 'Срок возврата брака', 14, 60, 1, ' дн.', 'Действует на экране «Возврат»'],
+  ['hold', 'Срок брони', 1, 7, 1, ' дн.', 'Действует на кнопке «Забронировать» в карточке товара'],
+  ['pct', 'Процент продавцу с личных продаж', 0, 10, 1, '%', 'Меняет зарплату, расходы и прибыль'],
+  ['bonus', 'Бонус за выполненный план', 0, 20000, 1000, ' ₽', 'Меняет зарплату, расходы и прибыль'],
+  ['prepay', 'Предоплата обязательна от суммы', 5000, 30000, 1000, ' ₽', 'Действует на экране «Заказы»']
+];
+var RIGHTS = [
+  ['Остатки по всем магазинам', ['да', 'да', 'да', 'да', '', '']],
+  ['Закупочные цены', ['да', '', '', '', '', 'да']],
+  ['Продажа', ['да', 'да', 'да', '', '', '']],
+  ['Возврат', ['да', 'да', 'до 3 000 ₽ сам', '', '', '']],
+  ['Перемещения', ['да', 'да', '', '', '', '']],
+  ['Касса и смены', ['да', 'свой магазин', 'своя смена', '', '', '']],
+  ['Заказы', ['да', 'смотрит', 'смотрит', 'да', 'свои', '']],
+  ['Клиенты', ['да', 'да', 'да', 'да', '', '']],
+  ['Расходы', ['да', '', '', '', '', 'смотрит']],
+  ['Прибыль и отчёты', ['да', '', '', '', '', 'без прибыли']],
+  ['Сотрудники и зарплата', ['да', '', '', '', '', '']],
+  ['Настройки', ['да', '', '', '', '', '']]
+];
+var TYPES = [
+  ['Мужская одежда', 'буквенная XS–XXXL и числовая 42–60, рост', true], ['Женская одежда', 'буквенная и числовая 38–60', false], ['Обувь', '35–48, с половинками', false],
+  ['Детская одежда', 'по возрасту или росту', false], ['Аксессуары', 'без размера: ремни, шапки, платки, сумки', true], ['Комплекты', 'костюм это пиджак и брюки', false]
+];
+var MODULES = [
+  ['Доставка и курьеры', 'заказы, стадии, деньги курьера', true], ['Переписки', 'Telegram, WhatsApp, Instagram внутри системы', true], ['Рассылки клиентам', 'списки по условиям', true],
+  ['Бронь', 'отложить вещь на срок', true], ['Акции и переоценка', 'массовая скидка на категорию или сезон', true], ['Аналитика', 'мёртвый товар, ABC', true],
+  ['Печать этикеток и штрихкодов', 'название, размер, цена, штрихкод', true], ['Импорт и экспорт Excel', 'загрузка товара, выгрузка отчётов', true], ['Уведомления', 'мало товара, расхождение в кассе, платёж по аренде', true],
+  ['Рассрочка и долги клиентов', 'платежи частями, без процентов', false], ['Накопительная скидка', 'скидка растёт от суммы покупок', false], ['Подарочные сертификаты', 'продажа и погашение', false],
+  ['Возврат поставщику', 'брак и непроданное', false], ['Товар на реализации', 'платим швеям по факту продажи', false], ['Услуги', 'подгонка, ремонт', false],
+  ['Прогноз закупки', 'что и сколько докупать', false], ['Несколько валют', 'закупка в других валютах', false]
+];
+var initRet = function () { return { item: 1, reason: 0, tag: true, said: true, mode: 'check' }; };
+var init = function () { return { w: 'phone', t: 'light', sb: 'pinned', peek: false, screen: 'today', prev: 'today', shop: 'Все', cat: 'Все', role: 'Владелец', q: '', product: 0, ret: initRet(), tr: cloneTr(), trTab: null, trId: 118, trGot: null, trOpen: false, nt: null, flash: '', ord: cloneOrd(), ordTab: 'new', ordId: null, cp: null, shifts: cloneShifts(), myClosed: false, sc: null, shiftId: null, rsort: null, exp: cloneExp(), staff: cloneStaff(), clients: cloneClients(), log: cloneLog(), sched: schedBuild(), sale: newSale(), cNew: null, cliBack: 'clients', cliSeason: 'Все', pEdit: null, pMoney: { kind: 'adv', amt: '' }, schWeek: 0, schDay: 6, holdN: 0, expCat: 'Все', expNew: null, cliMode: 'list', cliSeg: 'all', cliQ: '', cliId: 1, mSize: 'Все', mCat: 'Все', pTab: 'staff', personId: 1, logF: 'Все', rules: cloneRules(), shopName: '', setId: null, roleSel: 'Владелец', mods: MODULES.map(function (m) { return m[2]; }), types: TYPES.map(function (m) { return m[2]; }) }; };
+var st = init();
+var pendingRole = 'Владелец';
+var $ = function (id) { return document.getElementById(id); };
+var frame = $('frame');
+var todayHtml = document.getElementById('tpl-today').innerHTML;
+
+function cfg() { return ROLE[st.role]; }
+function allowed(s) { var c = cfg(); s = SUB_OF[s] || s; if (s === 'product') s = 'products'; if (s === 'order') s = 'orders'; if (s === 'shift' || s === 'shift-close') s = 'cash'; if (s === 'transfer' || s === 'transfer-new') s = 'transfers'; return c.tabs.indexOf(s) >= 0 || c.side.indexOf(s) >= 0; }
+
+// ===== «Сегодня» каждой роли: плитки из образца «Модульная сетка». Числа сходятся между ролями (см. design-system.md) =====
+var tHero = function (label, val, foot) { return '<div class="tile inv hero s2" style="min-height:150px"><span class="t-label">' + label + '</span><span class="tile-hero-num">' + val + '</span><span class="t-label">' + foot + '</span></div>'; };
+var tMid = function (label, val) { return '<div class="tile"><span class="t-label">' + label + '</span><span class="t-mid">' + val + '</span></div>'; };
+var tBad = function (label, val) { return '<div class="tile bad s2"><span class="t-label" style="color:inherit">' + label + '</span><span class="t-big">' + val + '</span></div>'; };
+var tList = function (label, rows) { return '<div class="tile s2"><span class="t-label">' + label + '</span><div>' + rows + '</div></div>'; };
+var tiles = function () { return '<div class="tiles">' + Array.prototype.join.call(arguments, '') + '</div>'; };
+var sellerRow = function (name, val) { return '<div class="rowline"><span>' + name + '</span><span class="t-seller">' + val + '</span></div>'; };
+function lowStock(shop) {
+  var si = SHOPS.indexOf(shop), rows = '';
+  DATA.forEach(function (d) {
+    var n = sum(d.rows[si]);
+    if (n <= 2) rows += '<div class="rowline"><span>' + d.n + '</span>' + (n === 0 ? '<span class="chip chip-neutral">нет в наличии</span>' : '<span class="chip chip-bad">осталось <span class="num">' + n + '</span></span>') + '</div>';
+  });
+  return rows || '<div class="t-label">Всё в достатке</div>';
+}
+function homeHtml() {
+  var c = cfg();
+  if (st.role === 'Владелец') return todayHtml.replace(/<div class="tile bad s2">[\s\S]*?<\/div>/, cashTile(null)).replace('{{profit}}', money(REP.profit)).replace('{{debt}}', money(DEBT));
+  if (st.role === 'Старший продавец') return tiles(
+    tHero('Выручка ' + c.shop + ' сегодня', money(84700), '<span class="num">12</span> чеков'),
+    tMid('Возврат ждёт подтверждения', '1 / ' + money(4990)),
+    tMid('Перемещение к приёму', String(trFilter('in').length)),
+    cashTile(c.shop),
+    tList('Продавцы смены', sellerRow('Заур', money(58600)) + sellerRow('Мурад', money(26100))),
+    tList('Заканчивается в ' + c.shopIn, lowStock(c.shop)));
+  if (st.role === 'Продавец') return tiles(
+    tHero('Мои продажи за смену', money(49300), '<span class="num">9</span> чеков / ' + c.shop),
+    tMid('Мои брони', String(2 + st.holdN)),
+    tMid('Средний чек', money(5478)),
+    tList('Заканчивается в ' + c.shopIn, lowStock(c.shop)));
+  if (st.role === 'Онлайн-менеджер') {
+    var oc = function (x) { return st.ord.filter(function (o) { return x.indexOf(o.st) >= 0; }).length; }, no = oc(['no']);
+    return tiles(
+      tHero('Новые заказы', String(oc(['new', 'chat'])), 'ждут ответа'),
+      tMid('Ждут отправки', String(oc(['paid']))),
+      tMid('В пути', String(oc(['way']))),
+      tBad('Отказы за 7 дней', no + ' ' + plural(no, 'заказ', 'заказа', 'заказов'))) + ordersListHtml();
+  }
+  if (st.role === 'Курьер') return courierHtml();
+  return tiles(
+    tHero('Выручка сегодня', money(343400), 'по всей сети'),
+    tMid('Расходы за 30 дней', money(REP.exp)),
+    tMid('Долги поставщикам', money(DEBT)),
+    cashTile(null),
+    tMid('Возвраты', '3 / ' + money(12480)),
+    tMid('Обмены / брак', '2 / 1'));
+}
+function moreHtml() {
+  var c = cfg();
+  var rows = c.side.filter(function (id) { return c.tabs.indexOf(id) < 0; }).map(function (id) {
+    return '<button class="mrow" data-go="' + id + '"><svg class="ic"><use href="#' + ITEMS[id][1] + '"/></svg><span class="grow">' + ITEMS[id][0] + '</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('');
+  rows += '<button class="mrow" data-login><svg class="ic"><use href="#i-person"/></svg><span class="grow">Войти под другой ролью</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  return '<section class="scr"><div class="t-h1">Ещё</div><div>' + rows + '</div></section>';
+}
+
+function productsHtml() {
+  var si = SHOPS.indexOf(st.shop);
+  if (st.shop === 'Склад') {
+    return '<div class="empty"><svg class="ic"><use href="#i-box"/></svg><div class="t-h2">На складе пока пусто</div><p>Остатки склада Махачкала в демо не заведены. Они появятся при вводе начальных остатков.</p></div>';
+  }
+  var q = st.q.trim().toLowerCase();
+  var rows = DATA.filter(function (d) { return (st.cat === 'Все' || d.cat === st.cat) && (!q || d.n.toLowerCase().indexOf(q) >= 0); });
+  var chips = '<div class="fchips">' + CATS.map(function (c) { return '<button class="fchip" data-cat="' + c + '" aria-pressed="' + (c === st.cat) + '">' + c + '</button>'; }).join('') + '</div>';
+  var head = '<div class="t-label">' + (st.shop === 'Все' ? 'Остатки по всей сети' : 'Остатки: ' + st.shop) + (q ? ' / поиск «' + st.q.trim() + '»' : '') + '</div>';
+  if (!rows.length) return chips + head + '<div class="empty"><svg class="ic"><use href="#i-search"/></svg><div class="t-h2">Ничего не найдено</div><p>Попробуйте другое название или уберите фильтр.</p></div>';
+  return chips + head + '<div>' + rows.map(function (d) {
+    var n = si < 0 ? sum(d.rows.map(sum)) : sum(d.rows[si]);
+    var chip = n === 0 ? '<span class="chip chip-neutral">нет в наличии</span>' : n <= 2 ? '<span class="chip chip-bad">осталось <span class="num">' + n + '</span></span>' : '<span class="chip chip-good">в наличии <span class="num">' + n + '</span></span>';
+    return '<button class="prow" data-product="' + DATA.indexOf(d) + '"><span><b>' + d.n + '</b><span class="sub">' + d.meta + '</span></span><span class="r"><span class="price">' + nb(d.price) + '</span>' + chip + '</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div>';
+}
+
+// ===== Экран «Возврат»: образец «Из чека» (веер 5). Демо: чек 9 дней назад, оплата картой, без скидки =====
+var RET = [
+  { n: 'Рубашка Oxford', meta: 'M / рост 182 / белый', p: 4990 },
+  { n: 'Брюки чинос', meta: '50 / синий', p: 5490 },
+  { n: 'Носки хлопок', meta: '39–42 / хлопок', p: 390 }
+];
+var REASONS = ['Не подошёл размер', 'Передумал', 'Брак'];
+var RET_DAYS = 9;
+function returnHtml() {
+  var r = st.ret, it = RET[r.item], shop = cfg().shop || 'Махачкала';
+  var term = r.reason === 2 ? st.rules.retDefect : st.rules.retDays;
+  var selfOk = st.role !== 'Продавец' || it.p <= 3000;
+  var ok = r.tag && (r.mode === 'check' || r.said);
+  var lines = RET.map(function (x, i) {
+    return '<button class="cl" data-ritem="' + i + '" aria-pressed="' + (i === r.item) + '"><span class="rad"></span><span class="name">' + x.n + '</span><span class="price">' + money(x.p) + '</span><span class="meta">' + x.meta + '</span></button>';
+  }).join('');
+  var reasons = '<div style="display:grid;gap:var(--s2)"><div class="sec-h"><span class="t-h2">Причина</span></div><div class="rs">' + REASONS.map(function (t, i) { return '<button data-rreason="' + i + '" aria-pressed="' + (i === r.reason) + '">' + t + '</button>'; }).join('') + '</div></div>';
+  var tag = '<button class="tog" data-rtag aria-pressed="' + r.tag + '"><span class="box"><svg class="ic"><use href="#i-check"/></svg></span>С биркой и не ношена</button>';
+  var left;
+  if (r.mode === 'check') {
+    left = '<label class="field"><svg class="ic"><use href="#i-search"/></svg><input value="№ 2418" aria-label="Номер чека или телефон клиента" autocomplete="off"><svg class="ic"><use href="#i-scan"/></svg></label>' +
+      '<div class="chk"><div class="chk-h"><span class="t-h2">Чек № <span class="num">2418</span></span><span class="chip chip-neutral"><span class="num">' + RET_DAYS + '</span> дней назад</span></div><div class="t-label">Оплата: карта / без скидки</div>' + lines + '</div>' +
+      '<div class="rowline"><span class="t-label">Срок возврата</span><span class="chip chip-good">осталось <span class="num">' + (term - RET_DAYS) + '</span> из <span class="num">' + term + '</span></span></div>' +
+      '<button class="linkbtn" data-rmode="item">Чека нет, найти по вещи</button>';
+  } else {
+    left = '<label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название, артикул или код" aria-label="Поиск вещи" autocomplete="off"><svg class="ic"><use href="#i-scan"/></svg></label>' +
+      '<div class="chk"><div class="chk-h"><span class="t-h2">Найдено по коду</span></div><div class="t-label">Дату покупки система не знает</div>' + lines + '</div>' +
+      '<button class="tog" data-rsaid aria-pressed="' + r.said + '"><span class="box"><svg class="ic"><use href="#i-check"/></svg></span>Клиент говорит: прошло не больше <span class="num">' + term + '</span> дней</button>' +
+      '<button class="linkbtn" data-rmode="check">Есть чек: найти по номеру</button>';
+  }
+  left += reasons + tag;
+  var outcome = '<div class="t-label">' + (r.reason === 2 ? 'Вещь пойдёт в списание.' : 'Вещь вернётся в остатки: ' + shop + '.') + '</div>';
+  var notice = '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>' + (st.role !== 'Продавец' ? 'Возврат подтверждаете вы. Запись попадёт в журнал.' :
+    selfOk ? 'До <span class="num">' + money(3000) + '</span> можно оформить самому, если старшего продавца нет в смене. Запись попадёт в журнал.' :
+    'Больше <span class="num">' + money(3000) + '</span>: возврат подтверждает старший продавец. Вы отправляете ему заявку.') + '</span></div>';
+  var hero = '<div class="hero-sum"><div class="t-label">Вернуть клиенту</div><div class="hero-num">' + money(it.p) + '</div><div class="t-label" style="margin-top:var(--s2)">на карту, так клиент платил</div></div>';
+  var hint = !r.tag ? 'Без бирки и после носки возврат не принимается' : (!ok ? 'Без подтверждения срока клиентом возврат не оформить' : '');
+  var btn = '<button class="btn btn-main"' + (ok ? '' : ' style="opacity:.4"') + '>' + (selfOk ? 'Оформить возврат' : 'Отправить старшему') + '</button>' + (hint ? '<div class="t-label bad" style="text-align:center">' + hint + '</div>' : '');
+  return '<section class="scr"><div class="sale-head"><div class="t-h1">Возврат</div><button class="iconbtn" data-back aria-label="Закрыть возврат"><svg class="ic"><use href="#i-close"/></svg></button></div>' +
+    '<div class="cols"><div style="display:grid;gap:var(--s4);align-content:start">' + left + '</div><div style="display:grid;gap:var(--s4);align-content:start">' + outcome + notice + hero + btn + '</div></div></section>';
+}
+
+// ===== Перемещения: список, приём («Всё сошлось», веер 6), создание =====
+var SHOP_OPTS = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт', 'Склад'];
+var trUnits = function (x) { return x.lines.reduce(function (a, l) { return a + l.sent; }, 0); };
+var trSum = function (x) { return x.lines.reduce(function (a, l) { return a + l.sent * l.price; }, 0); };
+function trShort(x, got) { var u = 0, s = 0; x.lines.forEach(function (l, i) { var d = Math.max(0, l.sent - got[i]); u += d; s += d * l.price; }); return { u: u, s: s, notify: u > 2 || s > 5000 }; }
+function trById(id) { return st.tr.filter(function (x) { return x.id === id; })[0]; }
+function trChip(x) {
+  if (x.status === 'transit') return '<span class="chip chip-neutral">в пути</span>';
+  var d = trShort(x, x.got);
+  return d.u ? '<span class="chip chip-bad">не хватило <span class="num">' + d.u + '</span></span>' : '<span class="chip chip-good">принято</span>';
+}
+function trTabs() { return st.role === 'Старший продавец' ? [['in', 'К приёму'], ['out', 'Отправлено'], ['done', 'Завершено']] : [['transit', 'В пути'], ['done', 'Завершено']]; }
+function trFilter(tab) {
+  var shop = cfg().shop, senior = st.role === 'Старший продавец';
+  return st.tr.filter(function (x) {
+    if (tab === 'in') return x.status === 'transit' && x.to === shop;
+    if (tab === 'out') return x.status === 'transit' && x.from === shop;
+    if (tab === 'transit') return x.status === 'transit';
+    return x.status === 'done' && (!senior || x.from === shop || x.to === shop);
+  });
+}
+function flashHtml() { return st.flash ? '<div class="notice good"><svg class="ic"><use href="#i-check"/></svg><span>' + st.flash + '</span></div>' : ''; }
+function backRow(label) { return '<div class="top-row"><button class="iconbtn" data-go="transfers" aria-label="Назад к списку"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">' + label + '</span></div>'; }
+
+function transfersHtml() {
+  var tabs = trTabs();
+  if (!tabs.some(function (x) { return x[0] === st.trTab; })) st.trTab = tabs[0][0];
+  var chips = '<div class="fchips tabs" style="--n:' + tabs.length + '">' + tabs.map(function (x) { return '<button class="fchip" data-trtab="' + x[0] + '" aria-pressed="' + (x[0] === st.trTab) + '">' + x[1] + ' <span class="num">' + trFilter(x[0]).length + '</span></button>'; }).join('') + '</div>';
+  var rows = trFilter(st.trTab);
+  var list = rows.length ? '<div>' + rows.map(function (x) {
+    return '<button class="prow" data-tr="' + x.id + '"><span><b>№ ' + x.id + '</b><span class="sub">Откуда: ' + x.from + '</span><span class="sub">Куда: ' + x.to + '</span></span><span class="r"><span class="price">' + trUnits(x) + ' шт</span>' + trChip(x) + '</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div>' : '<div class="empty"><svg class="ic"><use href="#i-transfer"/></svg><div class="t-h2">Здесь пока пусто</div><p>Новые перемещения появятся здесь.</p></div>';
+  return '<section class="scr"><div class="t-h1">Перемещения</div>' + flashHtml() + '<button class="btn btn-main" data-go="transfer-new"><svg class="ic"><use href="#i-plus"/></svg>Новое перемещение</button>' + chips + list + '</section>';
+}
+
+function transferHtml() {
+  var x = trById(st.trId), c = cfg();
+  var canRecv = x.status === 'transit' && (st.role === 'Владелец' || x.to === c.shop);
+  var route = '<div><div class="sec-h"><span class="t-h2">Перемещение № <span class="num">' + x.id + '</span></span>' + trChip(x) + '</div>' +
+    '<div class="rowline"><span class="t-label">Откуда</span><b>' + x.from + (x.from === c.shop ? ', ваш магазин' : '') + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Куда</span><b>' + x.to + (x.to === c.shop ? ', ваш магазин' : '') + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Отправил</span><b>' + x.by + '</b></div></div>';
+  var body;
+  if (x.status === 'done') {
+    var d = trShort(x, x.got);
+    body = '<div>' + x.lines.map(function (l, i) { return '<div class="ln' + (x.got[i] < l.sent ? ' diff' : '') + '"><span class="name">' + l.n + '</span><span class="qty">' + x.got[i] + ' из ' + l.sent + '</span><span class="meta">' + l.meta + '</span></div>'; }).join('') + '</div>' +
+      (d.u ? '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Не хватило <b class="num bad">' + d.u + ' шт</b> на <span class="num">' + money(d.s) + '</span> по цене продажи. Расхождение разбирает старший продавец.' + (d.notify ? ' Владельцу сообщили.' : '') + '</span></div>' : '<div class="chip chip-good" style="justify-self:start">Всё сошлось: <span class="num">' + trUnits(x) + '</span> шт</div>');
+  } else if (!canRecv) {
+    body = '<div>' + x.lines.map(function (l) { return '<div class="ln"><span class="name">' + l.n + '</span><span class="qty">' + l.sent + '</span><span class="meta">' + l.meta + '</span></div>'; }).join('') + '</div>' +
+      '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Ждём приёма в магазине «' + x.to + '». Принять может старший продавец получателя.</span></div>';
+  } else if (!st.trOpen) {
+    body = '<div>' + x.lines.map(function (l) { return '<div class="ln"><span class="name">' + l.n + '</span><span class="qty">' + l.sent + '</span><span class="meta">' + l.meta + '</span></div>'; }).join('') + '</div>' +
+      '<div class="t-label">Всего <span class="num">' + trUnits(x) + '</span> шт</div><button class="btn btn-main" data-traccept>Всё сошлось, принять</button><button class="linkbtn" style="justify-self:center" data-tropen>Есть расхождение</button>';
+  } else {
+    var dd = trShort(x, st.trGot);
+    body = '<div>' + x.lines.map(function (l, i) {
+      return '<div class="ln' + (st.trGot[i] < l.sent ? ' diff' : '') + '"><span class="name">' + l.n + '</span><span class="stp"><button data-trdec="' + i + '" aria-label="Меньше"><svg class="ic"><use href="#i-minus"/></svg></button><span class="v">' + st.trGot[i] + '</span><button data-trinc="' + i + '" aria-label="Больше"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="meta">' + l.meta + '<br>отправлено&nbsp;<span class="num">' + l.sent + '</span></span></div>';
+    }).join('') + '</div>' +
+      (dd.u ? '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Не хватает <b class="num bad">' + dd.u + ' шт</b> на <span class="num">' + money(dd.s) + '</span> по цене продажи. Расхождение разбирает старший продавец.' + (dd.notify ? ' Владельцу сообщим автоматически.' : '') + '</span></div>' : '<div class="chip chip-good" style="justify-self:start">Всё сошлось: <span class="num">' + trUnits(x) + '</span> шт</div>') +
+      '<button class="btn btn-main" data-traccept>' + (dd.u ? 'Принять с расхождением' : 'Принять') + '</button>';
+  }
+  return '<section class="scr">' + backRow('Перемещения') + '<div class="t-h1">' + (canRecv ? 'Приём' : 'Перемещение') + '</div>' + route + body + '</section>';
+}
+
+function newNt() { var from = cfg().shop || 'Махачкала'; return { from: from, to: SHOP_OPTS.filter(function (s) { return s !== from; })[0], q: '', qty: {} }; }
+function stockRows(from) {
+  var si = SHOPS.indexOf(from), rows = [];
+  if (si < 0) return rows;
+  DATA.forEach(function (d, i) { d.rows[si].forEach(function (cnt, j) { if (cnt > 0) rows.push({ key: i + ':' + j, n: d.n, size: EXTRA[i].sizes[j], color: d.meta.split(' / ')[0], have: cnt, price: EXTRA[i].price }); }); });
+  return rows;
+}
+function newTransferHtml() {
+  var nt = st.nt, own = cfg().shop, all = stockRows(nt.from), q = nt.q.trim().toLowerCase();
+  var rows = all.filter(function (r) { return !q || r.n.toLowerCase().indexOf(q) >= 0; });
+  var units = 0, sumv = 0;
+  all.forEach(function (r) { var n = nt.qty[r.key] || 0; units += n; sumv += n * r.price; });
+  var chipRow = function (attr, list, cur) { return '<div class="fchips">' + list.map(function (s) { return '<button class="fchip" ' + attr + '="' + s + '" aria-pressed="' + (s === cur) + '">' + s + '</button>'; }).join('') + '</div>'; };
+  var fromBlock = own ? '<div class="rowline" style="padding:0;border:0"><span class="t-label">Откуда</span><b>' + own + ', ваш магазин</b></div>' : '<div style="display:grid;gap:var(--s2)"><span class="t-label">Откуда</span>' + chipRow('data-ntfrom', SHOP_OPTS.slice(0, 4), nt.from) + '</div>';
+  var toBlock = '<div style="display:grid;gap:var(--s2)"><span class="t-label">Куда</span>' + chipRow('data-ntto', SHOP_OPTS.filter(function (s) { return s !== nt.from; }), nt.to) + '</div>';
+  var search = '<label class="field"><svg class="ic"><use href="#i-search"/></svg><input id="ntq" value="' + nt.q.replace(/"/g, '&quot;') + '" placeholder="Название вещи" aria-label="Поиск вещи" autocomplete="off"></label>';
+  var list = rows.length ? '<div>' + rows.map(function (r) {
+    var n = nt.qty[r.key] || 0;
+    return '<div class="ln"><span class="name">' + r.n + '</span><span class="stp"><button data-ntdec="' + r.key + '" aria-label="Меньше"><svg class="ic"><use href="#i-minus"/></svg></button><span class="v">' + n + '</span><button data-ntinc="' + r.key + '" aria-label="Больше"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="meta">' + r.size + ' / ' + r.color + '<br>в наличии&nbsp;<span class="num">' + r.have + '</span></span></div>';
+  }).join('') + '</div>' : '<div class="empty"><svg class="ic"><use href="#i-search"/></svg><div class="t-h2">Ничего не найдено</div><p>Попробуйте другое название.</p></div>';
+  var sumLine = units ? '<div class="t-label">Выбрано <span class="num">' + units + '</span> шт на <span class="num">' + money(sumv) + '</span> по цене продажи</div>' : '<div class="t-label">Выберите, что везём</div>';
+  return '<section class="scr">' + backRow('Перемещения') + '<div class="t-h1">Новое перемещение</div>' +
+    '<div class="cols"><div style="display:grid;gap:var(--s4);align-content:start">' + fromBlock + toBlock + search + list + '</div>' +
+    '<div style="display:grid;gap:var(--s3);align-content:start">' + sumLine + '<button class="btn btn-main" data-ntsend' + (units ? '' : ' style="opacity:.4"') + '>Отправить</button></div></div></section>';
+}
+
+// ===== Касса и смена (веер 8) =====
+var SH_REASONS = ['Ошиблись со сдачей', 'Выдача не записана', 'Причина неизвестна'];
+var SC_KINDS = ['Хозрасходы', 'Передано Руслану', 'Передано Магомеду', 'Другое'];
+var digitsOf = function (s) { return String(s || '').replace(/\D/g, ''); };
+var spacedNum = function (s) { var d = digitsOf(s); return d ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; };
+var plusMoney = function (n) { return (n > 0 ? '+' : '') + money(n); };
+var shOut = function (s) { return s.outs.reduce(function (a, o) { return a + o[1]; }, 0); };
+var shExpected = function (s) { return s.start + s.sales1 + s.sales2 - shOut(s); };
+var shDiff = function (s) { return s.counted - shExpected(s); };
+var shById = function (id) { return st.shifts.filter(function (s) { return s.id === id; })[0]; };
+// Плитка «Касса» на «Сегодня»: непогашенные расхождения сегодняшних смен (shop = null: по всей сети)
+function cashTile(shop) {
+  var bad = st.shifts.filter(function (s) { return s.day === 'Сегодня' && shDiff(s) !== 0 && !s.reason && (!shop || s.shop === shop); });
+  if (!bad.length) return '<div class="tile s2"><span class="t-label">Касса' + (shop ? ' ' + shop : '') + '</span><span class="t-big">Сходится</span></div>';
+  var sum = bad.reduce(function (a, s) { return a + shDiff(s); }, 0);
+  return tBad(bad.length === 1 ? 'Касса ' + bad[0].shop : 'Касса: расхождений ' + bad.length, money(sum));
+}
+function shiftChip(s) {
+  var d = shDiff(s);
+  return d === 0 ? '<span class="chip chip-good">сошлось</span>' : s.reason ? '<span class="chip chip-neutral">разобрано</span>' : '<span class="chip chip-bad">' + money(d) + '</span>';
+}
+function shiftLedger(s) {
+  var ev = [{ t: '09:00', tx: 'Начало смены', sub: 'остаток в кассе', amt: s.start }];
+  s.outs.forEach(function (o) { ev.push({ t: o[2], tx: 'Выдано: ' + o[0].toLowerCase(), sub: /^Передано/.test(o[0]) ? o[3] + ' отдал, ' + o[0].replace('Передано ', '') + ' принял' : o[3], amt: -o[1] }); });
+  ev.push({ t: '13:00', tx: 'Продажи наличными до 13:00', sub: '<span class="num">' + s.n1 + '</span> ' + plural(s.n1, 'чек', 'чека', 'чеков'), amt: s.sales1 });
+  ev.push({ t: s.closed, tx: 'Продажи наличными после 13:00', sub: '<span class="num">' + s.n2 + '</span> ' + plural(s.n2, 'чек', 'чека', 'чеков'), amt: s.sales2 });
+  ev.sort(function (a, b) { return a.t < b.t ? -1 : a.t > b.t ? 1 : 0; });
+  var bal = 0;
+  return ev.map(function (e, i) { bal += e.amt; return '<div class="led"><span class="tm">' + e.t + '</span><span class="tx">' + e.tx + '<span class="sub">' + e.sub + '</span></span><span class="amt' + (e.amt < 0 ? ' bad' : '') + '">' + (i === 0 ? money(e.amt) : plusMoney(e.amt)) + '</span><span class="bal">остаток ' + money(bal) + '</span></div>'; }).join('');
+}
+
+function cashHtml() {
+  var c = cfg(), own = c.shop;
+  if (st.role === 'Продавец') {
+    var body = st.myClosed ? '<div class="done"><span class="okc"><svg class="ic"><use href="#i-check"/></svg></span><div class="t-h2">Смена закрыта</div><div class="t-label">Наличные записаны. Результат увидит старший продавец.</div></div>' :
+      '<div class="dcard"><div class="dmini"><span class="ttl"><b>Смена открыта</b><span class="t-label">' + SELLER_SHIFT.shop + ' / с <span class="num">09:00</span></span></span><span class="chip chip-good">идёт</span></div><button class="btn btn-main" data-go="shift-close">Закрыть смену</button></div>';
+    return '<section class="scr"><div class="t-h1">Касса</div>' + flashHtml() + body + '</section>';
+  }
+  var rows = st.shifts.filter(function (s) { return own ? s.shop === own : (st.shop === 'Все' || s.shop === st.shop); });
+  var list = rows.length ? '<div>' + rows.map(function (s) {
+    return '<button class="prow" data-shift="' + s.id + '"><span><b>' + s.shop + ' / ' + s.day + '</b><span class="sub">Закрыл ' + s.by + ', <span class="num">' + s.closed + '</span></span></span><span class="r"><span class="price">' + money(s.counted) + '</span>' + shiftChip(s) + '</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div>' : '<div class="empty"><svg class="ic"><use href="#i-wallet"/></svg><div class="t-h2">Смен пока нет</div><p>Закрытые смены появятся здесь.</p></div>';
+  return '<section class="scr"><div class="t-h1">Касса</div>' + flashHtml() + '<div class="t-label">Закрытые смены: что насчитали в кассе</div>' + list + '</section>';
+}
+
+function shiftHtml() {
+  var s = shById(st.shiftId), d = shDiff(s), c = cfg();
+  var canResolve = st.role === 'Владелец' || (st.role === 'Старший продавец' && s.shop === c.shop);
+  var back = '<div class="top-row"><button class="iconbtn" data-go="cash" aria-label="Назад к списку"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">Касса</span></div>';
+  var formula = '<div class="formula"><div class="frow"><span class="t-label">Ожидали</span><span class="v">' + money(shExpected(s)) + '</span></div><div class="frow"><span class="t-label">Насчитали</span><span class="v">' + money(s.counted) + '</span></div><div class="frow res"><span class="t-label">Разница</span><span class="v ' + (d === 0 ? 'good' : 'bad') + '">' + (d === 0 ? money(0) : plusMoney(d)) + '</span></div></div>';
+  var resolve = '';
+  if (d !== 0) {
+    if (s.reason) resolve = '<div class="notice good"><svg class="ic"><use href="#i-check"/></svg><span>Разобрано: ' + s.reason.toLowerCase() + '. Запись в журнале.</span></div>';
+    else if (canResolve) resolve = '<div style="display:grid;gap:var(--s2)"><div class="t-h2">Причина расхождения</div><div class="seg stack">' + SH_REASONS.map(function (r) { return '<button data-sreason="' + r + '" aria-pressed="' + (st.shReason === r) + '">' + r + '</button>'; }).join('') + '</div></div><button class="btn btn-main" data-sresolve' + (st.shReason ? '' : ' style="opacity:.4"') + '>Закрыть расхождение</button>';
+    else resolve = '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Расхождение разберёт старший продавец.</span></div>';
+  }
+  return '<section class="scr">' + back + flashHtml() + '<div><div class="t-h1">' + s.shop + '</div><div class="t-label" style="margin-top:6px">' + s.day + ', смена закрыта в <span class="num">' + s.closed + '</span>, ' + s.by + '</div></div>' + formula +
+    '<div><div class="sec-h"><span class="t-h2">Движение денег за смену</span></div>' + shiftLedger(s) + '</div>' + resolve + '</section>';
+}
+
+function shiftCloseHtml() {
+  var sc = st.sc, back = '<div class="top-row"><button class="iconbtn" data-go="cash" aria-label="Назад"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">Касса</span></div>';
+  var title = '<div><div class="t-h1">Закрытие смены</div><div class="t-label" style="margin-top:6px">' + SELLER_SHIFT.shop + ' / смена с <span class="num">09:00</span></div></div>';
+  var bar = '<div class="prog p2">' + [1, 2].map(function (i) { return '<i class="' + (i <= sc.step ? 'on' : '') + '"></i>'; }).join('') + '</div><div class="t-label">Шаг <span class="num">' + sc.step + '</span> из <span class="num">2</span></div>';
+  if (sc.step === 1) {
+    var outs = sc.outs.length ? sc.outs.map(function (o) { return '<div class="rowline"><span><b>' + o[0] + '</b><span class="t-label" style="display:block"><span class="num">' + o[2] + '</span> / ' + o[3] + '</span></span><b class="num bad">' + money(-o[1]) + '</b></div>'; }).join('') : '<div class="t-label">Выдач из кассы не было.</div>';
+    var tail;
+    if (sc.add) {
+      var okAdd = +digitsOf(sc.add.amt) > 0 && sc.add.kind;
+      tail = '<div style="display:grid;gap:var(--s2)"><span class="t-label">Сколько выдали</span><label class="big-in"><input id="scadd" data-in="scadd" inputmode="numeric" placeholder="0" value="' + spacedNum(sc.add.amt) + '" autocomplete="off"><span class="cur">₽</span></label></div>' +
+        '<div class="seg stack">' + SC_KINDS.map(function (k) { return '<button data-sckind="' + k + '" aria-pressed="' + (sc.add.kind === k) + '">' + k + '</button>'; }).join('') + '</div>' +
+        '<button class="btn btn-main" data-scaddsave' + (okAdd ? '' : ' style="opacity:.4"') + '>Записать выдачу</button><button class="linkbtn" style="justify-self:center" data-scaddcancel>Отмена</button>';
+    } else tail = '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Всё, что вы брали из кассы сегодня, записано? Неучтённая выдача даст расхождение.</span></div><button class="btn btn-main" data-scstep="1">Да, всё записано</button><button class="btn btn-second" data-scadd>Добавить выдачу</button>';
+    return '<section class="scr">' + back + title + bar + '<div class="t-h2">Выдачи из кассы за смену</div><div>' + outs + '</div>' + tail + '</section>';
+  }
+  var ok = +digitsOf(sc.amt) > 0;
+  return '<section class="scr">' + back + title + bar + '<div class="t-h2">Наличные в кассе</div><label class="big-in"><input id="scamt" data-in="scamt" inputmode="numeric" placeholder="0" value="' + spacedNum(sc.amt) + '" aria-label="Сколько наличных в кассе" autocomplete="off"><span class="cur">₽</span></label>' +
+    '<div class="t-label">Пересчитайте всё, вместе с мелочью. Результат увидит старший продавец.</div><button class="btn btn-main" data-scclose' + (ok ? '' : ' style="opacity:.4"') + '>Закрыть смену</button><button class="linkbtn" style="justify-self:center" data-scstep="-1">Назад</button></section>';
+}
+
+// ===== Заказы: список по стадиям (веер 7, вариант 1), карточка заказа =====
+// ===== Отчёты: прибыль за последние 30 дней (веер 9). Данные придуманы для демо. Плитки «Сегодня» (прибыль, расходы, долги) берут цифры отсюда =====
+// Данные отчёта считаются из журнала расходов и зарплаты (expAll; пересчитывает repRebuild в начале каждой отрисовки): изменили процент, добавили расход, и прибыль пересчиталась везде
+var REP = null;
+function repRebuild() {
+  var all = expAll(), direct = {}, cats = {}, total = 0, shared = 0;
+  all.forEach(function (e) { total += e.amt; cats[e.cat] = (cats[e.cat] || 0) + e.amt; if (SHOPS.indexOf(e.shop) >= 0) direct[e.shop] = (direct[e.shop] || 0) + e.amt; else shared += e.amt; });
+  var shops = SHOP_BASE.map(function (x) { return { n: x[0], rev: x[1], cogs: x[2] }; });
+  var rev = sum(shops.map(function (s) { return s.rev; })), cogs = sum(shops.map(function (s) { return s.cogs; }));
+  shops.forEach(function (s) { s.exp = (direct[s.n] || 0) + Math.round(shared * s.rev / rev); });
+  shops[0].exp += total - sum(shops.map(function (s) { return s.exp; }));   // округление не должно менять итог
+  shops.forEach(function (s) { s.profit = s.rev - s.cogs - s.exp; s.margin = Math.round(100 * s.profit / s.rev); s.mx = s.profit / s.rev; });
+  REP = { shops: shops, rev: rev, cogs: cogs, exp: total, profit: rev - cogs - total, cats: EXP_ORDER.filter(function (c) { return cats[c]; }).map(function (c) { return [c, cats[c]]; }).sort(function (x, y) { return y[1] - x[1]; }) };
+}
+var DEBT = 310000;
+// бухгалтер итоговую прибыль и маржу не видит (допущение, уточнить с Магомедом)
+var REP_SORTS = { 'Владелец': [['profit', 'По прибыли'], ['rev', 'По выручке'], ['margin', 'По марже']], 'Бухгалтер': [['rev', 'По выручке'], ['exp', 'По расходам']] };
+var repPct = function (a) { return Math.round(100 * a / REP.rev); };
+function repSortKey() { var list = REP_SORTS[st.role]; return list.some(function (x) { return x[0] === st.rsort; }) ? st.rsort : list[0][0]; }
+function repShopRow(s, key, max, owner) {
+  var n = function (v) { return '<span class="num">' + money(v) + '</span>'; }, mg = '<span class="num">' + s.margin + '%</span>';
+  var shown = key === 'margin' ? mg : money(s[key]), main = key === 'margin' ? s.mx : s[key];
+  // в подписи показываем остальные числа, а не то, по которому идёт сортировка
+  var sub = owner
+    ? (key === 'profit' ? 'выручка ' + n(s.rev) + ' / маржа ' + mg : key === 'rev' ? 'прибыль ' + n(s.profit) + ' / маржа ' + mg : 'выручка ' + n(s.rev) + ' / прибыль ' + n(s.profit))
+    : (key === 'rev' ? 'закупка ' + n(s.cogs) + ' / расходы ' + n(s.exp) : 'выручка ' + n(s.rev) + ' / закупка ' + n(s.cogs));
+  return '<div class="rep-shop"><div class="h"><b>' + s.n + '</b><span class="v">' + shown + '</span></div><div class="rep-bar"><i class="rep-acc" style="width:' + Math.round(100 * main / max) + '%"></i></div><div class="t-label">' + sub + '</div></div>';
+}
+function reportsHtml() {
+  var owner = st.role === 'Владелец', key = repSortKey(), sorts = REP_SORTS[st.role];
+  var list = REP.shops.slice().sort(function (a, b) { return key === 'margin' ? b.mx - a.mx : b[key] - a[key]; });
+  var max = Math.max.apply(null, list.map(function (s) { return key === 'margin' ? s.mx : s[key]; }));
+  var pc = repPct(REP.cogs), pe = repPct(REP.exp), pp = 100 - pc - pe;
+  var leg = function (cls, label, p, v) { return '<div class="rep-leg"><span class="sw ' + cls + '"></span><span>' + label + '</span><span class="pc">' + p + '%</span><span class="am">' + money(v) + '</span></div>'; };
+  var hundred = '<div style="display:grid;gap:var(--s3)"><div class="t-h2">С каждых <span class="num">100 ₽</span> выручки остаётся <span class="num good">' + pp + ' ₽</span></div>' +
+    '<div class="rep-stack"><i class="rep-mut" style="width:' + pc + '%"></i><i class="rep-acc" style="width:' + pe + '%"></i><i class="rep-good" style="width:' + pp + '%"></i></div>' +
+    '<div>' + leg('rep-mut', 'Закупка проданного', pc, REP.cogs) + leg('rep-acc', 'Расходы', pe, REP.exp) + leg('rep-good', 'Прибыль', pp, REP.profit) + '</div></div>';
+  var hero = owner
+    ? '<div class="tile inv"><span class="t-label">Прибыль за <span class="num">30</span> дней</span><span class="tile-hero-num">' + money(REP.profit) + '</span><span class="t-label">маржа <span class="num">' + repPct(REP.profit) + '%</span> от выручки</span></div>' + hundred
+    : '<div class="tile inv"><span class="t-label">Выручка за <span class="num">30</span> дней</span><span class="tile-hero-num">' + money(REP.rev) + '</span><span class="t-label">по всей сети</span></div>' +
+      '<div class="rep-two">' + tMid('Закупка проданного', money(REP.cogs)) + tMid('Расходы', money(REP.exp)) + '</div>';
+  var cats = '<div><div class="sec-h"><span class="t-h2">Расходы по статьям</span><span class="t-label num">' + money(REP.exp) + '</span></div>' +
+    REP.cats.map(function (c) { return '<div class="rowline"><span>' + c[0] + '</span><b class="num">' + money(c[1]) + '</b></div>'; }).join('') + '</div>';
+  var chips = '<div class="fchips eq" style="--n:' + sorts.length + '">' + sorts.map(function (x) { return '<button class="fchip" data-rsort="' + x[0] + '" aria-pressed="' + (x[0] === key) + '">' + x[1] + '</button>'; }).join('') + '</div>';
+  var shops = '<div style="display:grid;gap:var(--s3)"><div class="sec-h"><span class="t-h2">По магазинам</span></div>' + chips + '<div>' + list.map(function (s) { return repShopRow(s, key, max, owner); }).join('') + '</div></div>';
+  var note = '<div class="t-label">Закупка товара в расходы не входит: она уже в закупочной стоимости проданного. Долги поставщикам (<span class="num">' + money(DEBT) + '</span>) это отдельный отчёт.</div>';
+  var btn = '<button class="btn btn-second" data-rexport><svg class="ic"><use href="#i-download"/></svg>Выгрузить в Excel</button>';
+  return '<section class="scr"><div><div class="t-h1">Отчёты</div><div class="t-label" style="margin-top:6px">Весь бизнес / последние <span class="num">30</span> дней</div></div>' +
+    '<div class="cols"><div class="scr">' + hero + cats + '</div><div class="scr">' + shops + note + flashHtml() + btn + '</div></div></section>';
+}
+// ===== Шаг 2.4: общие кирпичики, расходы, клиенты, продажа с клиентом, люди, настройки =====
+var esc = function (s) { return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'); };
+var numSp = function (v) { return '<span class="num">' + v + '</span>'; };
+var backTo = function (screen, label, aria) { return '<div class="top-row"><button class="iconbtn" data-go="' + screen + '" aria-label="' + aria + '"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">' + label + '</span></div>'; };
+var titleSub = function (title, sub) { return '<div><div class="t-h1">' + title + '</div>' + (sub ? '<div class="t-label" style="margin-top:6px">' + sub + '</div>' : '') + '</div>'; };
+var secH = function (title, right) { return '<div class="sec-h"><span class="t-h2">' + title + '</span>' + (right ? '<span class="t-label">' + right + '</span>' : '') + '</div>'; };
+var heroTile = function (label, val, foot) { return '<div class="tile inv"><span class="t-label">' + label + '</span><span class="tile-hero-num">' + val + '</span><span class="t-label">' + foot + '</span></div>'; };
+var stubBtn = function (cls, icon, label, msg) { return '<button class="btn ' + cls + '" data-stub="' + esc(msg) + '">' + (icon ? '<svg class="ic"><use href="#' + icon + '"/></svg>' : '') + label + '</button>'; };
+var XLSX_MSG = 'Демо: файл не создаётся. В настоящей системе здесь скачается таблица Excel.';
+// ряд чипов: items это пары [значение, подпись]; eq: равные колонки в одну строку (t4: четыре в ряд, на узком экране два), иначе перенос на новую
+var chipsOf = function (attr, items, cur, eq) { return '<div class="fchips ' + (eq ? 'eq' : 'wrap') + (eq === 't4' ? ' t4' : '') + '"' + (eq ? ' style="--n:' + items.length + '"' : '') + '>' + items.map(function (x) { return '<button class="fchip" ' + attr + '="' + x[0] + '" aria-pressed="' + (x[0] === cur) + '">' + x[1] + '</button>'; }).join('') + '</div>'; };
+var limitText = function () { return st.role === 'Владелец' ? 'без ограничений' : 'до ' + (st.role === 'Старший продавец' ? st.rules.discSenior : st.rules.discSeller) + '%'; };
+var lblInput = function (label, id, val, ph, extra) { return '<label class="lbl">' + label + '<input class="inp" id="' + id + '" data-in="' + id + '" value="' + esc(val) + '" placeholder="' + ph + '" autocomplete="off"' + (extra || '') + '></label>'; };
+var phoneDigits = function (raw) { var d = digitsOf(raw); return d.length === 11 && /^[78]/.test(d) ? d.slice(1) : d; };
+var fmtPhone = function (raw) { var d = phoneDigits(raw); return d.length === 10 ? '+7 ' + d.slice(0, 3) + ' ' + d.slice(3, 6) + '-' + d.slice(6, 8) + '-' + d.slice(8) : String(raw).trim(); };
+var disabledIf = function (ok) { return ok ? '' : ' style="opacity:.4"'; };
+
+// ----- Зарплата: оклад + процент от личных продаж + бонус за план − аванс − штраф (ТЗ 8.5). Из неё считаются расходы -----
+var isSeller = function (p) { return p.role === 'Старший продавец' || p.role === 'Продавец'; };
+var rateOf = function (p) { return p.pct == null ? st.rules.pct : p.pct; };
+var isOn = function (p) { return st.sched[0][6].indexOf(p.id) >= 0; };
+var shopOf = function (p) { return p.shop === 'Все' ? 'все магазины' : p.shop; };
+function staffSales() {   // личные продажи за 30 дней: выручка магазина делится по весам продавцов, последний забирает остаток
+  var res = {};
+  SHOP_BASE.forEach(function (b) {
+    var team = st.staff.filter(function (p) { return p.shop === b[0] && isSeller(p) && p.share > 0; }), w = sum(team.map(function (p) { return p.share; })), left = b[1];
+    team.forEach(function (p, i) { var v = i === team.length - 1 ? left : Math.round(b[1] * p.share / w / 100) * 100; res[p.id] = v; left -= v; });
+  });
+  return res;
+}
+function staffPay(p, sales) {
+  var s = isSeller(p) ? (sales[p.id] || 0) : 0, pct = Math.round(s * rateOf(p) / 100);
+  var base = SHOP_BASE.filter(function (b) { return b[0] === p.shop; })[0], plan = isSeller(p) && !!base && base[1] >= PLANS[p.shop], bonus = plan ? st.rules.bonus : 0;
+  return { sales: s, pct: pct, bonus: bonus, plan: plan, total: p.salary + pct + bonus - p.adv - p.fine };
+}
+var staffPays = function () { var sales = staffSales(); return st.staff.map(function (p) { return staffPay(p, sales); }); };
+// расходы, которые система записывает сама: зарплата по магазинам (аванс это часть зарплаты, штраф её уменьшает) и доставка
+function autoExp() {
+  var pays = staffPays(), by = {}, out = [];
+  st.staff.forEach(function (p, i) { var k = SHOPS.indexOf(p.shop) >= 0 ? p.shop : 'Все'; by[k] = (by[k] || 0) + p.salary + pays[i].pct + pays[i].bonus - p.fine; });
+  SHOPS.concat(['Все']).forEach(function (k, i) { if (by[k]) out.push({ id: 101 + i, ago: 0, n: k === 'Все' ? 'Зарплата, онлайн и доставка' : 'Зарплата, ' + k, cat: 'Зарплата', shop: k, amt: by[k], by: 'авто' }); });
+  out.push({ id: 110, ago: 0, n: 'Доставка заказов: 168 по 250 ₽', cat: 'Доставка', shop: 'Все', amt: 42000, by: 'авто' });
+  return out;
+}
+function expAll() { return st.exp.concat(autoExp()); }
+
+// ----- Расходы (ТЗ 7.4). Владелец вносит, бухгалтер смотрит и выгружает. Зарплата и доставка записываются сами -----
+function expensesHtml() {
+  var owner = st.role === 'Владелец', all = expAll(), total = REP.exp, cats = REP.cats, max = cats.length ? cats[0][1] : 1;
+  var hero = heroTile('Расходы за <span class="num">30</span> дней', money(total), numSp(all.length) + ' ' + plural(all.length, 'запись', 'записи', 'записей'));
+  var add = owner ? '<button class="btn btn-main" data-go="expense-new"><svg class="ic"><use href="#i-plus"/></svg>Добавить расход</button>' : '';
+  var due = all.filter(function (e) { return e.cat === 'Аренда'; }).map(function (e) { return { n: e.n, amt: e.amt, left: 31 - e.ago, at: dateOf(e.ago - 31) }; }).sort(function (a, b) { return a.left - b.left; });
+  var dueBlock = due.length ? '<div>' + secH('Ближайшие платежи', money(sum(due.map(function (d) { return d.amt; })))) + due.map(function (d) {
+    return '<div class="rowline"><span>' + d.n + '<span class="t-label" style="display:block">' + d.at + ' / через ' + numSp(d.left) + ' ' + plural(d.left, 'день', 'дня', 'дней') + '</span></span><b class="num">' + money(d.amt) + '</b></div>';
+  }).join('') + '</div>' : '';
+  var catRows = cats.map(function (c) {
+    var cnt = all.filter(function (e) { return e.cat === c[0]; }).length;
+    return '<div class="rep-shop"><div class="h"><b>' + c[0] + '</b><span class="v">' + money(c[1]) + '</span></div><div class="rep-bar"><i class="rep-acc" style="width:' + Math.round(100 * c[1] / max) + '%"></i></div>' +
+      '<div class="t-label">' + numSp(Math.round(100 * c[1] / total) + '%') + ' расходов / ' + (EXP_AUTO[c[0]] || numSp(cnt) + ' ' + plural(cnt, 'запись', 'записи', 'записей')) + '</div></div>';
+  }).join('');
+  var rows = all.slice().sort(function (a, b) { return a.ago - b.ago || (a.by === 'авто') - (b.by === 'авто') || b.id - a.id; }).filter(function (e) { return st.expCat === 'Все' || e.cat === st.expCat; });
+  var ledger = '<div style="display:grid;gap:var(--s3)">' + secH('Записи', numSp(rows.length)) + chipsOf('data-expcat', [['Все', 'Все']].concat(cats.map(function (c) { return [c[0], c[0]]; })), st.expCat) +
+    '<div>' + rows.map(function (e) { return '<div class="ln"><span class="name">' + e.n + '</span><span class="qty">' + money(e.amt) + '</span><span class="meta">' + dateOf(e.ago) + ' / ' + e.cat + ' / ' + e.by + '</span></div>'; }).join('') + '</div></div>';
+  return '<section class="scr">' + titleSub('Расходы', 'Весь бизнес / последние ' + numSp(30) + ' дней') + flashHtml() +
+    '<div class="cols"><div class="scr">' + hero + add + dueBlock + '<div>' + secH('По статьям') + catRows + '</div></div><div class="scr">' + ledger + stubBtn('btn-second', 'i-download', 'Выгрузить в Excel', XLSX_MSG) + '</div></div></section>';
+}
+function expenseNewHtml() {
+  var x = st.expNew, ok = +digitsOf(x.amt) > 0 && x.cat;
+  return '<section class="scr narrow">' + backTo('expenses', 'Расходы', 'Назад к расходам') + '<div class="t-h1">Новый расход</div>' +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Статья</span>' + chipsOf('data-expnewcat', EXP_MANUAL.map(function (c) { return [c, c]; }), x.cat) + '</div>' +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Сколько заплатили</span><label class="big-in"><input id="expamt" data-in="expamt" inputmode="numeric" placeholder="0" value="' + spacedNum(x.amt) + '" aria-label="Сумма расхода" autocomplete="off"><span class="cur">₽</span></label></div>' +
+    lblInput('За что (по желанию)', 'expnote', x.note, 'Например, свет за октябрь', ' maxlength="40"') +
+    '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Зарплата и доставка записываются сами, вручную их вносить не нужно. Аренда задаётся один раз с датами.</span></div>' +
+    '<button class="btn btn-main" data-expsave' + disabledIf(ok) + '>Записать расход</button></section>';
+}
+
+// ----- Клиенты (ТЗ 6): список, карточка, создание и правка, подбор для рассылки -----
+var clientById = function (id) { return st.clients.filter(function (c) { return c.id === id; })[0]; };
+var cliTotal = function (c) { return sum(c.buys.map(function (b) { return b[4] * EXTRA[b[1]].price; })); };
+var cliLast = function (c) { return c.buys.length ? Math.min.apply(null, c.buys.map(function (b) { return b[0]; })) : 9999; };
+var cliSeen = function (c) { return c.buys.length ? agoText(cliLast(c)) : 'нет покупок'; };
+var cliHas = function (c, cat) { return c.buys.some(function (b) { return DATA[b[1]].cat === cat; }); };
+var cliSeason = function (c, s) { return c.buys.some(function (b) { return seasonOf(b[0]) === s; }); };
+function cliCats(c) { var m = {}; c.buys.forEach(function (b) { var k = DATA[b[1]].cat; m[k] = (m[k] || 0) + b[4]; }); return Object.keys(m).sort(function (a, b) { return m[b] - m[a]; }); }
+var cliPhone = function (c) { return c.phone.replace(/[^+\d]/g, ''); };
+var cliBuys = function (n) { return numSp(n) + ' ' + plural(n, 'покупка', 'покупки', 'покупок'); };
+function clientsHtml() {
+  var mail = st.cliMode === 'mail';
+  var mode = chipsOf('data-climode', [['list', 'Список'], ['mail', 'Для рассылки']], st.cliMode, true);
+  if (mail) {
+    var sizes = [['Все', 'Все']].concat(CLOTH_SIZES.map(function (s) { return [s, s]; })), cats = CATS.map(function (c) { return [c, c]; });
+    var hit = st.clients.filter(function (c) { return (st.mSize === 'Все' || c.cloth === st.mSize) && (st.mCat === 'Все' || cliHas(c, st.mCat)) && (st.cliSeason === 'Все' || cliSeason(c, st.cliSeason)); });
+    var list = hit.length ? '<div>' + hit.map(function (c) { return '<div class="callrow"><span><b>' + c.n + '</b><span class="sub">' + numSp(c.phone) + ' / размер ' + numSp(c.cloth) + '</span></span><a class="iconbtn" href="tel:' + cliPhone(c) + '" aria-label="Позвонить: ' + c.n + '"><svg class="ic"><use href="#i-phone"/></svg></a></div>'; }).join('') + '</div>' :
+      '<div class="empty"><svg class="ic"><use href="#i-users"/></svg><div class="t-h2">Никто не подходит</div><p>Попробуйте убрать одно из условий.</p></div>';
+    var copy = hit.length ? stubBtn('btn-main', '', 'Скопировать ' + hit.length + ' ' + plural(hit.length, 'номер', 'номера', 'номеров'), 'Демо: номера не копируются. В настоящей системе список уйдёт в буфер обмена, и вы отправите рассылку сами (' + hit.length + ' ' + plural(hit.length, 'клиент', 'клиента', 'клиентов') + ').') : '';
+    return '<section class="scr">' + titleSub('Клиенты', 'Кому написать: выберите условия') + mode + flashHtml() +
+      '<div class="cols"><div class="scr"><div style="display:grid;gap:var(--s2)"><span class="t-label">Размер одежды</span>' + chipsOf('data-msize', sizes, st.mSize) + '</div>' +
+      '<div style="display:grid;gap:var(--s2)"><span class="t-label">Что покупал</span>' + chipsOf('data-mcat', cats, st.mCat) + '</div>' +
+      '<div style="display:grid;gap:var(--s2)"><span class="t-label">Когда покупал</span>' + chipsOf('data-mseason', SEASONS, st.cliSeason) + '</div>' +
+      '<div class="t-label">Рассылку вы отправляете сами. Автоматическая будет позже.</div></div>' +
+      '<div class="scr">' + secH('Подходит', numSp(hit.length) + ' ' + plural(hit.length, 'клиент', 'клиента', 'клиентов')) + list + copy + '</div></div></section>';
+  }
+  var q = (st.cliQ || '').trim().toLowerCase(), qd = digitsOf(q);
+  var segs = [['all', 'Все'], ['new', 'Недавно'], ['old', 'Давно не были'], ['note', 'С заметкой']];
+  var rows = st.clients.filter(function (c) {
+    var l = cliLast(c), s = st.cliSeg;
+    if (s === 'new' && l > 30) return false; if (s === 'old' && !(c.buys.length && l > 60)) return false; if (s === 'note' && !c.note) return false;
+    return !q || c.n.toLowerCase().indexOf(q) >= 0 || (qd && digitsOf(c.phone).indexOf(qd) >= 0);
+  }).sort(function (a, b) { return cliLast(a) - cliLast(b); });
+  var search = '<label class="field"><svg class="ic"><use href="#i-search"/></svg><input id="cliq" data-in="cliq" value="' + esc(st.cliQ) + '" placeholder="Телефон или имя клиента" aria-label="Поиск клиента" autocomplete="off"></label>';
+  var body = rows.length ? '<div>' + rows.map(function (c) {
+    return '<button class="prow" data-client="' + c.id + '"><span><b>' + c.n + '</b><span class="sub">' + numSp(c.phone) + '</span><span class="sub">' + c.city + ' / ' + cliBuys(c.buys.length) + '</span></span><span class="r"><span class="price">' + money(cliTotal(c)) + '</span><span class="t-label">' + cliSeen(c) + '</span></span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div>' : '<div class="empty"><svg class="ic"><use href="#i-search"/></svg><div class="t-h2">Никого не нашли</div><p>Проверьте номер или имя.</p></div>';
+  return '<section class="scr">' + titleSub('Клиенты', numSp(st.clients.length) + ' ' + plural(st.clients.length, 'клиент', 'клиента', 'клиентов')) + flashHtml() + mode +
+    '<button class="btn btn-second" data-cnew="clients"><svg class="ic"><use href="#i-plus"/></svg>Новый клиент</button>' + search + chipsOf('data-cliseg', segs, st.cliSeg) + body + '</section>';
+}
+function clientHtml() {
+  var c = clientById(st.cliId), cats = cliCats(c), dash = function (v, u) { return v ? numSp(v) + (u || '') : '—'; };
+  var hero = heroTile('Сумма покупок', money(cliTotal(c)), c.buys.length ? cliBuys(c.buys.length) + ' / последний визит: ' + agoText(cliLast(c)) : 'покупок пока нет');
+  var acts = '<div class="dtwo even"><a class="btn btn-second" href="tel:' + cliPhone(c) + '"><svg class="ic"><use href="#i-phone"/></svg>Позвонить</a><button class="btn btn-second" data-cedit="' + c.id + '">Изменить</button></div>';
+  var info = [['Телефон', numSp(c.phone)], ['Город', c.city], ['Возраст', dash(c.age)], ['Размер одежды', dash(c.cloth)], ['Размер обуви', dash(c.shoe)], ['Рост', dash(c.h, ' см')]];
+  var data = '<div>' + secH('О клиенте') + info.map(function (r) { return '<div class="rowline"><span class="t-label">' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + (c.note ? '<div class="rowline"><span class="t-label">Заметка</span><b style="text-align:right">' + esc(c.note) + '</b></div>' : '') + '</div>';
+  var likes = cats.length ? '<div>' + secH('Что покупает') + '<div class="fchips wrap" style="padding-top:var(--s3)">' + cats.map(function (k) { return '<span class="chip chip-neutral">' + k + '</span>'; }).join('') + '</div></div>' : '';
+  var hist = '<div>' + secH('История покупок', numSp(c.buys.length)) + (c.buys.length ? c.buys.slice().sort(function (a, b) { return a[0] - b[0]; }).map(function (b) {
+    return '<div class="ln"><span class="name">' + DATA[b[1]].n + '</span><span class="qty">' + money(b[4] * EXTRA[b[1]].price) + '</span><span class="meta">' + dateOf(b[0]) + ' / ' + b[2] + ' / ' + SHOPS[b[3]] + (b[4] > 1 ? ' / ' + numSp('×' + b[4]) : '') + '</span></div>';
+  }).join('') : '<div class="t-label" style="padding-top:var(--s3)">Покупок пока нет. Привяжите клиента к продаже на экране «Продажа».</div>') + '</div>';
+  return '<section class="scr">' + backTo('clients', 'Клиенты', 'Назад к списку клиентов') + '<div class="t-h1">' + c.n + '</div>' + flashHtml() + '<div class="cols"><div class="scr">' + hero + acts + likes + hist + '</div><div class="scr">' + data + '</div></div></section>';
+}
+function clientFormHtml() {
+  var x = st.cNew, d = phoneDigits(x.phone), okPhone = d.length === 10, dup = okPhone && st.clients.filter(function (c) { return c.id !== x.id && phoneDigits(c.phone) === d; })[0];
+  var ok = x.n.trim().length >= 2 && okPhone && !dup, back = x.id ? 'client' : st.cliBack === 'sale' ? 'sale' : 'clients';
+  var warn = dup ? '<div class="notice bad"><svg class="ic"><use href="#i-alert"/></svg><span>Клиент с таким телефоном уже есть: ' + esc(dup.n) + '.</span></div>' : x.phone && !okPhone ? '<div class="t-label">Нужно 10 цифр после +7, например 928 555-03-12.</div>' : '';
+  var three = '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--s2)">' + lblInput('Возраст', 'cage', x.age, '', ' inputmode="numeric"') + lblInput('Обувь', 'cshoe', x.shoe, '', ' inputmode="numeric"') + lblInput('Рост, см', 'ch', x.h, '', ' inputmode="numeric"') + '</div>';
+  return '<section class="scr narrow">' + backTo(back, x.id ? 'Клиент' : back === 'sale' ? 'Продажа' : 'Клиенты', 'Назад') + '<div class="t-h1">' + (x.id ? 'Изменить клиента' : 'Новый клиент') + '</div>' +
+    lblInput('Имя', 'cname', x.n, 'Например, Аслан Гаджиев', ' maxlength="30"') + lblInput('Телефон (по нему ищем клиента)', 'cphone', x.phone, '+7 928 555-00-00', ' inputmode="tel" maxlength="18"') + warn +
+    lblInput('Город', 'ccity', x.city, 'Махачкала', ' maxlength="20"') +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Размер одежды</span>' + chipsOf('data-cloth', CLOTH_SIZES.map(function (s) { return [s, s]; }), x.cloth) + '</div>' + three +
+    lblInput('Заметка', 'cnote', x.note, 'Например, любит тёмные цвета', ' maxlength="60"') +
+    '<button class="btn btn-main" data-csave' + disabledIf(ok) + '>' + (x.id ? 'Сохранить' : 'Добавить клиента') + '</button></section>';
+}
+
+// ----- Продажа с клиентом (ТЗ 6.2: привязка по телефону, но не обязательно) -----
+function saleScreenHtml() {
+  var sale = st.sale, c = sale.cid ? clientById(sale.cid) : null, head = '<div class="sale-head"><div class="t-h1">Продажа</div><button class="iconbtn" data-back aria-label="Закрыть продажу"><svg class="ic"><use href="#i-close"/></svg></button></div>';
+  if (sale.done) return '<section class="scr">' + head + '<div class="done"><span class="okc"><svg class="ic"><use href="#i-check"/></svg></span><div class="t-h1">Продано</div><div class="t-label">Чек № ' + numSp(2432) + ' / ' + numSp(nb('9 956 ₽')) + '</div>' +
+    '<div class="t-label">' + (c ? 'Покупка записана в карточку клиента: ' + esc(c.n) + '.' : 'Клиент не привязан.') + '</div></div><button class="btn btn-main" data-salenew>Новая продажа</button><button class="btn btn-second" data-back>Закрыть</button></section>';
+  var q = (sale.q || '').trim().toLowerCase(), qd = digitsOf(q);
+  var found = !c && (qd.length >= 3 || q.length >= 2) ? st.clients.filter(function (x) { return (qd.length >= 3 && digitsOf(x.phone).indexOf(qd) >= 0) || (q.length >= 2 && x.n.toLowerCase().indexOf(q) >= 0); }).slice(0, 3) : [];
+  var client = c ? '<div class="chk"><div class="chk-h"><span class="t-h2">' + esc(c.n) + '</span><button class="iconbtn" data-saleunlink aria-label="Убрать клиента из чека"><svg class="ic"><use href="#i-close"/></svg></button></div><div class="t-label">' + numSp(c.phone) + ' / ' + cliBuys(c.buys.length) + ' на ' + numSp(money(cliTotal(c))) + '</div></div>' :
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Клиент (по желанию, чтобы не задерживать очередь)</span><label class="field"><svg class="ic"><use href="#i-phone"/></svg><input id="saleq" data-in="saleq" value="' + esc(sale.q) + '" placeholder="Телефон или имя" aria-label="Клиент" autocomplete="off"></label>' +
+    (found.length ? '<div>' + found.map(function (x) { return '<button class="prow" data-salecli="' + x.id + '"><span><b>' + x.n + '</b><span class="sub">' + numSp(x.phone) + '</span></span><span class="r"><span class="t-label">' + cliBuys(x.buys.length) + '</span></span><svg class="ic"><use href="#i-chevron-right"/></svg></button>'; }).join('') + '</div>' : (qd.length >= 3 || q.length >= 2) ? '<div class="t-label">Не нашли такого клиента.</div>' : '') +
+    '<button class="linkbtn" data-cnew="sale">Новый клиент</button></div>';
+  return '<section class="scr">' + head +
+    '<div class="cols"><div style="display:grid;gap:var(--s4);align-content:start">' +
+    '<label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул" autocomplete="off"><svg class="ic"><use href="#i-scan"/></svg></label>' +
+    '<div><div class="sec-h"><span class="t-h2">Чек</span><span class="t-label"><span class="num">2</span> вещи</span></div>' +
+    '<div class="item"><span class="name">Рубашка Oxford</span><span class="price">' + nb('4 990 ₽') + '</span><span class="meta"><span class="num">M</span> / рост <span class="num">182</span> / белый</span><span class="chip chip-good" style="justify-self:end">в наличии <span class="num">3</span></span></div>' +
+    '<div class="item"><span class="name">Брюки чинос</span><span class="price">' + nb('5 490 ₽') + '</span><span class="meta"><span class="num">50</span> / синий</span><span class="chip chip-bad" style="justify-self:end">осталось <span class="num">1</span></span></div></div>' + client + '</div>' +
+    '<div style="display:grid;gap:var(--s4);align-content:start">' +
+    '<div class="rowline" style="padding:0;border:0"><span class="t-label">Скидка <span class="num">5%</span> / ваш предел: ' + limitText() + '</span><span class="num bad" style="font-weight:700">−524&nbsp;₽</span></div>' +
+    '<div class="seg"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div>' +
+    '<div class="hero-sum"><div class="t-label">Итого</div><div class="hero-num">' + nb('9 956 ₽') + '</div></div>' +
+    '<button class="btn btn-main" data-saledone>Продано</button></div></div></section>';
+}
+
+// ----- Люди (ТЗ 8): команда, график, зарплата, журнал. Видит только владелец -----
+function peopleHtml() {
+  var tabs = [['staff', 'Команда'], ['sched', 'График'], ['pay', 'Зарплата'], ['log', 'Журнал']], body;
+  if (st.pTab === 'pay') {
+    var pays = staffPays(), n = function (v) { return numSp(money(v)); }, cost = sum(autoExp().filter(function (e) { return e.cat === 'Зарплата'; }).map(function (e) { return e.amt; }));
+    var hero = heroTile('К выплате за <span class="num">30</span> дней', money(sum(pays.map(function (x) { return x.total; }))), numSp(st.staff.length) + ' ' + plural(st.staff.length, 'сотрудник', 'сотрудника', 'сотрудников') + ' / в расходах ' + numSp(money(cost)));
+    var plans = '<div>' + secH('План магазинов', 'бонус ' + numSp(money(st.rules.bonus))) + SHOP_BASE.map(function (b) {
+      var ok = b[1] >= PLANS[b[0]];
+      return '<div class="rowline"><span>' + b[0] + '<span class="t-label" style="display:block">выручка ' + n(b[1]) + ' из ' + n(PLANS[b[0]]) + '</span></span>' + (ok ? '<span class="chip chip-good">выполнен</span>' : '<span class="chip chip-neutral">не хватает ' + numSp(money(PLANS[b[0]] - b[1])) + '</span>') + '</div>';
+    }).join('') + '</div>';
+    var list = '<div>' + secH('Расчёт по сотрудникам') + st.staff.map(function (p, i) {
+      var x = pays[i];
+      var f = 'оклад ' + n(p.salary) + (x.pct ? ' + ' + numSp(rateOf(p) + '%') + ' ' + n(x.pct) : '') + (x.bonus ? ' + бонус ' + n(x.bonus) : '') + (p.adv ? ' − аванс ' + n(p.adv) : '') + (p.fine ? ' − штраф ' + n(p.fine) : '');
+      return '<button class="prow" data-person="' + p.id + '"><span><b>' + p.n + '</b><span class="sub">' + f + '</span></span><span class="r"><span class="price">' + money(x.total) + '</span></span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+    }).join('') + '</div>';
+    body = '<div class="cols"><div class="scr">' + hero + plans + '</div><div class="scr">' + list + '</div></div>';
+  } else if (st.pTab === 'log') {
+    var rows = st.log.filter(function (l) { return st.logF === 'Все' || l[3] === st.logF; });
+    body = chipsOf('data-logf', LOG_TYPES, st.logF) + '<div>' + rows.map(function (l) { return '<div class="led"><span class="tm">' + l[1] + '</span><span class="tx">' + l[4] + '<span class="sub">' + l[2] + ' / ' + agoText(l[0]) + '</span></span></div>'; }).join('') + '</div>';
+  } else if (st.pTab === 'sched') {
+    body = schedHtml();
+  } else {
+    body = '<button class="btn btn-second" data-pnew><svg class="ic"><use href="#i-plus"/></svg>Новый сотрудник</button><div class="t-label">Сегодня работают ' + numSp(st.staff.filter(isOn).length) + ' из ' + numSp(st.staff.length) + '</div><div>' + st.staff.map(function (p) {
+      return '<button class="prow" data-person="' + p.id + '"><span><b>' + p.n + '</b><span class="sub">' + p.role + ' / ' + shopOf(p) + '</span></span><span class="r"><span class="chip chip-' + (isOn(p) ? 'good' : 'neutral') + '">' + (isOn(p) ? 'работает' : 'выходной') + '</span></span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+    }).join('') + '</div>';
+  }
+  return '<section class="scr">' + titleSub('Люди', 'Команда, график, зарплата и журнал') + chipsOf('data-ptab', tabs, st.pTab, 't4') + flashHtml() + body + '</section>';
+}
+// недельный график (ТЗ 8.3): неделя, день, у кого смена; красная плашка, если в магазине никого нет
+function schedHtml() {
+  var w = st.schWeek, d = st.schDay, ids = st.sched[w][d], ago = 6 - d - 7 * w;
+  var dayChips = '<div class="fchips tabs" style="--n:7">' + DAYS.map(function (nm, i) { return '<button class="fchip" data-schday="' + i + '" aria-pressed="' + (i === d) + '">' + nm + ' <span class="num">' + dayNum(6 - i - 7 * w) + '</span></button>'; }).join('') + '</div>';
+  var empty = SHOPS.filter(function (s) { return st.staff.some(function (p) { return p.shop === s; }) && !st.staff.some(function (p) { return p.shop === s && ids.indexOf(p.id) >= 0; }); });
+  var warn = empty.map(function (s) { return '<div class="notice bad"><svg class="ic"><use href="#i-alert"/></svg><span>' + s + ': в этот день в магазине никого нет.</span></div>'; }).join('');
+  var groups = SHOPS.concat(['Все']).filter(function (s) { return st.staff.some(function (p) { return p.shop === s; }); }).map(function (s) {
+    var team = st.staff.filter(function (p) { return p.shop === s; }), on = team.filter(function (p) { return ids.indexOf(p.id) >= 0; }).length;
+    return '<div>' + secH(s === 'Все' ? 'Онлайн и доставка' : s, numSp(on) + ' из ' + numSp(team.length)) + '<div class="togs" style="padding-top:var(--s3)">' + team.map(function (p) {
+      var works = ids.indexOf(p.id) >= 0;
+      return '<button class="tog multi" data-swork="' + p.id + '" aria-pressed="' + works + '"><span class="box"><svg class="ic"><use href="#i-check"/></svg></span><span><b>' + p.n + '</b><span class="sub">' + p.role + ' / ' + (works ? numSp('9:00–21:00') : 'выходной') + '</span></span></button>';
+    }).join('') + '</div></div>';
+  }).join('');
+  return chipsOf('data-schweek', [[0, 'Эта неделя'], [1, 'Следующая']], w, true) + dayChips +
+    '<div class="t-label">' + DAYS[d] + ', ' + dateOf(ago) + ': работают ' + numSp(ids.length) + ' из ' + numSp(st.staff.length) + '. Нажмите на имя, чтобы поставить или убрать смену.</div>' + warn + groups;
+}
+function personHtml() {
+  var i = st.staff.map(function (p) { return p.id; }).indexOf(st.personId), p = st.staff[i], x = staffPays()[i], seller = isSeller(p), n = function (v) { return numSp(money(v)); };
+  var hero = heroTile('К выплате за <span class="num">30</span> дней', money(x.total), 'оклад + процент + бонус − аванс − штраф');
+  var line = function (l, v, bad) { return '<div class="rowline"><span class="t-label">' + l + '</span><b class="num' + (bad ? ' bad' : '') + '">' + v + '</b></div>'; };
+  var calc = '<div>' + secH('Из чего складывается') + line('Оклад', money(p.salary)) + (seller ? line('Личные продажи', money(x.sales)) + line('Процент ' + rateOf(p) + '% от продаж', money(x.pct)) + line('Бонус за план магазина', x.plan ? money(x.bonus) : '0 ₽') : '') +
+    line('Аванс', p.adv ? money(-p.adv) : '0 ₽', p.adv) + line('Штраф', p.fine ? money(-p.fine) : '0 ₽', p.fine) + '</div>' + (p.fine ? '<div class="t-label">Штраф за невыход без предупреждения.</div>' : '');
+  var info = [['Роль', p.role], ['Магазин', shopOf(p)], ['Телефон', numSp(p.phone)], ['Возраст', p.age ? numSp(p.age) : '—'], ['В команде с', p.since], ['Оклад', n(p.salary)], ['Процент с продаж', seller ? numSp(rateOf(p) + '%') : 'нет'], ['Сегодня', isOn(p) ? 'работает' : 'выходной']];
+  var data = '<div>' + secH('Данные') + info.map(function (r) { return '<div class="rowline"><span class="t-label">' + r[0] + '</span><b>' + r[1] + '</b></div>'; }).join('') + '</div>';
+  var acts = '<div class="dtwo even"><a class="btn btn-second" href="tel:' + p.phone.replace(/[^+\d]/g, '') + '"><svg class="ic"><use href="#i-phone"/></svg>Позвонить</a><button class="btn btn-second" data-pedit="' + p.id + '">Изменить</button></div>';
+  var pm = st.pMoney, okm = +digitsOf(pm.amt) > 0;
+  var money_ = '<div style="display:grid;gap:var(--s3)">' + secH('Аванс и штраф') + chipsOf('data-pmkind', [['adv', 'Аванс'], ['fine', 'Штраф']], pm.kind, true) +
+    '<label class="big-in"><input id="pmamt" data-in="pmamt" inputmode="numeric" placeholder="0" value="' + spacedNum(pm.amt) + '" aria-label="Сумма" autocomplete="off"><span class="cur">₽</span></label>' +
+    '<div class="t-label">' + (pm.kind === 'fine' ? 'Штраф только за невыход без предупреждения. Он уменьшает расходы на зарплату.' : 'Аванс вычитается из зарплаты за месяц.') + '</div>' +
+    '<button class="btn btn-second" data-pmsave' + disabledIf(okm) + '>Записать</button></div>';
+  return '<section class="scr">' + backTo('people', 'Люди', 'Назад к списку сотрудников') + titleSub(p.n, p.role + ' / ' + shopOf(p)) + flashHtml() + '<div class="cols"><div class="scr">' + hero + calc + '</div><div class="scr">' + acts + data + money_ + '</div></div></section>';
+}
+function personFormHtml() {
+  var x = st.pEdit, ok = x.n.trim().length >= 2, seller = x.role === 'Старший продавец' || x.role === 'Продавец';
+  var pctRow = seller ? '<div class="ln"><span class="name">Процент с личных продаж</span><span class="stp w"><button data-ppct="-1" aria-label="Меньше"><svg class="ic"><use href="#i-minus"/></svg></button><span class="v">' + x.pct + '%</span><button data-ppct="1" aria-label="Больше"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="meta">По умолчанию ' + st.rules.pct + '% из «Правил»</span></div>' : '';
+  return '<section class="scr narrow">' + backTo(x.id ? 'person' : 'people', x.id ? 'Сотрудник' : 'Люди', 'Назад') + '<div class="t-h1">' + (x.id ? 'Изменить сотрудника' : 'Новый сотрудник') + '</div>' +
+    lblInput('Имя', 'pname', x.n, 'Например, Руслан Алиев', ' maxlength="30"') + lblInput('Телефон', 'pphone', x.phone, '+7 928 555-00-00', ' inputmode="tel" maxlength="18"') +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Роль</span>' + chipsOf('data-prole', STAFF_ROLES.map(function (r) { return [r, r]; }), x.role) + '</div>' +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Магазин</span>' + chipsOf('data-pshop', SHOPS.concat(['Все']).map(function (s) { return [s, s === 'Все' ? 'Все магазины' : s]; }), x.shop) + '</div>' +
+    '<div style="display:grid;gap:var(--s2)"><span class="t-label">Оклад в месяц</span><label class="big-in"><input id="psal" data-in="psal" inputmode="numeric" placeholder="0" value="' + spacedNum(x.salary) + '" aria-label="Оклад" autocomplete="off"><span class="cur">₽</span></label></div>' + pctRow +
+    '<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s2)">' + lblInput('Возраст', 'page', x.age, '', ' inputmode="numeric"') + '</div>' +
+    '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Оклад, процент и магазин сразу меняют зарплату, расходы и прибыль.</span></div>' +
+    '<button class="btn btn-main" data-psave' + disabledIf(ok) + '>' + (x.id ? 'Сохранить' : 'Добавить сотрудника') + '</button></section>';
+}
+
+// ----- Настройки (ТЗ 12.4). Только владелец. Скидки, возврат, бронь, предоплата, процент и бонус сразу меняют другие экраны -----
+function settingsHtml() {
+  var r = st.rules, on = st.mods.filter(Boolean).length, ton = st.types.filter(Boolean).length;
+  var items = [['shop', 'Магазин', (st.shopName || 'CRM') + ' / рубль / русский язык'], ['points', 'Торговые точки', '4 магазина и склад'], ['rules', 'Правила', 'Скидки до ' + r.discSeller + '% и ' + r.discSenior + '%, возврат ' + r.retDays + ' дней'],
+    ['roles', 'Права ролей', ROLE_NAMES.length + ' ролей'], ['types', 'Виды товара и размеры', ton + ' из ' + st.types.length + ' включено'], ['mods', 'Модули', on + ' из ' + st.mods.length + ' включено']];
+  return '<section class="scr">' + titleSub('Настройки', 'Всё, что магазин решает сам') + '<div>' + items.map(function (i) {
+    return '<button class="mrow srow" data-set="' + i[0] + '"><span class="grow"><b>' + i[1] + '</b><span class="sub">' + i[2] + '</span></span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div></section>';
+}
+var setHead = function (title, sub) { return backTo('settings', 'Настройки', 'Назад к настройкам') + titleSub(title, sub) + flashHtml(); };
+function settingHtml() {
+  var id = st.setId, h, b = '';
+  if (id === 'shop') {
+    var kv = [['Логотип', 'не загружен'], ['Валюта', 'рубль, ₽'], ['Формат цены', numSp('12 900 ₽')], ['Формат даты', numSp('1 нояб 2026')], ['Язык', 'русский'], ['Цвет бренда', 'чернила (меняется в панели твиков)']];
+    h = setHead('Магазин', 'Название, валюта, язык');
+    b = lblInput('Название магазина', 'setname', st.shopName, 'Например, Магомед', ' maxlength="16"') + '<div class="t-label">Видно вверху боковой панели на компьютере.</div><div>' +
+      kv.map(function (r) { return '<div class="rowline"><span class="t-label">' + r[0] + '</span><b style="text-align:right">' + r[1] + '</b></div>'; }).join('') + '</div>';
+  } else if (id === 'points') {
+    h = setHead('Торговые точки', 'Число точек не ограничено');
+    b = '<div>' + SHOP_OPTS.map(function (s) { var k = st.staff.filter(function (p) { return p.shop === s; }).length; return '<div class="rowline"><span><b>' + s + '</b><span class="t-label" style="display:block">' + (s === 'Склад' ? 'остатки не заведены' : numSp(k) + ' ' + plural(k, 'сотрудник', 'сотрудника', 'сотрудников')) + '</span></span><span class="chip chip-neutral">' + (s === 'Склад' ? 'склад' : 'магазин') + '</span></div>'; }).join('') + '</div>' +
+      stubBtn('btn-second', 'i-plus', 'Добавить точку', 'Демо: в настоящей системе откроется форма новой точки (название, адрес, тип).');
+  } else if (id === 'rules') {
+    h = setHead('Правила', 'Меняйте числа и смотрите на экранах');
+    b = '<div>' + RULE_ROWS.map(function (r) {
+      var v = st.rules[r[0]], t = r[5] === ' ₽' ? money(v) : v + (r[5] === '%' ? '%' : ' дн.');
+      return '<div class="ln"><span class="name">' + r[1] + '</span><span class="stp w"><button data-rule="' + r[0] + ':-1" aria-label="Меньше"><svg class="ic"><use href="#i-minus"/></svg></button><span class="v">' + t + '</span><button data-rule="' + r[0] + ':1" aria-label="Больше"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="meta">' + r[6] + '</span></div>';
+    }).join('') + '</div><button class="linkbtn" data-rulesreset>Вернуть стандартные значения</button>';
+  } else if (id === 'roles') {
+    var ri = ROLE_NAMES.indexOf(st.roleSel);
+    h = setHead('Права ролей', 'Кто что видит и делает');
+    b = chipsOf('data-rolesel', ROLE_NAMES.map(function (r) { return [r, r]; }), st.roleSel) + '<div>' + RIGHTS.map(function (r) { var v = r[1][ri]; return '<div class="rowline"><span>' + r[0] + '</span>' + (v ? '<span class="chip chip-good">' + v + '</span>' : '<span class="chip chip-neutral">нет</span>') + '</div>'; }).join('') + '</div>' +
+      stubBtn('btn-second', 'i-plus', 'Создать свою роль', 'Демо: в настоящей системе откроется выбор прав для новой роли.');
+  } else {
+    var isT = id === 'types', src = isT ? TYPES : MODULES, key = isT ? 'types' : 'mods';
+    h = setHead(isT ? 'Виды товара' : 'Модули', isT ? 'Какую одежду продаёт магазин' : 'Что включено в системе');
+    b = '<div class="togs">' + src.map(function (m, i) { return '<button class="tog multi" data-tog="' + key + ':' + i + '" aria-pressed="' + st[key][i] + '"><span class="box"><svg class="ic"><use href="#i-check"/></svg></span><span><b>' + m[0] + '</b><span class="sub">' + m[1] + '</span></span></button>'; }).join('') + '</div>' +
+      '<div class="t-label">Переключатели запоминаются, на других экранах демо пока ничего не меняют.</div>';
+  }
+  return '<section class="scr narrow">' + h + b + '</section>';
+}
+function plural(n, a, b, c) { var m = n % 10, h = n % 100; return h >= 11 && h <= 14 ? c : m === 1 ? a : m >= 2 && m <= 4 ? b : c; }
+var ORD_GROUPS = [['new', 'Новые', ['new', 'chat']], ['pay', 'Ждут оплаты', ['pay']], ['ready', 'К отправке', ['paid']], ['way', 'В пути', ['way']], ['closed', 'Закрытые', ['done', 'no']]];
+var STAGE_CHIP = { new: ['новая', 'neutral'], chat: ['в переписке', 'neutral'], pay: ['ждёт оплаты', 'neutral'], paid: ['оплачено', 'good'], way: ['в пути', 'neutral'], done: ['доставлено', 'good'], no: ['отказ', 'bad'] };
+var STEPS = ['Новая', 'Переписка', 'Оплата', 'Оплачено', 'В пути', 'Доставлено'];
+var STEP_OF = { new: 0, chat: 1, pay: 2, paid: 3, way: 4, done: 5 };
+var NEXT = { new: ['chat', 'Взять в работу', 'Заказ взят в работу.'], chat: ['pay', 'Забронировать', 'Вещи забронированы, заказ ждёт оплаты (1 день).'], pay: ['paid', 'Отметить оплату', 'Оплата отмечена.'], paid: ['way', 'Передать курьеру', 'Заказ передан курьеру.'] };
+var ordSum = function (o) { return o.lines.reduce(function (a, l) { return a + l.qty * l.price; }, 0); };
+var ordCollect = function (o) { return ordSum(o) - o.prepaid; };
+var ordText = function (o) { return o.lines.map(function (l) { return l.n + ' ' + l.meta.split(' / ')[0] + (l.qty > 1 ? ' ×' + l.qty : ''); }).join(', '); };
+var ordTel = function (o) { return '+7928555' + '01' + ('0' + (o.id % 100)).slice(-2); };
+var ordPhone = function (o) { return '+7 928 555-01-' + ('0' + (o.id % 100)).slice(-2); };
+var ordById = function (id) { return st.ord.filter(function (o) { return o.id === id; })[0]; };
+var inGroup = function (g) { var set = ORD_GROUPS.filter(function (x) { return x[0] === g; })[0][2]; return st.ord.filter(function (o) { return set.indexOf(o.st) >= 0; }); };
+function stageChip(o) { var x = STAGE_CHIP[o.st]; return '<span class="chip chip-' + (o.st === 'pay' && o.urgent ? 'bad' : x[1]) + '">' + x[0] + '</span>'; }
+
+function ordersListHtml() {
+  var chips = '<div class="fchips wrap">' + ORD_GROUPS.map(function (x) { return '<button class="fchip" data-ordtab="' + x[0] + '" aria-pressed="' + (x[0] === st.ordTab) + '">' + x[1] + ' <span class="num">' + inGroup(x[0]).length + '</span></button>'; }).join('') + '</div>';
+  var rows = inGroup(st.ordTab);
+  var list = rows.length ? '<div>' + rows.map(function (o) {
+    var more = o.st === 'pay' && o.left ? ' / <span class="' + (o.urgent ? 'bad' : '') + '">осталось <span class="num">' + o.left + '</span></span>' : '';
+    return '<button class="prow" data-ord="' + o.id + '"><span><b>№ ' + o.id + ' / ' + o.who + '</b><span class="sub">' + ordText(o) + '</span><span class="sub">' + o.city + more + '</span></span><span class="r"><span class="price">' + money(ordSum(o)) + '</span>' + stageChip(o) + '</span><svg class="ic"><use href="#i-chevron-right"/></svg></button>';
+  }).join('') + '</div>' : '<div class="empty"><svg class="ic"><use href="#i-truck"/></svg><div class="t-h2">Здесь пока пусто</div><p>Заказы этой стадии появятся здесь.</p></div>';
+  return flashHtml() + chips + list;
+}
+
+function orderHtml() {
+  var o = ordById(st.ordId), act = st.role === 'Онлайн-менеджер' || st.role === 'Владелец', sum = ordSum(o), step = STEP_OF[o.st];
+  var back = '<div class="top-row"><button class="iconbtn" data-go="orders" aria-label="Назад к списку"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">Заказы</span></div>';
+  var progress = o.st === 'no' ? '' : '<div class="prog">' + STEPS.map(function (s, i) { return '<i class="' + (i <= step ? 'on' : '') + '"></i>'; }).join('') + '</div><div class="t-label">Шаг <span class="num">' + (step + 1) + '</span> из <span class="num">6</span>: ' + STEPS[step].toLowerCase() + '</div>';
+  var info = '<div><div class="sec-h"><span class="t-h2">Заказ № <span class="num">' + o.id + '</span></span>' + stageChip(o) + '</div>' +
+    '<div class="rowline"><span class="t-label">Клиент</span><b>' + o.who + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Телефон</span><b class="num">' + ordPhone(o) + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Адрес</span><b>' + o.city + ', ' + o.addr + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Из магазина</span><b>' + o.city + '</b></div>' +
+    (o.courier ? '<div class="rowline"><span class="t-label">Курьер</span><b>' + (st.role === 'Курьер' && o.courier === 'К1' ? 'Вы' : 'Курьер ' + o.courier.slice(1)) + '</b></div>' : '') +
+    '<div class="rowline"><span class="t-label">Доставка курьеру</span><b class="num">' + money(250) + '</b></div></div>';
+  var items = '<div><div class="sec-h"><span class="t-h2">Что в заказе</span><span class="t-label"><span class="num">' + o.lines.reduce(function (a, l) { return a + l.qty; }, 0) + '</span> шт</span></div>' +
+    o.lines.map(function (l) { return '<div class="rowline"><span>' + l.n + '<br><span class="t-label">' + l.meta + (l.qty > 1 ? ' / <span class="num">' + l.qty + '</span> шт' : '') + '</span></span><b class="num">' + money(l.qty * l.price) + '</b></div>'; }).join('') +
+    '<div class="rowline"><span class="t-label">Итого</span><b class="num" style="font-size:20px">' + money(sum) + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Оплата</span>' + (o.prepaid >= sum ? '<span class="chip chip-good">оплачено заранее</span>' : o.prepaid ? '<span><span class="chip chip-good">предоплата ' + money(o.prepaid) + '</span> ' + '<span class="chip chip-neutral">при получении ' + money(ordCollect(o)) + '</span></span>' : '<span class="chip chip-neutral">при получении</span>') + '</div></div>';
+  var prepay = (sum > st.rules.prepay || o.city !== 'Махачкала') && (o.st === 'chat' || o.st === 'pay') ? '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Предоплата обязательна: ' + (o.city !== 'Махачкала' ? 'другой город' : 'сумма больше <span class="num">' + money(st.rules.prepay) + '</span>') + '.</span></div>' : '';
+  var call = '<a class="btn btn-second btn-sm" href="tel:' + ordTel(o) + '"><svg class="ic"><use href="#i-phone"/></svg>Позвонить</a>';
+  var tail;
+  if (o.st === 'done') tail = '<div class="chip chip-good" style="justify-self:start">Доставлено' + (o.pay ? ', ' + o.pay.toLowerCase() : '') + '</div>';
+  else if (o.st === 'no') tail = '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Отказ: ' + (o.reason || '').toLowerCase() + '. Вещь вернулась в магазин, продавец оформляет возврат.</span></div>';
+  else if (o.st === 'way') tail = '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Заказ у курьера. Доставку и оплату он отметит сам.</span></div>';
+  else if (!act) tail = '';
+  else {
+    var nx = NEXT[o.st];
+    tail = '<button class="btn btn-main" data-oact="next">' + nx[1] + '</button>' + (o.st === 'paid' ? '' : '<button class="linkbtn" style="justify-self:center" data-oact="cancel">Клиент отказался</button>');
+  }
+  return '<section class="scr">' + back + flashHtml() + '<div class="t-h1">' + o.who + '</div>' + progress + info + items + prepay + call + tail + '</section>';
+}
+
+// ===== Доставки курьера: кнопки прямо в карточках (веер 7, вариант 3) + «Позвонить» =====
+var CP_METHODS = ['Наличные', 'Карта', 'Перевод'], CP_REFUSE = ['Не подошло', 'Передумал', 'Не дозвонились'];
+function courierOrders() {
+  var mine = st.ord.filter(function (o) { return o.courier === 'К1' && (o.st === 'way' || o.st === 'done' || o.st === 'no'); });
+  var todo = mine.filter(function (o) { return o.st === 'way'; }).sort(function (a, b) { return a.id - b.id; });
+  var rest = mine.filter(function (o) { return o.st !== 'way'; }).sort(function (a, b) { return b.id - a.id; });
+  return todo.concat(rest);
+}
+function courierHtml() {
+  var list = courierOrders(), todo = list.filter(function (o) { return o.st === 'way'; }), done = list.filter(function (o) { return o.st === 'done'; });
+  var left = todo.reduce(function (a, o) { return a + ordCollect(o); }, 0);
+  var cash = done.filter(function (o) { return o.pay === 'Наличные'; }).reduce(function (a, o) { return a + ordCollect(o); }, 0);
+  var n = todo.length, foot = n ? ((n % 10 === 1 && n % 100 !== 11 ? 'Осталась ' : 'Осталось ') + '<span class="num">' + n + '</span> ' + plural(n, 'доставка', 'доставки', 'доставок')) : 'Все доставки готовы';
+  return tiles(tHero('К получению', money(left), foot), tMid('Доставлено', String(done.length)), tMid('Сдать в кассу', money(cash))) + flashHtml() + list.map(deliveryCard).join('');
+}
+function deliveryCard(o) {
+  var coll = ordCollect(o), cp = st.cp && st.cp.id === o.id ? st.cp : null, right;
+  if (o.st === 'done') right = '<span class="chip chip-good">доставлено' + (o.pay ? ', ' + o.pay.toLowerCase() : '') + '</span>';
+  else if (o.st === 'no') right = '<span class="chip chip-bad">отказ</span>';
+  else right = coll ? '<span class="amt">' + money(coll) + '</span><span class="chip chip-neutral">при получении</span>' : '<span class="chip chip-good">оплачено</span>';
+  var body = '';
+  if (o.st === 'way') {
+    var call = '<a class="btn btn-second btn-sm" href="tel:' + ordTel(o) + '"><svg class="ic"><use href="#i-phone"/></svg>Позвонить</a>';
+    if (!cp) body = call + '<div class="dtwo"><button class="btn btn-second btn-sm" data-cp="' + o.id + ':no">Отказ</button><button class="btn btn-main btn-sm"data-cp="' + o.id + ':done">Доставлено</button></div>';
+    else if (cp.mode === 'pay') body = call + '<div class="t-label">Как заплатил клиент</div><div class="seg">' + CP_METHODS.map(function (m) { return '<button data-cpv="' + m + '" aria-pressed="' + (cp.val === m) + '">' + m + '</button>'; }).join('') + '</div>' +
+      '<div class="rowline"><span class="t-label">Получено</span><b class="num" style="font-size:20px">' + money(coll) + '</b></div>' +
+      '<button class="btn btn-main btn-sm"data-cp="' + o.id + ':confirm"' + (cp.val ? '' : ' style="opacity:.4"') + '>Подтвердить</button><button class="linkbtn" style="justify-self:center" data-cp="' + o.id + ':back">Назад</button>';
+    else body = call + '<div class="t-label">Причина отказа</div><div class="seg stack">' + CP_REFUSE.map(function (m) { return '<button data-cpv="' + m + '" aria-pressed="' + (cp.val === m) + '">' + m + '</button>'; }).join('') + '</div><div class="t-label">Вещь вернётся в магазин, продавец оформит возврат.</div>' +
+      '<button class="btn btn-main btn-sm"data-cp="' + o.id + ':confirm"' + (cp.val ? '' : ' style="opacity:.4"') + '>Записать отказ</button><button class="linkbtn" style="justify-self:center" data-cp="' + o.id + ':back">Назад</button>';
+  }
+  return '<div class="dcard"><div class="dmini"><span class="ttl"><b>№ <span class="num">' + o.id + '</span> / ' + o.who + '</b><span class="t-label">' + o.city + ', ' + o.addr + '</span></span><span class="r2">' + right + '</span></div>' + body + '</div>';
+}
+
+function productHtml() {
+  var d = DATA[st.product], x = EXTRA[st.product], c = cfg(), own = SHOPS.indexOf(c.shop);
+  var total = sum(d.rows.map(sum));
+  var totalChip = total === 0 ? '<span class="chip chip-neutral">нет в сети</span>' : total <= 2 ? '<span class="chip chip-bad">осталось <span class="num">' + total + '</span></span>' : '<span class="chip chip-good">в сети <span class="num">' + total + '</span></span>';
+  var cards = SHOPS.map(function (s, i) {
+    var n = sum(d.rows[i]);
+    return '<div class="shop' + (i === own ? ' own' : '') + '"><div class="shop-h"><b>' + s + '</b>' + (i === own ? '<span class="chip chip-neutral">ваш магазин</span>' : '<span class="t-label"><span class="num">' + n + '</span> шт</span>') + '</div>' +
+      '<div class="pills" style="grid-template-columns:repeat(' + x.sizes.length + ',minmax(0,1fr))">' + d.rows[i].map(function (v, j) { return '<div class="pill' + (v ? '' : ' z') + '"><span class="t-label">' + x.sizes[j] + '</span><span class="num">' + (v || '&ndash;') + '</span></div>'; }).join('') + '</div></div>';
+  }).join('');
+  var hold = x.hold ? ' В брони <span class="num">' + x.hold.n + '</span> шт (' + x.sizes[x.hold.size] + ', ' + SHOPS[x.hold.shop] + ').' : '';
+  var legend = '<div class="t-label">Числа это «доступно»: на полке минус бронь.' + hold + (own >= 0 ? ' Ваш магазин выделен.' : '') + '</div>';
+  var costBlock = st.role === 'Владелец' ?
+    '<div><div class="sec-h"><span class="t-h2">Закупка и прибыль</span></div>' +
+    '<div class="rowline"><span class="t-label">Закупка, последняя партия</span><span class="num" style="font-weight:700">' + money(x.cost) + '</span></div>' +
+    '<div class="rowline"><span class="t-label">Прибыль с вещи</span><span class="num good" style="font-weight:800">' + money(x.price - x.cost) + '</span></div></div>' : '';
+  var btns = c.bar ? '<button class="btn btn-main" data-go="sale">Положить в чек</button><button class="btn btn-second" data-hold>Забронировать</button>' :
+    st.role === 'Владелец' ? '<button class="btn btn-second" data-go="transfer-new">Переместить товар</button>' : '<button class="btn btn-main">Добавить в заказ</button>';
+  return '<section class="scr">' +
+    '<div class="top-row"><button class="iconbtn" data-go="products" aria-label="Назад к списку"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">Товар / ' + d.cat + '</span></div>' +
+    flashHtml() + '<div><div class="t-h1">' + d.n + '</div><div class="t-label" style="margin-top:6px">Артикул ' + x.art + ' / ' + d.meta + '</div></div>' +
+    '<div class="pricebar"><span class="t-big">' + nb(d.price) + '</span>' + totalChip + '</div>' +
+    '<div class="cols"><div class="shops">' + cards + '<div class="t-label" style="padding:var(--s1) 2px">Склад: остатки не заведены</div></div>' +
+    '<div style="display:grid;gap:var(--s4);align-content:start">' + legend + costBlock + '<div style="display:grid;gap:var(--s2)">' + btns + '</div></div></div></section>';
+}
+
+function screenHtml() {
+  if (st.screen === cfg().home) return '<section class="scr"><div class="t-h1">' + ITEMS[st.screen][0] + '</div>' + homeHtml() + '</section>';
+  if (st.screen === 'sale') return saleScreenHtml();
+  if (st.screen === 'products') return '<section class="scr"><div class="t-h1">Товар</div>' + productsHtml() + '</section>';
+  if (st.screen === 'product') return productHtml();
+  if (st.screen === 'return') return returnHtml();
+  if (st.screen === 'cash') return cashHtml();
+  if (st.screen === 'shift') return shiftHtml();
+  if (st.screen === 'shift-close') return shiftCloseHtml();
+  if (st.screen === 'orders') return '<section class="scr"><div class="t-h1">Заказы</div>' + ordersListHtml() + '</section>';
+  if (st.screen === 'order') return orderHtml();
+  if (st.screen === 'transfers') return transfersHtml();
+  if (st.screen === 'transfer') return transferHtml();
+  if (st.screen === 'transfer-new') return newTransferHtml();
+  if (st.screen === 'reports') return reportsHtml();
+  if (st.screen === 'expenses') return expensesHtml();
+  if (st.screen === 'expense-new') return expenseNewHtml();
+  if (st.screen === 'clients') return clientsHtml();
+  if (st.screen === 'client') return clientHtml();
+  if (st.screen === 'people') return peopleHtml();
+  if (st.screen === 'person') return personHtml();
+  if (st.screen === 'client-new') return clientFormHtml();
+  if (st.screen === 'person-edit') return personFormHtml();
+  if (st.screen === 'settings') return settingsHtml();
+  if (st.screen === 'setting') return settingHtml();
+  if (st.screen === 'more') return moreHtml();
+  return '<section class="scr"><div class="t-h1">' + ITEMS[st.screen][0] + '</div><div class="empty"><svg class="ic"><use href="#i-box"/></svg><div class="t-h2">Экран ещё не нарисован</div><p>Этот раздел нарисуем на этапе интерфейса по готовой дизайн-системе.</p></div></section>';
+}
+
+function applySb() {
+  frame.dataset.sb = st.sb;
+  if (st.peek && st.sb === 'collapsed') frame.setAttribute('data-peek', ''); else frame.removeAttribute('data-peek');
+  $('side').inert = (st.sb === 'collapsed' && !st.peek) || st.w === 'phone';
+  $('sbOut').inert = st.sb !== 'collapsed' || st.w === 'phone';
+  document.querySelectorAll('.pick[data-k="sb"]').forEach(function (b) { b.setAttribute('aria-pressed', st.sb === b.dataset.val); });
+}
+
+function render() {
+  repRebuild();
+  document.documentElement.dataset.theme = st.t;
+  $('brand').textContent = st.shopName || 'CRM';
+  frame.dataset.w = st.w;
+  var c = cfg();
+  if (!allowed(st.screen)) st.screen = c.home;
+  $('roleLabel').textContent = st.role;
+  $('saleBar').hidden = !c.bar || st.screen === 'sale';
+  $('saleBtnD').hidden = !c.bar || st.screen === 'sale';
+  $('q').closest('.field').hidden = !c.search;
+  $('shopChips').hidden = c.side.indexOf('products') < 0;
+  $('shopChips').innerHTML = CHIPS.map(function (c) { return '<button class="fchip" data-shop="' + c + '" aria-pressed="' + (c === st.shop) + '">' + c + '</button>'; }).join('');
+  var cur = st.screen === 'product' ? 'products' : st.screen === 'order' ? 'orders' : /^shift/.test(st.screen) ? 'cash' : /^transfer/.test(st.screen) ? 'transfers' : st.screen, g = '', side = '';
+  if (SUB_OF[st.screen]) cur = SUB_OF[st.screen];
+  c.side.forEach(function (id) {
+    var n = ITEMS[id];
+    if (n[2] !== g) { g = n[2]; side += '<div class="nav-g">' + g + '</div>'; }
+    side += '<button class="nav-i" data-go="' + id + '"' + (id === cur ? ' aria-current="page"' : '') + '><svg class="ic"><use href="#' + n[1] + '"/></svg>' + n[0] + '</button>';
+  });
+  $('sideNav').innerHTML = side;
+  $('tabbar').style.gridTemplateColumns = 'repeat(' + c.tabs.length + ', minmax(0, 1fr))';
+  $('tabbar').innerHTML = c.tabs.map(function (id) { var n = ITEMS[id]; return '<button class="tab" data-go="' + id + '"' + (id === cur ? ' aria-current="page"' : '') + '><svg class="ic"><use href="#' + n[1] + '"/></svg>' + n[0] + '</button>'; }).join('');
+  var sc = $('content').scrollTop;
+  $('content').innerHTML = screenHtml();
+  $('content').scrollTop = sc;
+  document.querySelectorAll('.pick[data-k="w"],.pick[data-k="t"]').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+  applySb();
+}
+function renderRoles() {
+  $('rpInner').innerHTML = ROLE_NAMES.map(function (r) { return '<button class="opt" data-role="' + r + '" aria-pressed="' + (r === pendingRole) + '">' + r + '<svg class="ic"><use href="#i-check"/></svg></button>'; }).join('');
+  $('rpVal').textContent = pendingRole;
+}
+function openLogin(open) {
+  $('login').classList.toggle('open', open);
+  if (open) { pendingRole = st.role; renderRoles(); $('rpList').classList.remove('open'); $('rpBtn').setAttribute('aria-expanded', 'false'); setTimeout(function () { $('login').querySelector('.inp').focus(); }, 60); }
+  else $('userBtn').focus();
+}
+function goTo(name) { if ((name === 'sale' || name === 'return') && st.screen !== name && st.screen !== 'client-new') st.prev = st.screen; if (name === 'sale' && st.screen !== 'sale' && st.screen !== 'client-new' && st.sale.done) st.sale = newSale(); if (name === 'return' && st.screen !== 'return') st.ret = initRet(); if (name === 'transfer-new' && st.screen !== 'transfer-new') st.nt = newNt(); if (name === 'shift-close' && st.screen !== 'shift-close') st.sc = newSc(); if (name === 'expense-new' && st.screen !== 'expense-new') st.expNew = { cat: null, amt: '', note: '' }; if (!/^(transfer|order|shift|cash|expenses|client|pers)/.test(name)) st.flash = ''; st.screen = name; render(); $('content').scrollTop = 0; }
+
+// боковая панель: закрепить, скрыть, выглянуть по наведению
+var hideT = null, noPeek = false, noPeekT = null;
+function setPeek(v) { if (st.sb !== 'collapsed') v = false; if (st.peek === v) return; st.peek = v; applySb(); }
+function pin() { st.sb = 'pinned'; st.peek = false; applySb(); }
+// после нажатия «скрыть» курсор остаётся над квадратиком: не выглядываем, пока он не уйдёт (или не пройдёт 1,2 с)
+function collapse() { st.sb = 'collapsed'; st.peek = false; noPeek = true; clearTimeout(noPeekT); noPeekT = setTimeout(function () { noPeek = false; }, 1200); applySb(); }
+$('sbOut').addEventListener('mouseenter', function () { if (noPeek) return; clearTimeout(hideT); setPeek(true); });
+$('sbOut').addEventListener('mouseleave', function () { noPeek = false; clearTimeout(noPeekT); hideT = setTimeout(function () { setPeek(false); }, 220); });
+$('side').addEventListener('mouseenter', function () { clearTimeout(hideT); });
+$('side').addEventListener('mouseleave', function () { hideT = setTimeout(function () { setPeek(false); }, 220); });
+$('sbOut').addEventListener('focus', function () { if (!noPeek) setPeek(true); });
+// квадратик внутри панели: у закреплённой скрывает, у выехавшей по наведению закрепляет
+$('sbIn').addEventListener('click', function () { if (st.sb === 'collapsed' && st.peek) pin(); else collapse(); });
+$('sbOut').addEventListener('click', pin);
+
+document.addEventListener('click', function (e) {
+  var t = e.target;
+  if (t.closest('#side') && st.sb === 'collapsed' && st.peek && !t.closest('#sbIn')) pin();   // нажатие на выглянувшую панель закрепляет её
+  var pk = t.closest('.pick[data-k]');
+  if (pk) { var k = pk.dataset.k; if (k === 'sb') { st.sb = pk.dataset.val; st.peek = false; applySb(); } else { st[k] = pk.dataset.val; render(); } return; }
+  if (t.closest('.pick[data-act="login"]')) { openLogin(true); return; }
+  var sf = t.closest('[data-shift]'); if (sf) { st.shiftId = +sf.dataset.shift; st.shReason = null; goTo('shift'); return; }
+  var sr = t.closest('[data-sreason]'); if (sr) { st.shReason = sr.dataset.sreason; render(); return; }
+  if (t.closest('[data-sresolve]')) { if (!st.shReason) return; var sh0 = shById(st.shiftId); sh0.reason = st.shReason; st.flash = 'Расхождение закрыто, запись в журнале.'; st.shReason = null; render(); return; }
+  var ss = t.closest('[data-scstep]'); if (ss) { st.sc.step = Math.max(1, Math.min(2, st.sc.step + +ss.dataset.scstep)); render(); return; }
+  if (t.closest('[data-scadd]')) { st.sc.add = { amt: '', kind: null }; render(); return; }
+  var sk = t.closest('[data-sckind]'); if (sk) { st.sc.add.kind = sk.dataset.sckind; render(); return; }
+  if (t.closest('[data-scaddcancel]')) { st.sc.add = null; render(); return; }
+  if (t.closest('[data-scaddsave]')) { var ad = st.sc.add; if (!(+digitsOf(ad.amt) > 0 && ad.kind)) return; st.sc.outs.push([ad.kind, +digitsOf(ad.amt), '20:45', SELLER_SHIFT.by]); st.sc.add = null; render(); return; }
+  if (t.closest('[data-scclose]')) {
+    if (!(+digitsOf(st.sc.amt) > 0)) return;
+    var nid = Math.max.apply(null, st.shifts.map(function (x) { return x.id; })) + 1;
+    st.shifts.unshift({ id: nid, shop: SELLER_SHIFT.shop, day: SELLER_SHIFT.day, by: SELLER_SHIFT.by, closed: SELLER_SHIFT.closed, start: SELLER_SHIFT.start, n1: SELLER_SHIFT.n1, sales1: SELLER_SHIFT.sales1, n2: SELLER_SHIFT.n2, sales2: SELLER_SHIFT.sales2, outs: st.sc.outs, counted: +digitsOf(st.sc.amt), reason: null });
+    st.myClosed = true; goTo('cash'); return;
+  }
+  var oo = t.closest('[data-ord]'); if (oo) { st.ordId = +oo.dataset.ord; goTo('order'); return; }
+  var ot = t.closest('[data-ordtab]'); if (ot) { st.ordTab = ot.dataset.ordtab; render(); return; }
+  var oa = t.closest('[data-oact]');
+  if (oa) {
+    var og = ordById(st.ordId);
+    if (oa.dataset.oact === 'next') { var nx = NEXT[og.st]; og.st = nx[0]; if (og.st === 'pay') { og.left = '24 ч'; og.urgent = false; } if (og.st === 'paid') og.prepaid = ordSum(og); if (og.st === 'way') og.courier = 'К1'; st.flash = nx[2]; }
+    else { og.st = 'no'; og.reason = 'Клиент отказался'; st.flash = 'Заказ закрыт: клиент отказался.'; }
+    render(); $('content').scrollTop = 0; return;
+  }
+  var cv = t.closest('[data-cpv]'); if (cv) { st.cp.val = cv.dataset.cpv; render(); return; }
+  var cc = t.closest('[data-cp]');
+  if (cc) {
+    var cq = cc.dataset.cp.split(':'), cid = +cq[0], cact = cq[1], co = ordById(cid);
+    if (cact === 'done') { if (ordCollect(co) === 0) { co.st = 'done'; co.pay = null; st.cp = null; } else st.cp = { id: cid, mode: 'pay', val: null }; }
+    else if (cact === 'no') st.cp = { id: cid, mode: 'no', val: null };
+    else if (cact === 'back') st.cp = null;
+    else if (cact === 'confirm') { if (!st.cp || !st.cp.val) return; if (st.cp.mode === 'pay') { co.st = 'done'; co.pay = st.cp.val; } else { co.st = 'no'; co.reason = st.cp.val; } st.cp = null; }
+    render(); return;
+  }
+  var tt = t.closest('[data-trtab]'); if (tt) { st.trTab = tt.dataset.trtab; render(); return; }
+  var tr = t.closest('[data-tr]'); if (tr) { st.trId = +tr.dataset.tr; st.trGot = trById(st.trId).lines.map(function (l) { return l.sent; }); st.trOpen = false; goTo('transfer'); return; }
+  if (t.closest('[data-tropen]')) { st.trOpen = true; render(); return; }
+  var td = t.closest('[data-trdec],[data-trinc]');
+  if (td) { var ti = +(td.dataset.trdec || td.dataset.trinc), tl = trById(st.trId).lines[ti]; st.trGot[ti] = Math.max(0, Math.min(tl.sent, st.trGot[ti] + (td.dataset.trinc !== undefined ? 1 : -1))); render(); return; }
+  if (t.closest('[data-traccept]')) {
+    var tx = trById(st.trId); tx.status = 'done'; tx.got = st.trGot.slice(); var tdd = trShort(tx, tx.got);
+    st.flash = tdd.u ? 'Принято с расхождением: не хватило ' + tdd.u + ' шт на ' + money(tdd.s) + '. ' + (tdd.notify ? 'Владельцу отправлено уведомление.' : 'Расхождение разберёт старший продавец.') : 'Перемещение № ' + tx.id + ' принято.';
+    st.trTab = 'done'; goTo('transfers'); return;
+  }
+  var nf = t.closest('[data-ntfrom]'); if (nf) { st.nt.from = nf.dataset.ntfrom; st.nt.qty = {}; if (st.nt.to === st.nt.from) st.nt.to = SHOP_OPTS.filter(function (s) { return s !== st.nt.from; })[0]; render(); return; }
+  var nto = t.closest('[data-ntto]'); if (nto) { st.nt.to = nto.dataset.ntto; render(); return; }
+  var nd = t.closest('[data-ntdec],[data-ntinc]');
+  if (nd) { var nk = nd.dataset.ntdec || nd.dataset.ntinc, nr = stockRows(st.nt.from).filter(function (r) { return r.key === nk; })[0], nc = st.nt.qty[nk] || 0; st.nt.qty[nk] = Math.max(0, Math.min(nr.have, nc + (nd.dataset.ntinc !== undefined ? 1 : -1))); render(); return; }
+  if (t.closest('[data-ntsend]')) {
+    var lines = [];
+    stockRows(st.nt.from).forEach(function (r) { var n = st.nt.qty[r.key] || 0; if (n) lines.push({ n: r.n, meta: r.size + ' / ' + r.color, sent: n, price: r.price }); });
+    if (!lines.length) return;
+    var nid = Math.max.apply(null, st.tr.map(function (x) { return x.id; })) + 1;
+    st.tr.unshift({ id: nid, from: st.nt.from, to: st.nt.to, by: 'Вы', status: 'transit', got: null, lines: lines });
+    st.flash = 'Перемещение № ' + nid + ' отправлено, статус «в пути».';
+    st.trTab = st.role === 'Старший продавец' ? 'out' : 'transit'; goTo('transfers'); return;
+  }
+  var ri = t.closest('[data-ritem]'); if (ri) { st.ret.item = +ri.dataset.ritem; render(); return; }
+  var rr = t.closest('[data-rreason]'); if (rr) { st.ret.reason = +rr.dataset.rreason; render(); return; }
+  if (t.closest('[data-rtag]')) { st.ret.tag = !st.ret.tag; render(); return; }
+  if (t.closest('[data-rsaid]')) { st.ret.said = !st.ret.said; render(); return; }
+  var rm = t.closest('[data-rmode]'); if (rm) { st.ret.mode = rm.dataset.rmode; render(); return; }
+  var rsb = t.closest('[data-rsort]'); if (rsb) { st.rsort = rsb.dataset.rsort; st.flash = ''; render(); return; }
+  if (t.closest('[data-rexport]')) { st.flash = 'Демо: файл не создаётся. В настоящей системе здесь скачается таблица Excel.'; render(); return; }
+  var xStub = t.closest('[data-stub]'); if (xStub) { st.flash = xStub.dataset.stub; render(); $('content').scrollTop = 0; return; }
+  var xEc = t.closest('[data-expcat]'); if (xEc) { st.expCat = xEc.dataset.expcat; render(); return; }
+  var xEn = t.closest('[data-expnewcat]'); if (xEn) { st.expNew.cat = xEn.dataset.expnewcat; render(); return; }
+  if (t.closest('[data-expsave]')) {
+    var xe = st.expNew, xa = +digitsOf(xe.amt); if (!(xa > 0 && xe.cat)) return;
+    st.exp.push({ id: Math.max.apply(null, st.exp.map(function (x) { return x.id; })) + 1, ago: 0, n: xe.note.trim() || xe.cat, cat: xe.cat, shop: 'Все', amt: xa, by: 'Вы' });
+    st.flash = 'Расход записан: ' + xe.cat + ', ' + money(xa) + '. Он уже учтён в отчёте «Прибыль» и на «Сегодня».'; goTo('expenses'); return;
+  }
+  var xCm = t.closest('[data-climode]'); if (xCm) { st.cliMode = xCm.dataset.climode; st.flash = ''; render(); return; }
+  var xCs = t.closest('[data-cliseg]'); if (xCs) { st.cliSeg = xCs.dataset.cliseg; render(); return; }
+  var xMs = t.closest('[data-msize]'); if (xMs) { st.mSize = xMs.dataset.msize; st.flash = ''; render(); return; }
+  var xMc = t.closest('[data-mcat]'); if (xMc) { st.mCat = xMc.dataset.mcat; st.flash = ''; render(); return; }
+  var xCl = t.closest('[data-client]'); if (xCl) { st.cliId = +xCl.dataset.client; st.flash = ''; goTo('client'); return; }
+  var xCn = t.closest('[data-cnew]'); if (xCn) { st.cliBack = xCn.dataset.cnew; st.cNew = { id: null, n: '', phone: '', city: '', age: '', cloth: 'M', shoe: '', h: '', note: '' }; goTo('client-new'); return; }
+  var xCe = t.closest('[data-cedit]'); if (xCe) { var c0 = clientById(+xCe.dataset.cedit); st.cNew = { id: c0.id, n: c0.n, phone: c0.phone, city: c0.city, age: c0.age ? String(c0.age) : '', cloth: c0.cloth, shoe: c0.shoe ? String(c0.shoe) : '', h: c0.h ? String(c0.h) : '', note: c0.note }; goTo('client-new'); return; }
+  var xCz = t.closest('[data-cloth]'); if (xCz) { st.cNew.cloth = xCz.dataset.cloth; render(); return; }
+  if (t.closest('[data-csave]')) {
+    var cx = st.cNew, cd = phoneDigits(cx.phone);
+    if (!(cx.n.trim().length >= 2 && cd.length === 10 && !st.clients.filter(function (c) { return c.id !== cx.id && phoneDigits(c.phone) === cd; })[0])) return;
+    var rec = { n: cx.n.trim(), phone: fmtPhone(cx.phone), city: cx.city.trim() || 'Махачкала', age: +cx.age || 0, cloth: cx.cloth, shoe: +cx.shoe || 0, h: +cx.h || 0, note: cx.note.trim() };
+    if (cx.id) { var cu = clientById(cx.id); for (var kf in rec) cu[kf] = rec[kf]; st.cliId = cx.id; st.flash = 'Данные клиента сохранены.'; goTo('client'); return; }
+    rec.id = Math.max.apply(null, st.clients.map(function (c) { return c.id; })) + 1; rec.buys = []; st.clients.push(rec); st.cliId = rec.id;
+    if (st.cliBack === 'sale') { st.sale.cid = rec.id; st.sale.q = ''; goTo('sale'); return; }
+    st.flash = 'Клиент добавлен: ' + rec.n + '.'; goTo('client'); return;
+  }
+  var xMn = t.closest('[data-mseason]'); if (xMn) { st.cliSeason = xMn.dataset.mseason; st.flash = ''; render(); return; }
+  var xSc = t.closest('[data-salecli]'); if (xSc) { st.sale.cid = +xSc.dataset.salecli; st.sale.q = ''; render(); return; }
+  if (t.closest('[data-saleunlink]')) { st.sale.cid = null; render(); return; }
+  if (t.closest('[data-saledone]')) { if (st.sale.cid) { var sc0 = clientById(st.sale.cid), si = Math.max(0, SHOPS.indexOf(cfg().shop)); sc0.buys.push([0, 0, 'M', si, 1], [0, 1, '50', si, 1]); } st.sale.done = true; render(); $('content').scrollTop = 0; return; }
+  if (t.closest('[data-salenew]')) { st.sale = newSale(); render(); return; }
+  if (t.closest('[data-pnew]')) { st.pEdit = { id: null, n: '', phone: '', role: 'Продавец', shop: 'Махачкала', salary: '', pct: st.rules.pct, age: '' }; goTo('person-edit'); return; }
+  var xPd = t.closest('[data-pedit]'); if (xPd) { var p0 = st.staff.filter(function (p) { return p.id === +xPd.dataset.pedit; })[0]; st.pEdit = { id: p0.id, n: p0.n, phone: p0.phone, role: p0.role, shop: p0.shop, salary: String(p0.salary), pct: rateOf(p0), age: p0.age ? String(p0.age) : '' }; goTo('person-edit'); return; }
+  var xPr = t.closest('[data-prole]'); if (xPr) { st.pEdit.role = xPr.dataset.prole; render(); return; }
+  var xPs = t.closest('[data-pshop]'); if (xPs) { st.pEdit.shop = xPs.dataset.pshop; render(); return; }
+  var xPp = t.closest('[data-ppct]'); if (xPp) { st.pEdit.pct = Math.max(0, Math.min(10, st.pEdit.pct + (+xPp.dataset.ppct))); render(); return; }
+  if (t.closest('[data-psave]')) {
+    var pe = st.pEdit; if (pe.n.trim().length < 2) return;
+    var psel = pe.role === 'Старший продавец' || pe.role === 'Продавец', rec2 = { n: pe.n.trim(), phone: pe.phone.trim() ? fmtPhone(pe.phone) : '—', role: pe.role, shop: pe.shop, salary: +pe.salary || 0, age: +pe.age || 0, pct: pe.pct === st.rules.pct ? null : pe.pct };
+    if (pe.id) {
+      var pu = st.staff.filter(function (p) { return p.id === pe.id; })[0]; for (var kp in rec2) pu[kp] = rec2[kp]; if (psel && !(pu.share > 0)) pu.share = 0.3;
+      st.log.unshift([0, '18:00', 'Вы', 'hr', 'Изменил данные сотрудника: ' + pu.n]); st.personId = pe.id; st.flash = 'Данные сохранены. Зарплата, расходы и прибыль пересчитаны.'; goTo('person'); return;
+    }
+    rec2.id = Math.max.apply(null, st.staff.map(function (p) { return p.id; })) + 1; rec2.since = 'ноябрь 2026'; rec2.share = psel ? 0.3 : 0; rec2.adv = 0; rec2.fine = 0; st.staff.push(rec2);
+    [0, 1].forEach(function (w) { [0, 1, 2, 3, 4].forEach(function (d) { st.sched[w][d].push(rec2.id); }); });
+    st.log.unshift([0, '18:00', 'Вы', 'hr', 'Добавил сотрудника: ' + rec2.n + ', ' + rec2.role.toLowerCase()]); st.personId = rec2.id; st.pMoney = { kind: 'adv', amt: '' }; st.flash = 'Сотрудник добавлен, смены с понедельника по пятницу поставлены в график.'; goTo('person'); return;
+  }
+  var xPk = t.closest('[data-pmkind]'); if (xPk) { st.pMoney.kind = xPk.dataset.pmkind; render(); return; }
+  if (t.closest('[data-pmsave]')) {
+    var pa = +digitsOf(st.pMoney.amt); if (!(pa > 0)) return;
+    var pp0 = st.staff.filter(function (p) { return p.id === st.personId; })[0], isAdv = st.pMoney.kind === 'adv'; pp0[isAdv ? 'adv' : 'fine'] += pa;
+    st.log.unshift([0, '18:00', 'Вы', 'hr', (isAdv ? 'Аванс ' : 'Штраф ') + pp0.n + ': ' + money(pa)]); st.flash = (isAdv ? 'Аванс' : 'Штраф') + ' записан: ' + money(pa) + '. К выплате и расходы пересчитаны.'; st.pMoney.amt = ''; render(); $('content').scrollTop = 0; return;
+  }
+  var xSw = t.closest('[data-schweek]'); if (xSw) { st.schWeek = +xSw.dataset.schweek; render(); return; }
+  var xSd = t.closest('[data-schday]'); if (xSd) { st.schDay = +xSd.dataset.schday; render(); return; }
+  var xWk = t.closest('[data-swork]'); if (xWk) { var wid = +xWk.dataset.swork, wl = st.sched[st.schWeek][st.schDay], wi = wl.indexOf(wid); if (wi >= 0) wl.splice(wi, 1); else wl.push(wid); render(); return; }
+  if (t.closest('[data-hold]')) { st.holdN++; st.flash = 'Забронировано: ' + DATA[st.product].n + ' на ' + st.rules.hold + ' ' + plural(st.rules.hold, 'день', 'дня', 'дней') + ', до ' + dateOf(-st.rules.hold) + '. Бронь видна в «Мои брони».'; render(); $('content').scrollTop = 0; return; }
+  var xPt = t.closest('[data-ptab]'); if (xPt) { st.pTab = xPt.dataset.ptab; render(); return; }
+  var xPe = t.closest('[data-person]'); if (xPe) { st.personId = +xPe.dataset.person; st.flash = ''; st.pMoney = { kind: 'adv', amt: '' }; goTo('person'); return; }
+  var xLf = t.closest('[data-logf]'); if (xLf) { st.logF = xLf.dataset.logf; render(); return; }
+  var xSe = t.closest('[data-set]'); if (xSe) { st.setId = xSe.dataset.set; goTo('setting'); return; }
+  var xRu = t.closest('[data-rule]');
+  if (xRu) { var xp = xRu.dataset.rule.split(':'), xd = RULE_ROWS.filter(function (r) { return r[0] === xp[0]; })[0]; st.rules[xp[0]] = Math.max(xd[2], Math.min(xd[3], st.rules[xp[0]] + (+xp[1]) * xd[4])); render(); return; }
+  if (t.closest('[data-rulesreset]')) { st.rules = cloneRules(); render(); return; }
+  var xRs = t.closest('[data-rolesel]'); if (xRs) { st.roleSel = xRs.dataset.rolesel; render(); return; }
+  var xTg = t.closest('[data-tog]'); if (xTg) { var xt = xTg.dataset.tog.split(':'); st[xt[0]][+xt[1]] = !st[xt[0]][+xt[1]]; render(); return; }
+  var pr = t.closest('[data-product]'); if (pr) { st.product = +pr.dataset.product; goTo('product'); return; }
+  var go = t.closest('[data-go]'); if (go) { goTo(go.dataset.go); return; }
+  if (t.closest('[data-back]')) { goTo(st.prev || 'today'); return; }
+  var sh = t.closest('[data-shop]'); if (sh) { st.shop = sh.dataset.shop; if (st.screen !== 'products' && st.screen !== 'cash') st.screen = 'products'; render(); return; }
+  var ct = t.closest('[data-cat]'); if (ct) { st.cat = ct.dataset.cat; render(); return; }
+  if (t.closest('#userBtn')) { openLogin(true); return; }
+  if (t.closest('#loginBack') || t.closest('#loginX')) { openLogin(false); return; }
+  if (t.closest('#rpBtn')) { var o = $('rpList').classList.toggle('open'); $('rpBtn').setAttribute('aria-expanded', o); return; }
+  var ro = t.closest('[data-role]'); if (ro) { pendingRole = ro.dataset.role; renderRoles(); $('rpList').classList.remove('open'); $('rpBtn').setAttribute('aria-expanded', 'false'); return; }
+  if (t.closest('[data-login]')) { openLogin(true); return; }
+  if (t.closest('#doLogin')) { st.role = pendingRole; st.screen = cfg().home; st.prev = st.screen; st.shop = 'Все'; openLogin(false); render(); return; }
+  if (t.closest('#reset')) { var keep = { w: st.w, t: st.t, sb: st.sb }; st = init(); st.w = keep.w; st.t = keep.t; st.sb = keep.sb; $('q').value = ''; render(); return; }
+  var sg = t.closest('.seg button'); if (sg) { sg.parentElement.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === sg); }); }
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key !== 'Escape') return;
+  if ($('login').classList.contains('open')) openLogin(false);
+  else if (st.peek) setPeek(false);
+});
+document.addEventListener('input', function (e) {
+  var kin = e.target.dataset && e.target.dataset.in;
+  if (kin) {
+    var dv = digitsOf(e.target.value).slice(0, 7);
+    if (kin === 'scamt') st.sc.amt = dv; else if (kin === 'scadd') st.sc.add.amt = dv;
+    else if (TEXT_IN[kin]) { var ti = TEXT_IN[kin]; (ti[0] ? st[ti[0]] : st)[ti[1]] = e.target.value; }
+    else if (NUM_IN[kin]) { var ni = NUM_IN[kin]; (ni[0] ? st[ni[0]] : st)[ni[1]] = digitsOf(e.target.value).slice(0, ni[2]); }
+    render(); var ek = $(e.target.id); if (ek) { ek.focus(); var kn = ek.value.length; ek.setSelectionRange(kn, kn); }
+    return;
+  }
+  if (e.target.id !== 'ntq') return;
+  st.nt.q = e.target.value; render();
+  var el = $('ntq'); if (el) { el.focus(); var n = el.value.length; el.setSelectionRange(n, n); }
+});
+$('q').addEventListener('input', function () { st.q = this.value; if (st.q.trim() && cfg().search) st.screen = 'products'; render(); });
+
+render(); renderRoles();
+</script>
+</body>
+</html>

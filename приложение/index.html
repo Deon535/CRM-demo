@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CRM для магазинов одежды (демо)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/screens.css">
+<link rel="stylesheet" href="css/login.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-sale" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2 .7 3.5 2.6 3.5 5.7"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7h15a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 7l12-3v3"/><path d="M16 13.5h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="3"/><path d="M9.5 4.5v15"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-chevron-up" viewBox="0 0 24 24"><path d="m5 15 7-7 7 7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-transfer" viewBox="0 0 24 24"><path d="M4 7h16m-4-4 4 4-4 4"/><path d="M20 17H4m4-4-4 4 4 4"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m-4-4 4 4 4-4"/><path d="M5 19h14"/></symbol>
+  <symbol id="i-receipt" viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <div class="fan-row"><b>Вид</b>
+      <button class="pick" data-k="w" data-val="phone">Телефон</button>
+      <button class="pick" data-k="w" data-val="desk">Компьютер</button>
+      <span style="width:12px"></span><b style="width:auto">Панель слева</b>
+      <button class="pick" data-k="sb" data-val="pinned">Закреплена</button>
+      <button class="pick" data-k="sb" data-val="collapsed">Скрыта</button>
+      <span style="width:12px"></span><b style="width:auto">Тема</b>
+      <button class="pick" data-k="t" data-val="light">Светлая</button>
+      <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+      <span style="width:12px"></span>
+      <button class="pick" data-act="login">Окно входа</button>
+    </div>
+  </div>
+
+  <div class="about">На компьютере нажми на квадратик с черточкой слева вверху: панель скроется. Наведи на этот квадратик: панель выедет, а экран плавно сожмётся. Убери курсор: всё вернётся. Пока панель выехала, нажми на квадратик или на саму панель: она закрепится. Нажимай прямо на экране: человечек справа вверху (там смена роли: у каждой роли своё меню и свой «Сегодня»), чипы магазинов, поиск, «Новая продажа» (только у старшего продавца и продавца; владелец продаёт через пункт «Продажа»). Каждый раздел это отдельный экран. Магазины работают на экране «Товар», на «Сегодня» цифры пока по всей сети.</div>
+
+  <div class="stage">
+  <div class="frame" id="frame" data-w="phone" data-sb="pinned">
+    <div class="app">
+      <div class="strip"><span class="chip chip-demo">ДЕМО</span><span>Роль: <b id="roleLabel">Владелец</b></span><span class="gap"></span><button id="reset">Сбросить демо</button></div>
+
+      <aside class="side" id="side" aria-label="Разделы">
+        <div class="sb-head"><button class="sbtn" id="sbIn" aria-label="Скрыть боковую панель"><svg class="ic"><use href="#i-sidebar"/></svg></button><span class="brand" id="brand">CRM</span></div>
+        <nav class="navv" id="sideNav"></nav>
+      </aside>
+      <button class="sbtn sbtn-out" id="sbOut" aria-label="Показать боковую панель"><svg class="ic"><use href="#i-sidebar"/></svg></button>
+
+      <div class="main" id="main">
+        <header class="top">
+          <label class="field"><svg class="ic"><use href="#i-search"/></svg><input id="q" placeholder="Поиск по всей CRM" autocomplete="off"><svg class="ic"><use href="#i-scan"/></svg></label>
+          <button class="btn btn-main btn-sale-d" id="saleBtnD" data-go="sale"><svg class="ic"><use href="#i-plus"/></svg>Новая продажа</button>
+          <button class="iconbtn" id="userBtn" aria-label="Войти или сменить роль"><svg class="ic"><use href="#i-person"/></svg></button>
+          <div class="fchips" id="shopChips"></div>
+        </header>
+        <div class="content" id="content"></div>
+      </div>
+
+      <button class="salebar" id="saleBar" data-go="sale"><span class="grow">Новая продажа</span><span class="sq"><svg class="ic"><use href="#i-plus"/></svg></span></button>
+      <nav class="tabbar" id="tabbar"></nav>
+    </div>
+
+    <div class="modal" id="login" role="dialog" aria-modal="true" aria-labelledby="loginT">
+      <div class="back" id="loginBack"></div>
+      <div class="card">
+        <div class="card-h"><span class="t-h2" id="loginT">Вход</span><button class="iconbtn" id="loginX" aria-label="Закрыть"><svg class="ic"><use href="#i-close"/></svg></button></div>
+        <p class="t-label">В демо пароль не нужен, роль можно сменить без выхода.</p>
+        <label class="lbl">Логин<input class="inp" placeholder="Например, ruslan" autocomplete="off"></label>
+        <label class="lbl">Пароль<input class="inp" type="password" placeholder="В демо не нужен" autocomplete="off"></label>
+        <div>
+          <button class="rp-btn" id="rpBtn" aria-expanded="false"><span class="t-label">Войти как</span><span class="rp-val" id="rpVal">Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+          <div class="rp-list" id="rpList"><div class="rp-inner" id="rpInner"></div></div>
+        </div>
+        <div class="lbl">Тема<div class="seg" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button class="pick" data-k="t" data-val="light">Светлая</button><button class="pick" data-k="t" data-val="dark">Тёмная</button></div></div>
+        <button class="btn btn-main" id="doLogin">Войти</button>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<template id="tpl-today">
+  <div class="tiles">
+    <div class="tile inv hero s2" style="min-height:150px"><span class="t-label">Выручка сегодня</span><span class="tile-hero-num">343 400 ₽</span><span class="t-label"><span class="num">+7%</span> к вчера</span></div>
+    <div class="tile"><span class="t-label">Прибыль за 30 дней</span><span class="t-mid">{{profit}}</span></div>
+    <div class="tile"><span class="t-label">Долги поставщикам</span><span class="t-mid">{{debt}}</span></div>
+    <div class="tile bad s2"><span class="t-label" style="color:inherit">Касса Каспийск</span><span class="t-big">−1 200 ₽</span></div>
+    <div class="tile"><span class="t-label">Возвраты</span><span class="t-mid">3 / 12 480 ₽</span></div>
+    <div class="tile"><span class="t-label">Обмены / брак</span><span class="t-mid">2 / 1</span></div>
+    <div class="tile s2">
+      <span class="t-label">Продавцы сегодня</span>
+      <div><div class="rowline"><span>Руслан</span><span class="t-seller">71 200 ₽</span></div><div class="rowline"><span>Заур</span><span class="t-seller">58 600 ₽</span></div><div class="rowline"><span>Али</span><span class="t-seller">49 300 ₽</span></div></div>
+    </div>
+    <div class="tile s2"><span class="t-label">Не продаётся <span class="num">60+</span> дней</span><span class="t-big"><span class="num">14</span> позиций</span></div>
+  </div>
+</template>
+
+<script src="js/data.js"></script>
+<script src="js/state.js"></script>
+<script src="js/helpers.js"></script>
+<script src="js/screens/today.js"></script>
+<script src="js/screens/more.js"></script>
+<script src="js/screens/products.js"></script>
+<script src="js/screens/returns.js"></script>
+<script src="js/screens/transfers.js"></script>
+<script src="js/screens/cash.js"></script>
+<script src="js/screens/reports.js"></script>
+<script src="js/payroll.js"></script>
+<script src="js/screens/expenses.js"></script>
+<script src="js/screens/clients.js"></script>
+<script src="js/screens/sale.js"></script>
+<script src="js/screens/people.js"></script>
+<script src="js/screens/settings.js"></script>
+<script src="js/screens/orders.js"></script>
+<script src="js/screens/courier.js"></script>
+<script src="js/screens/product-card.js"></script>
+<script src="js/app.js"></script>
+<script src="js/events.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

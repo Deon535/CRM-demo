@@ -1,0 +1,80 @@
+/* ▪ Файл css/shell.css: рамка приложения: панель демо, шапка, боковая панель, нижнее меню. Подключается в index.html по порядку, порядок важен. */
+/* ===== Панель страницы ===== */
+.fan { max-width: 1360px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { background: var(--bg); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
+@media (min-width: 700px) and (min-height: 800px) { .fan-bar { position: sticky; top: 0; z-index: 50; padding-top: var(--s3); } }
+.fan-row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.fan-row b { font-size: 12px; color: var(--muted); font-weight: 500; width: 64px; flex: none; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; }
+.stage { overflow-x: auto; padding-bottom: var(--s2); }
+
+/* ===== Рамка приложения ===== */
+.frame { container: f / inline-size; position: relative; width: 100%; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.frame[data-w="phone"] { max-width: 375px; border-radius: 28px; height: 780px; }
+.frame[data-w="desk"] { max-width: 1280px; min-width: 760px; border-radius: 20px; height: 740px; }
+.app { position: relative; height: 100%; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto auto; }
+.frame[data-w="desk"] .app { grid-template-rows: auto minmax(0, 1fr); }
+
+.strip { display: flex; align-items: center; gap: var(--s2); padding: 0 var(--s4); height: var(--strip-h); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.strip b { color: var(--text); font-weight: 700; }
+.strip span, .strip button { white-space: nowrap; }
+.strip .gap { flex: 1; }
+.strip button { background: transparent; border: 0; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 40px; padding: 0 var(--s1); color: var(--muted); }
+
+.main { display: flex; flex-direction: column; min-width: 0; min-height: 0; transition: margin-left .32s var(--ease); }
+.top { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s2); padding: var(--s3) var(--s4) var(--s2); flex: none; transition: padding-left .32s var(--ease); }
+.top .fchips { grid-column: 1 / -1; }
+.btn-sale-d { display: none; min-height: 48px; width: auto; }
+.frame[data-w="desk"] .top { grid-template-columns: minmax(0, 1fr) auto auto; padding: var(--s4) var(--s5) var(--s2); }
+.frame[data-w="desk"] .btn-sale-d { display: inline-flex; }
+.frame[data-w="desk"] .btn-sale-d[hidden] { display: none; }
+.fchips { display: flex; gap: var(--s2); overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.fchips::-webkit-scrollbar { display: none; }
+.fchip { flex: none; min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.content { container: c / inline-size; flex: 1; min-height: 0; overflow-y: auto; padding: var(--s3) var(--s4) var(--s5); }
+.frame[data-w="desk"] .content { padding: var(--s3) var(--s5) var(--s5); }
+.scr { display: grid; gap: var(--s4); min-width: 0; }
+
+/* ===== Боковая панель: закреплена, скрыта, выглядывает ===== */
+.side { display: none; }
+.sbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; flex: none; color: var(--text); }
+.sbtn:hover { border-color: var(--line-strong); }
+.sbtn-out { display: none; }
+.frame[data-w="desk"] .side { display: flex; flex-direction: column; gap: var(--s3); position: absolute; z-index: 25; left: 0; top: var(--strip-h); bottom: 0; width: var(--side-w); padding: var(--s3); background: var(--bg); border-right: 1px solid var(--line); overflow-y: auto; transform: translateX(-100%); transition: transform .32s var(--ease), box-shadow .32s var(--ease), background-color .32s var(--ease); }
+.frame[data-w="desk"] .sbtn-out { display: grid; position: absolute; z-index: 24; left: var(--s3); top: calc(var(--strip-h) + var(--s3)); opacity: 0; pointer-events: none; transition: opacity .2s var(--ease); }
+.frame[data-w="desk"][data-sb="pinned"] .side { transform: none; }
+.frame[data-w="desk"][data-sb="pinned"] .main, .frame[data-w="desk"][data-peek] .main { margin-left: var(--side-w); }
+.frame[data-w="desk"][data-sb="collapsed"] .sbtn-out { opacity: 1; pointer-events: auto; }
+.frame[data-w="desk"][data-sb="collapsed"] .top { padding-left: 68px; }
+.frame[data-w="desk"][data-peek] .top { padding-left: var(--s5); }
+.frame[data-w="desk"][data-peek] .side { transform: none; }
+.frame[data-w="desk"][data-peek] .sbtn-out { opacity: 0; }
+.sb-head { display: flex; align-items: center; gap: var(--s3); height: 40px; }
+.brand { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.navv { display: grid; gap: var(--s1); }
+.nav-i { display: flex; align-items: center; gap: var(--s3); min-height: 48px; padding: 0 var(--s3); border-radius: var(--r-btn); color: var(--muted); font-weight: 500; cursor: pointer; background: transparent; border: 0; width: 100%; text-align: left; }
+.nav-i:hover { background: var(--surface-2); color: var(--text); }
+.nav-i[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.nav-g { font-size: 12px; color: var(--muted); padding: var(--s3) var(--s3) var(--s1); }
+
+/* Нижнее меню и полоса «Новая продажа» (телефон) */
+.tabbar { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--s1); background: var(--surface); border-top: 1px solid var(--line); padding: var(--s2) var(--s2) var(--s3); }
+.frame[data-w="desk"] .tabbar { display: none; }
+.tab { display: grid; justify-items: center; gap: 2px; padding: var(--s2) 0; border-radius: var(--r-btn); color: var(--muted); font-size: 11px; font-weight: 500; min-height: 52px; cursor: pointer; background: transparent; border: 0; }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.salebar { display: flex; align-items: center; gap: var(--s3); min-height: 56px; padding: 0 var(--s3) 0 var(--s4); margin: 0 var(--s2); background: var(--accent); color: var(--on-accent); border: 0; border-radius: var(--r-card) var(--r-card) 0 0; cursor: pointer; text-align: left; font-weight: 700; }
+.salebar .grow { flex: 1; font-size: 16px; }
+.salebar .sq { width: 36px; height: 36px; border-radius: 10px; border: 1px solid currentColor; display: grid; place-items: center; opacity: .9; }
+.frame[data-w="desk"] .salebar { display: none; }
+
+/* ===== Режим приложения (по умолчанию): экран на всё окно, «телефон» или «компьютер» выбирается по ширине окна (см. js/main.js).
+   Режим «витрина» (адрес index.html?витрина) сохраняет прежний вид: рамка и кнопки сверху. ===== */
+html:not(.showcase) body { height: 100vh; height: 100dvh; overflow: hidden; }
+html:not(.showcase) .fan { max-width: none; margin: 0; padding: 0; }
+html:not(.showcase) .fan-bar, html:not(.showcase) .about { display: none; }
+html:not(.showcase) .stage { overflow: visible; padding: 0; }
+html:not(.showcase) .frame, html:not(.showcase) .frame[data-w="phone"], html:not(.showcase) .frame[data-w="desk"] { max-width: none; min-width: 0; width: 100%; height: 100vh; height: 100dvh; margin: 0; border: 0; border-radius: 0; }
+

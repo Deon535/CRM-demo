@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 7: Заказы и курьер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s4); border-radius: var(--r-btn); font-weight: 700; border: 1px solid transparent; width: 100%; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-sm { min-height: 48px; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.fchips { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.fchip { flex: none; min-height: 40px; padding: 0 var(--s3); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); min-height: 40px; padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+.rowline b { text-align: right; }
+.scr { display: grid; gap: var(--s4); min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); background: var(--surface-2); border-radius: var(--r-field); font-size: 14px; }
+.notice .ic { width: 20px; height: 20px; margin-top: 1px; }
+.linkbtn { min-height: 48px; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; justify-self: center; padding: 0 var(--s1); }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.seg.stack { grid-template-columns: minmax(0, 1fr); }
+.seg button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; line-height: 1.2; padding: 0 4px; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .95; letter-spacing: -0.03em; font-size: 40px; white-space: nowrap; }
+
+/* Заказы */
+.orow { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); min-height: 64px; }
+.orow:last-child { border-bottom: 0; }
+.orow .who { font-weight: 700; }
+.orow .sub { display: block; font-size: 13px; color: var(--muted); }
+.orow .r { display: grid; justify-items: end; gap: 4px; }
+.orow .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.grp { border: 0; background: transparent; width: 100%; text-align: left; display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 56px; border-bottom: 1px solid var(--line-strong); padding: 0; }
+.grp .ic { transition: transform .2s; }
+.grp[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.act { font-size: 12px; font-weight: 700; }
+
+/* Курьер */
+.sum3 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.sum3 > div:first-child { grid-column: span 2; }
+.sum3 > div:first-child .t-big { font-size: 32px; }
+.sum3 > div { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3); display: grid; gap: 4px; align-content: space-between; min-width: 0; }
+.sum3 .t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 20px; line-height: 1; letter-spacing: -0.02em; white-space: nowrap; }
+.card { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s3); }
+.card.cur { border-color: var(--line-strong); }
+.card-h { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); width: 100%; text-align: left; background: transparent; border: 0; padding: 0; min-height: 48px; }
+.card-h .ttl { display: grid; gap: 2px; }
+.card-h b { font-weight: 700; }
+.pay-big { display: grid; gap: 2px; }
+.tl { display: grid; gap: var(--s3); position: relative; padding-left: 36px; }
+.tl::before { content: ""; position: absolute; left: 11px; top: 12px; bottom: 12px; width: 2px; background: var(--line); }
+.stop { position: relative; }
+.stop .dot { position: absolute; left: -36px; top: 12px; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line-strong); background: var(--bg); display: grid; place-items: center; font-family: var(--font-num); font-weight: 800; font-size: 12px; }
+.stop.cur .dot { background: var(--accent); color: var(--on-accent); }
+.stop.dn .dot { background: var(--good-bg); border-color: var(--good); color: var(--good); }
+.stop.no .dot { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+.stop .dot .ic { width: 14px; height: 14px; stroke-width: 2.5; }
+.mini { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 48px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s3); }
+.note { font-size: 13px; color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.col { width: 375px; max-width: 100%; }
+.col > .t-h2 { margin-bottom: var(--s3); }
+.ph { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; grid-template-columns: minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v3a2 2 0 0 1-2 2A16 16 0 0 1 4 5a2 2 0 0 1 2-2z"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Раздел</b>
+    <button class="pick" data-k="sec" data-val="orders">Заказы (менеджер)</button>
+    <button class="pick" data-k="sec" data-val="cour">Курьер</button>
+    <span style="width:12px"></span><b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1</button>
+    <button class="pick" data-k="v" data-val="2">2</button>
+    <button class="pick" data-k="v" data-val="3">3</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+    <span style="width:12px"></span>
+    <button class="pick" data-reset>Сбросить</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; };
+var nb = function (s) { return String(s).replace(/ /g, ' '); };
+
+/* ===== Данные: заказы (сходятся с экраном «Сегодня» менеджера: новые 5, к отправке 3, в пути 4, отказы 2) ===== */
+var STAGE = { new: ['новая', 'neutral'], chat: ['в переписке', 'neutral'], pay: ['ждёт оплаты', 'neutral'], paid: ['оплачено', 'good'], way: ['в пути', 'neutral'], done: ['доставлено', 'good'], no: ['отказ', 'bad'] };
+var ORD = [
+  { id: 1055, st: 'new', who: 'Аслан К.', it: 'Куртка зимняя L', sum: 12900, city: 'Махачкала', act: 'Ответить' },
+  { id: 1054, st: 'new', who: 'Мадина Г.', it: 'Рубашка Oxford M ×2', sum: 9980, city: 'Каспийск', act: 'Ответить' },
+  { id: 1053, st: 'chat', who: 'Заур М.', it: 'Ремень кожаный 100', sum: 1990, city: 'Дербент', act: 'Продолжить переписку' },
+  { id: 1052, st: 'chat', who: 'Патимат А.', it: 'Брюки чинос 48', sum: 5490, city: 'Хасавюрт', act: 'Продолжить переписку' },
+  { id: 1051, st: 'chat', who: 'Рашид Б.', it: 'Рубашка Oxford L, ремень 90', sum: 6980, city: 'Махачкала', act: 'Продолжить переписку' },
+  { id: 1050, st: 'pay', who: 'Камиль Х.', it: 'Куртка зимняя L', sum: 12900, city: 'Каспийск', left: '18 ч', act: 'Ждём оплату' },
+  { id: 1049, st: 'pay', who: 'Залина Р.', it: 'Брюки чинос 52', sum: 5490, city: 'Махачкала', left: '3 ч', urgent: true, act: 'Напомнить об оплате' },
+  { id: 1048, st: 'paid', who: 'Ильяс Д.', it: 'Рубашка Oxford M', sum: 4990, city: 'Махачкала', act: 'Передать курьеру' },
+  { id: 1047, st: 'paid', who: 'Амина Ш.', it: 'Носки хлопок ×6', sum: 2340, city: 'Каспийск', act: 'Передать курьеру' },
+  { id: 1045, st: 'paid', who: 'Гасан О.', it: 'Брюки чинос 50, ремень 100', sum: 7480, city: 'Дербент', act: 'Передать курьеру' },
+  { id: 1046, st: 'way', who: 'Руслан Т.', it: 'Рубашка Oxford M', sum: 4990, city: 'Махачкала', act: 'В пути' },
+  { id: 1044, st: 'way', who: 'Хадижат Ю.', it: 'Ремень кожаный 90', sum: 1990, city: 'Махачкала', act: 'В пути' },
+  { id: 1043, st: 'way', who: 'Мадина Р.', it: 'Брюки чинос 50', sum: 5490, city: 'Махачкала', act: 'В пути' },
+  { id: 1041, st: 'way', who: 'Аслан Г.', it: 'Куртка зимняя L', sum: 12900, city: 'Махачкала', act: 'В пути' },
+  { id: 1042, st: 'done', who: 'Шамиль И.', it: 'Рубашка Oxford L', sum: 4990, city: 'Махачкала', act: '' },
+  { id: 1040, st: 'done', who: 'Камилла Н.', it: 'Носки хлопок ×4', sum: 1560, city: 'Каспийск', act: '' },
+  { id: 1039, st: 'no', who: 'Муса Л.', it: 'Брюки чинос 52', sum: 5490, city: 'Махачкала', act: 'Причина: не подошёл размер' },
+  { id: 1038, st: 'no', who: 'Асият В.', it: 'Рубашка Oxford S', sum: 4990, city: 'Дербент', act: 'Причина: передумал' }
+];
+var GROUPS = [['new', 'Новые', ['new', 'chat']], ['pay', 'Ждут оплаты', ['pay']], ['ready', 'К отправке', ['paid']], ['way', 'В пути', ['way']], ['closed', 'Закрытые', ['done', 'no']]];
+var inGroup = function (g) { return ORD.filter(function (o) { return GROUPS.filter(function (x) { return x[0] === g; })[0][2].indexOf(o.st) >= 0; }); };
+
+/* ===== Данные: доставки курьера (те же три заказа, что в «В пути» у менеджера) ===== */
+var CD_BASE = [
+  { id: 1041, who: 'Аслан Г.', phone: '+7 928 555-01-41', addr: 'Махачкала, ул. Ленина, 12, кв. 7', it: 'Куртка зимняя L', price: 12900, paid: 12900, st: 'todo' },
+  { id: 1043, who: 'Мадина Р.', phone: '+7 928 555-01-43', addr: 'Махачкала, пр. Гамидова, 30', it: 'Брюки чинос 50', price: 5490, paid: 0, st: 'todo' },
+  { id: 1046, who: 'Руслан Т.', phone: '+7 928 555-01-46', addr: 'Махачкала, ул. Дахадаева, 5', it: 'Рубашка Oxford M', price: 4990, paid: 0, st: 'todo' }
+];
+var METHODS = ['Наличные', 'Карта', 'Перевод'], REFUSE = ['Не подошло', 'Передумал', 'Не дозвонились'];
+var collect = function (d) { return d.price - d.paid; };
+var clone = function (a) { return JSON.parse(JSON.stringify(a)); };
+
+var VO = {
+  '1': { name: '1. Вкладки по стадиям', how: 'Пять групп вкладками с числом заказов, ниже список выбранной группы.', plus: 'Короткие списки, картина по стадиям видна по цифрам над списком.', minus: 'Чтобы увидеть всё, нужно пройти по вкладкам.' },
+  '2': { name: '2. Группы одним списком', how: 'Один длинный список, разделённый по стадиям; группы раскрываются и сворачиваются, первая открыта.', plus: 'Ближе всего к ТЗ: «заказы списками по стадиям», всё на одном экране.', minus: 'Длинная прокрутка; без сворачивания утонешь в 18 заказах.' },
+  '3': { name: '3. Очередь «что делать»', how: 'Один список, отсортированный по срочности; справа подсказка действия. Завершённые не показываем.', plus: 'Менеджер сразу видит, что горит (оплата через 3 часа выше всего).', minus: 'Отход от «списков по стадиям» из ТЗ; стадию видно только плашкой.' }
+};
+var VC = {
+  '1': { name: '1. Список, доставка раскрывается', how: 'Сверху итоги дня, ниже три доставки; нажал на доставку, раскрылась карточка с кнопками «Доставлено» и «Отказ».', plus: 'Привычно; карточка раскрыта только одна, ошибиться труднее.', minus: 'Лишнее нажатие, чтобы открыть карточку.' },
+  '2': { name: '2. Маршрут по остановкам', how: 'Вертикальная линия остановок. Текущая остановка раскрыта сразу с кнопками, сделанные сворачиваются с галочкой.', plus: 'Ведёт по порядку, не нужно искать, что делать дальше; лучше всего подходит «пути курьера».', minus: 'Нельзя «перепрыгнуть» к другой остановке без нажатия на неё.' },
+  '3': { name: '3. Кнопки прямо в списке', how: 'У каждой доставки сразу видны «Доставлено» и «Отказ», без открытия карточки.', plus: 'Меньше всего нажатий.', minus: 'Деньги рядом с «Отказ»: легче промахнуться; мало места для адреса и телефона.' }
+};
+var st;
+function init() { return { sec: st ? st.sec : 'orders', v: st ? st.v : 'all', t: st ? st.t : 'light', tab: 'new', open: { new: true }, cd: { 1: clone(CD_BASE), 2: clone(CD_BASE), 3: clone(CD_BASE) }, sel: { 1: null, 2: null }, pn: { 1: null, 2: null, 3: null } }; }
+st = init();
+
+/* ---- общие куски ---- */
+function chip(s) { var x = STAGE[s]; return '<span class="chip chip-' + x[1] + '">' + x[0] + '</span>'; }
+function orow(o, withAct) {
+  var right = '<span class="r"><span class="price">' + fmt(o.sum) + '</span>' + (withAct ? '<span class="act ' + (o.urgent ? 'bad' : '') + '">' + (o.act || '') + '</span>' : chip(o.st)) + '</span>';
+  var sub = o.it + ' / ' + o.city + (o.left ? ' / <span class="' + (o.urgent ? 'bad' : '') + '">осталось <span class="num">' + o.left + '</span></span>' : '');
+  return '<div class="orow"><span><span class="who">№ <span class="num">' + o.id + '</span> / ' + o.who + '</span><span class="sub">' + sub + '</span></span>' + right + '</div>';
+}
+function head(t, extra) { return '<div class="t-h1">' + t + '</div>' + (extra || ''); }
+
+/* ---- заказы ---- */
+function o1() {
+  var g = st.tab, rows = inGroup(g);
+  var chips = '<div class="fchips">' + GROUPS.map(function (x) { return '<button class="fchip" data-tab="' + x[0] + '" aria-pressed="' + (x[0] === g) + '">' + x[1] + ' <span class="num">' + inGroup(x[0]).length + '</span></button>'; }).join('') + '</div>';
+  return '<div class="scr">' + head('Заказы') + chips + '<div>' + rows.map(function (o) { return orow(o); }).join('') + '</div></div>';
+}
+function o2() {
+  return '<div class="scr">' + head('Заказы') + GROUPS.map(function (x) {
+    var open = !!st.open[x[0]], rows = inGroup(x[0]);
+    return '<div><button class="grp" data-grp="' + x[0] + '" aria-expanded="' + open + '"><span class="t-h2">' + x[1] + ' <span class="num">' + rows.length + '</span></span><svg class="ic"><use href="#i-chevron-down"/></svg></button>' +
+      (open ? rows.map(function (o) { return orow(o); }).join('') : '') + '</div>';
+  }).join('') + '</div>';
+}
+function o3() {
+  var order = { pay: 0, new: 1, paid: 2, chat: 3, way: 5 };
+  var rows = ORD.filter(function (o) { return o.st !== 'done' && o.st !== 'no'; }).map(function (o) { return { o: o, k: o.urgent ? -1 : order[o.st] }; }).sort(function (a, b) { return a.k - b.k || b.o.id - a.o.id; });
+  return '<div class="scr">' + head('Заказы') + '<div class="t-label">Сначала то, что требует действия</div><div>' + rows.map(function (x) { return orow(x.o, true); }).join('') + '</div></div>';
+}
+
+/* ---- курьер ---- */
+function totals(v) {
+  var list = st.cd[v], left = 0, todo = 0, done = 0, cash = 0;
+  list.forEach(function (d) { if (d.st === 'todo') { todo++; left += collect(d); } if (d.st === 'done') { done++; if (d.pay === 'Наличные') cash += collect(d); } });
+  return { left: left, todo: todo, done: done, cash: cash };
+}
+function sum3(v) {
+  var t = totals(v);
+  return '<div class="sum3"><div><span class="t-label">К получению</span><span class="t-big">' + fmt(t.left) + '</span></div><div><span class="t-label">Осталось</span><span class="t-big">' + t.todo + '</span></div><div><span class="t-label">Сдать в кассу</span><span class="t-big">' + fmt(t.cash) + '</span></div></div>';
+}
+function panel(v, d, i) {
+  var p = st.pn[v];
+  if (d.st !== 'todo') return '';
+  if (!p || p.i !== i) {
+    return '<div class="two"><button class="btn btn-sm" data-cd="' + v + ':' + i + ':done">Доставлено</button><button class="btn btn-second btn-sm" data-cd="' + v + ':' + i + ':no">Отказ</button></div>';
+  }
+  if (p.mode === 'pay') {
+    return '<div class="pay-big"><span class="t-label">Как заплатил клиент</span></div><div class="seg">' + METHODS.map(function (m) { return '<button data-cdv="' + v + ':' + m + '" aria-pressed="' + (p.val === m) + '">' + m + '</button>'; }).join('') + '</div>' +
+      '<div class="rowline"><span class="t-label">Получено</span><b class="num" style="font-size:20px">' + fmt(collect(d)) + '</b></div>' +
+      '<button class="btn btn-sm" data-cd="' + v + ':' + i + ':confirm"' + (p.val ? '' : ' style="opacity:.4"') + '>Подтвердить</button><button class="linkbtn" data-cd="' + v + ':' + i + ':back">Назад</button>';
+  }
+  return '<div class="t-label">Причина отказа</div><div class="seg stack">' + REFUSE.map(function (m) { return '<button data-cdv="' + v + ':' + m + '" aria-pressed="' + (p.val === m) + '">' + m + '</button>'; }).join('') + '</div>' +
+    '<div class="t-label">Вещь вернётся в магазин, продавец оформит возврат.</div>' +
+    '<button class="btn btn-sm" data-cd="' + v + ':' + i + ':confirm"' + (p.val ? '' : ' style="opacity:.4"') + '>Записать отказ</button><button class="linkbtn" data-cd="' + v + ':' + i + ':back">Назад</button>';
+}
+function details(d) {
+  return '<div><div class="rowline"><span class="t-label">Клиент</span><b>' + d.who + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Телефон</span><b class="num">' + d.phone + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Адрес</span><b>' + d.addr + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Что</span><b>' + d.it + '</b></div>' +
+    '<div class="rowline"><span class="t-label">К получению</span>' + (collect(d) ? '<b class="num">' + fmt(collect(d)) + '</b>' : '<b class="good">оплачено заранее</b>') + '</div></div>' +
+    '<button class="btn btn-second btn-sm"><svg class="ic"><use href="#i-phone"/></svg>Позвонить</button>';
+}
+function dchip(d) {
+  return d.st === 'done' ? '<span class="chip chip-good">доставлено' + (d.pay ? ', ' + d.pay.toLowerCase() : '') + '</span>' : d.st === 'refused' ? '<span class="chip chip-bad">отказ</span>' : (collect(d) ? '<span class="num" style="font-weight:800">' + fmt(collect(d)) + '</span>' : '<span class="chip chip-good">оплачено</span>');
+}
+function c1() {
+  var list = st.cd[1];
+  return '<div class="scr">' + head('Доставки') + sum3(1) + list.map(function (d, i) {
+    var open = st.sel[1] === i && d.st === 'todo';
+    return '<div class="card' + (open ? ' cur' : '') + '"><button class="card-h" data-sel="1:' + i + '"><span class="ttl"><b>№ <span class="num">' + d.id + '</span> / ' + d.who + '</b><span class="t-label">' + d.addr + '</span></span>' + dchip(d) + '</button>' + (open ? details(d) + panel(1, d, i) : '') + '</div>';
+  }).join('') + '</div>';
+}
+function c2() {
+  var list = st.cd[2], cur = list.findIndex(function (d) { return d.st === 'todo'; });
+  return '<div class="scr">' + head('Доставки') + sum3(2) + '<div class="tl">' + list.map(function (d, i) {
+    var isCur = i === cur, cls = d.st === 'done' ? ' dn' : d.st === 'refused' ? ' no' : isCur ? ' cur' : '';
+    var dot = d.st === 'done' ? '<svg class="ic"><use href="#i-check"/></svg>' : d.st === 'refused' ? '<svg class="ic"><use href="#i-close"/></svg>' : i + 1;
+    var body = isCur ? details(d) + panel(2, d, i) : '';
+    var headEl = '<div class="mini"><span class="ttl"><b>№ <span class="num">' + d.id + '</span> / ' + d.who + '</b><br><span class="t-label">' + d.addr + '</span></span>' + dchip(d) + '</div>';
+    return '<div class="stop' + cls + '"><span class="dot">' + dot + '</span><div class="card' + (isCur ? ' cur' : '') + '">' + headEl + body + '</div></div>';
+  }).join('') + '</div></div>';
+}
+function c3() {
+  var list = st.cd[3];
+  return '<div class="scr">' + head('Доставки') + sum3(3) + list.map(function (d, i) {
+    var p = st.pn[3], active = p && p.i === i;
+    return '<div class="card"><div class="mini"><span class="ttl"><b>№ <span class="num">' + d.id + '</span> / ' + d.who + '</b><br><span class="t-label">' + d.addr + '</span></span>' + dchip(d) + '</div>' + panel(3, d, i) + '</div>';
+  }).join('') + '</div>';
+}
+var VIEW = { orders: { '1': o1, '2': o2, '3': o3 }, cour: { '1': c1, '2': c2, '3': c3 } };
+
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var list = st.v === 'all' ? ['1', '2', '3'] : [st.v], V = st.sec === 'orders' ? VO : VC;
+  document.getElementById('stage').innerHTML = '<div class="pair">' + list.map(function (v) {
+    return '<div class="col"><div class="t-h2">' + V[v].name + '</div><div class="ph">' + VIEW[st.sec][v]() + '</div></div>';
+  }).join('') + '</div>';
+  document.getElementById('about').innerHTML = list.map(function (v) {
+    return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="note">Плюс:</span> ' + V[v].plus + '<br><span class="note">Минус:</span> ' + V[v].minus + '</div>';
+  }).join('') + '<div class="note">' + (st.sec === 'orders' ?
+    'Образец глазами онлайн-менеджера: <span class="num">' + ORD.length + '</span> заказов, цифры сходятся с его «Сегодня» (новые <span class="num">5</span>, к отправке <span class="num">3</span>, в пути <span class="num">4</span>, отказы <span class="num">2</span>). Карточка заказа собирается в каркасе после выбора.' :
+    'Образец глазами курьера: три доставки (в «В пути» у менеджера это № 1041, 1043, 1046). Заказ № 1041 оплачен заранее (дороже <span class="num">10 000 ₽</span>, ТЗ 5.4), поэтому к получению с него 0. Нажимаются «Доставлено», способ оплаты, «Подтвердить», «Отказ». «Сдать в кассу» считает только наличные.') + '</div>';
+  document.querySelectorAll('.pick[data-k]').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+}
+document.addEventListener('click', function (e) {
+  var t = e.target, p = t.closest('.pick[data-k]');
+  if (p) { st[p.dataset.k] = p.dataset.val; render(); return; }
+  if (t.closest('[data-reset]')) { st = init(); render(); return; }
+  var tb = t.closest('[data-tab]'); if (tb) { st.tab = tb.dataset.tab; render(); return; }
+  var g = t.closest('[data-grp]'); if (g) { st.open[g.dataset.grp] = !st.open[g.dataset.grp]; render(); return; }
+  var s = t.closest('[data-sel]'); if (s) { var a = s.dataset.sel.split(':'); st.sel[a[0]] = st.sel[a[0]] === +a[1] ? null : +a[1]; st.pn[a[0]] = null; render(); return; }
+  var pv = t.closest('[data-cdv]'); if (pv) { var b = pv.dataset.cdv.split(':'); st.pn[b[0]].val = b[1]; render(); return; }
+  var c = t.closest('[data-cd]');
+  if (c) {
+    var q = c.dataset.cd.split(':'), v = q[0], i = +q[1], act = q[2], d = st.cd[v][i];
+    if (act === 'done') { if (collect(d) === 0) { d.st = 'done'; d.pay = null; st.pn[v] = null; } else st.pn[v] = { i: i, mode: 'pay', val: null }; }
+    else if (act === 'no') st.pn[v] = { i: i, mode: 'no', val: null };
+    else if (act === 'back') st.pn[v] = null;
+    else if (act === 'confirm') { var pn = st.pn[v]; if (!pn || !pn.val) return; if (pn.mode === 'pay') { d.st = 'done'; d.pay = pn.val; } else { d.st = 'refused'; d.reason = pn.val; } st.pn[v] = null; }
+    render();
+  }
+});
+render();
+</script>
+</body>
+</html>

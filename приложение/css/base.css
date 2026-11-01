@@ -1,0 +1,32 @@
+/* ▪ Файл css/base.css: основа: сброс, текст, плашки, кнопки, поле ввода, переключатель. Подключается в index.html по порядку, порядок важен. */
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition-duration: .01ms !important; } }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-mid { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+.t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.chip-demo { border: 1px solid var(--line-strong); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; border: 1px solid transparent; width: 100%; white-space: nowrap; }
+.btn-main { background: var(--accent); color: var(--on-accent); }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; flex: none; }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); color: var(--muted); min-width: 0; }
+.field:focus-within { border-color: var(--line-strong); }
+.field input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--text); outline: 0; }
+.field input::placeholder { color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.seg button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; padding: 0 var(--s1); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+

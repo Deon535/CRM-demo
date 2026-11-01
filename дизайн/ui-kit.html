@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI-kit CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* ===== Токены: светлая тема (по умолчанию) ===== */
+:root {
+  --bg: #F6F6F4;
+  --surface: #FFFFFF;
+  --surface-2: #EEEEEA;
+  --text: #0E0E0E;
+  --muted: #6B6B66;
+  --line: #E2E2DE;
+  --line-strong: #0E0E0E;
+  --accent: #0E0E0E;          /* без цвета: акцент = чернила. Магазин может переопределить */
+  --on-accent: #FFFFFF;
+  --bad: #B3361F;
+  --bad-bg: #F8E6E2;
+  --good: #1A6D43;
+  --good-bg: #E1F1E8;
+  --scrim: rgba(14, 14, 14, .45);
+
+  --font-text: "Onest", sans-serif;
+  --font-num: "Inter Tight", sans-serif;
+
+  --r-chip: 6px;
+  --r-field: 10px;
+  --r-btn: 12px;
+  --r-card: 16px;
+  --r-sheet: 24px;
+
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C;
+  --surface: #171716;
+  --surface-2: #222220;
+  --text: #F2F2EE;
+  --muted: #98988F;
+  --line: #2A2A27;
+  --line-strong: #F2F2EE;
+  --accent: #F2F2EE;
+  --on-accent: #0D0D0C;
+  --bad: #EE7A66;
+  --bad-bg: #2E1A16;
+  --good: #5CC38C;
+  --good-bg: #14261C;
+  --scrim: rgba(0, 0, 0, .6);
+}
+
+* { box-sizing: border-box; margin: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-text); font-size: 16px; line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+
+/* Цифры и деньги: всегда Inter Tight, цифры одной ширины */
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+
+/* ===== Шкала текста ===== */
+.t-hero  { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 48px; font-weight: 800; line-height: .9; letter-spacing: -0.03em; }
+.t-big   { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+.t-mid   { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+.t-h1    { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2    { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-body  { font-size: 16px; font-weight: 400; }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+
+/* ===== Каркас страницы витрины ===== */
+.page { max-width: 1080px; margin: 0 auto; padding: var(--s4); }
+.bar {
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+  display: flex; justify-content: space-between; align-items: center; gap: var(--s3);
+  padding: var(--s3) 0; border-bottom: 1px solid var(--line); margin-bottom: var(--s5);
+}
+.kit-section { margin-bottom: var(--s7); }
+.kit-section > h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: var(--s1); }
+.kit-section > p { color: var(--muted); font-size: 14px; margin-bottom: var(--s4); max-width: 64ch; }
+.grid { display: grid; gap: var(--s3); }
+.g2 { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+.g3 { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); }
+.cap { font-size: 12px; color: var(--muted); margin-top: var(--s2); }
+.stack { display: grid; gap: var(--s3); }
+.rowx { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+
+.swatch { border: 1px solid var(--line); border-radius: var(--r-field); overflow: hidden; background: var(--surface); }
+.swatch i { display: block; height: 56px; }
+.swatch span { display: block; padding: var(--s2) var(--s3); font-size: 12px; line-height: 1.3; }
+.swatch b { display: block; font-size: 13px; }
+
+/* ===== Иконки (один набор, одна толщина) ===== */
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); gap: var(--s2); }
+.icons div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); padding: var(--s3) var(--s2); display: grid; justify-items: center; gap: var(--s2); font-size: 12px; color: var(--muted); }
+.icons .ic { color: var(--text); }
+
+/* ===== Кнопки ===== */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--s2);
+  min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn);
+  font-weight: 700; cursor: pointer; border: 1px solid transparent; width: 100%;
+}
+.btn:active { opacity: .85; }
+.btn-main { background: var(--accent); color: var(--on-accent); }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-text { background: transparent; color: var(--text); min-height: 48px; width: auto; text-decoration: underline; text-underline-offset: 3px; }
+.btn-main[disabled] { background: var(--surface-2); color: var(--muted); cursor: not-allowed; }
+.btn-small { min-height: 40px; padding: 0 var(--s4); width: auto; font-size: 14px; white-space: nowrap; }
+
+/* ===== Поле поиска ===== */
+.field {
+  display: flex; align-items: center; gap: var(--s3);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field);
+  min-height: 52px; padding: 0 var(--s4); color: var(--muted);
+}
+.field:focus-within { border-color: var(--line-strong); }
+.field input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--text); outline: 0; }
+.field input::placeholder { color: var(--muted); }
+
+/* ===== Плашка статуса ===== */
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad  { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.chip-demo { border: 1px solid var(--line-strong); color: var(--text); }
+
+/* ===== Карточки цифр ===== */
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s2); }
+.stat-hero .delta { font-size: 14px; font-weight: 700; }
+.delta.good { color: var(--good); }
+.delta.bad { color: var(--bad); }
+.stat-small { padding: var(--s3); border-radius: var(--r-card); gap: var(--s1); }
+
+/* ===== Строка товара ===== */
+.item {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  padding: var(--s3) var(--s4); display: grid; grid-template-columns: 1fr auto; gap: var(--s1) var(--s3); align-items: center;
+}
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { color: var(--muted); font-size: 13px; }
+.item .chip { justify-self: end; }
+
+/* ===== Уведомления ===== */
+.alert { display: flex; gap: var(--s3); align-items: flex-start; border-radius: var(--r-card); padding: var(--s3) var(--s4); font-size: 14px; font-weight: 700; }
+.alert-bad { background: var(--bad-bg); color: var(--bad); }
+.alert-good { background: var(--good-bg); color: var(--good); }
+.toast { background: var(--accent); color: var(--on-accent); border-radius: var(--r-btn); padding: var(--s3) var(--s4); font-size: 14px; font-weight: 500; display: flex; justify-content: space-between; gap: var(--s3); align-items: center; }
+
+/* ===== Таблица ===== */
+.table-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 520px; }
+th { text-align: left; font-size: 13px; font-weight: 500; color: var(--muted); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); }
+td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); font-size: 15px; }
+tr:last-child td { border-bottom: 0; }
+th.r, td.r { text-align: right; }
+td.r { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; }
+
+/* ===== Пустое состояние ===== */
+.empty { text-align: center; display: grid; justify-items: center; gap: var(--s3); padding: var(--s6) var(--s4); }
+.empty .ic { width: 40px; height: 40px; color: var(--muted); stroke-width: 1.5; }
+.empty p { color: var(--muted); max-width: 32ch; }
+
+/* ===== Переключатель магазина ===== */
+.switch { display: flex; align-items: center; gap: var(--s2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-btn); min-height: 48px; padding: 0 var(--s3) 0 var(--s4); font-weight: 700; cursor: pointer; }
+.switch .ic { width: 20px; height: 20px; color: var(--muted); }
+
+/* ===== Рамка телефона для нижнего меню и листа ===== */
+.phone { width: 100%; max-width: 375px; border: 1px solid var(--line); border-radius: 28px; background: var(--bg); overflow: hidden; position: relative; }
+.phone-body { padding: var(--s4); min-height: 300px; display: grid; gap: var(--s3); align-content: start; }
+
+/* ===== Нижнее меню ===== */
+.tabbar { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s1); background: var(--surface); border-top: 1px solid var(--line); padding: var(--s2) var(--s2) var(--s3); }
+.tab { display: grid; justify-items: center; gap: 2px; padding: var(--s2) 0; border-radius: var(--r-btn); color: var(--muted); font-size: 11px; font-weight: 500; min-height: 52px; }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+
+/* ===== Лист снизу ===== */
+.sheet-demo { position: relative; min-height: 420px; }
+.sheet-demo .scrim { position: absolute; inset: 0; background: var(--scrim); }
+.sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0; padding: var(--s3) var(--s4) var(--s5);
+  box-shadow: 0 -1px 0 var(--line), 0 -10px 28px rgba(0, 0, 0, .10), 0 -2px 6px rgba(0, 0, 0, .06);
+  display: grid; gap: var(--s3);
+}
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; margin-bottom: var(--s1); }
+.sheet .line { display: flex; justify-content: space-between; align-items: baseline; }
+</style>
+</head>
+<body>
+<!-- Набор иконок: все 24x24, толщина линии 1.75, скруглённые концы -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-sale" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2 .7 3.5 2.6 3.5 5.7"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 22 20H2z"/><path d="M12 10v5M12 17.4h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+</svg>
+
+<div class="page">
+  <div class="bar">
+    <div>
+      <div class="t-h2">UI-kit CRM</div>
+      <div class="t-label">Смелый минимал / без акцента / Onest + Inter Tight</div>
+    </div>
+    <button class="btn btn-second btn-small" id="theme">Тёмная тема</button>
+  </div>
+
+  <!-- ЦВЕТА -->
+  <section class="kit-section">
+    <h2>Цвета</h2>
+    <p>Пять нейтральных цветов и два сигнала. Акцент = чернила: в светлой теме чёрный, в тёмной почти белый. Красный и зелёный только для денег и проблем.</p>
+    <div class="grid g3">
+      <div class="swatch"><i style="background:var(--bg)"></i><span><b>Фон</b>--bg</span></div>
+      <div class="swatch"><i style="background:var(--surface)"></i><span><b>Карточка</b>--surface</span></div>
+      <div class="swatch"><i style="background:var(--surface-2)"></i><span><b>Плашка, активный пункт</b>--surface-2</span></div>
+      <div class="swatch"><i style="background:var(--text)"></i><span><b>Текст</b>--text</span></div>
+      <div class="swatch"><i style="background:var(--muted)"></i><span><b>Приглушённый текст</b>--muted</span></div>
+      <div class="swatch"><i style="background:var(--line)"></i><span><b>Линии</b>--line</span></div>
+      <div class="swatch"><i style="background:var(--accent)"></i><span><b>Акцент (чернила)</b>--accent</span></div>
+      <div class="swatch"><i style="background:var(--bad)"></i><span><b>Проблема</b>--bad</span></div>
+      <div class="swatch"><i style="background:var(--good)"></i><span><b>Хорошо</b>--good</span></div>
+    </div>
+  </section>
+
+  <!-- ШРИФТЫ -->
+  <section class="kit-section">
+    <h2>Шрифты и размеры</h2>
+    <p>Надписи и текст: Onest. Любые цифры и деньги: Inter Tight (класс num), цифры одной ширины, столбцы не прыгают. Крупные числа плотные: межстрочный 90–100%, трекинг минус.</p>
+    <div class="stack">
+      <div class="box"><div class="t-hero">184 500 ₽</div><div class="cap">Число-герой: Inter Tight 48 / 800 / межстрочный 90%</div></div>
+      <div class="box"><div class="t-big">1 236 800 ₽</div><div class="cap">Число крупное: 32 / 800</div></div>
+      <div class="box"><div class="t-mid">310 000 ₽</div><div class="cap">Число среднее: 20 / 700</div></div>
+      <div class="box"><div class="t-h1">Всё под контролем</div><div class="cap">Заголовок экрана: Onest 28 / 800</div></div>
+      <div class="box"><div class="t-h2">Остатки по магазинам</div><div class="cap">Заголовок блока: Onest 18 / 700</div></div>
+      <div class="box"><div class="t-body">Рубашка Oxford, размер M, рост 182, белая. В наличии <span class="num">3</span> шт.</div><div class="cap">Текст: Onest 16 / 400, числа внутри текста в Inter Tight</div></div>
+      <div class="box"><div class="t-label">Подпись: Onest 13 / 500, приглушённый цвет</div></div>
+      <div class="box"><div class="t-mid">1 111 111<br>8 888 888<br>0123456789</div><div class="cap">Проверка ровных столбцов</div></div>
+    </div>
+  </section>
+
+  <!-- ОТСТУПЫ И СКРУГЛЕНИЯ -->
+  <section class="kit-section">
+    <h2>Отступы и скругления</h2>
+    <p>Шаг отступов: 4 / 8 / 12 / 16 / 24 / 32 / 48. Поля экрана 16. Скругления разные по роли, не один радиус на всё. Тени нет, кроме листа снизу. Нажимаемое не меньше 48 px.</p>
+    <div class="rowx">
+      <div class="box" style="border-radius:var(--r-chip);padding:var(--s3)">Плашка 6</div>
+      <div class="box" style="border-radius:var(--r-field);padding:var(--s3)">Поле 10</div>
+      <div class="box" style="border-radius:var(--r-btn);padding:var(--s3)">Кнопка 12</div>
+      <div class="box" style="border-radius:var(--r-card);padding:var(--s3)">Карточка 16</div>
+      <div class="box" style="border-radius:var(--r-sheet);padding:var(--s3)">Лист 24</div>
+    </div>
+  </section>
+
+  <!-- ИКОНКИ -->
+  <section class="kit-section">
+    <h2>Иконки</h2>
+    <p>Один набор: сетка 24, линия 1,75, скруглённые концы. Эмодзи и символы с клавиатуры вместо иконок не используем.</p>
+    <div class="icons">
+      <div><svg class="ic"><use href="#i-today"/></svg>today</div>
+      <div><svg class="ic"><use href="#i-sale"/></svg>sale</div>
+      <div><svg class="ic"><use href="#i-box"/></svg>box</div>
+      <div><svg class="ic"><use href="#i-users"/></svg>users</div>
+      <div><svg class="ic"><use href="#i-menu"/></svg>menu</div>
+      <div><svg class="ic"><use href="#i-search"/></svg>search</div>
+      <div><svg class="ic"><use href="#i-scan"/></svg>scan</div>
+      <div><svg class="ic"><use href="#i-chevron-right"/></svg>chevron-right</div>
+      <div><svg class="ic"><use href="#i-chevron-down"/></svg>chevron-down</div>
+      <div><svg class="ic"><use href="#i-plus"/></svg>plus</div>
+      <div><svg class="ic"><use href="#i-alert"/></svg>alert</div>
+      <div><svg class="ic"><use href="#i-check"/></svg>check</div>
+      <div><svg class="ic"><use href="#i-close"/></svg>close</div>
+    </div>
+  </section>
+
+  <!-- КОМПОНЕНТЫ -->
+  <section class="kit-section">
+    <h2>Компоненты</h2>
+    <p>У каждого есть имя. В задачах говорим «поставь Кнопку основную», а не «сделай кнопку».</p>
+
+    <div class="grid g2">
+      <div class="stack">
+        <div class="t-label">Кнопка основная / Кнопка вторая / Кнопка-текст</div>
+        <button class="btn btn-main">Продано</button>
+        <button class="btn btn-second">Отложить на 3 дня</button>
+        <button class="btn btn-main" disabled>Продано (нет вещей в чеке)</button>
+        <div class="rowx"><button class="btn btn-text">Отмена</button><button class="btn btn-main btn-small">Принять</button></div>
+      </div>
+
+      <div class="stack">
+        <div class="t-label">Поле поиска</div>
+        <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+        <div class="t-label">Переключатель магазина</div>
+        <button class="switch">Махачкала / Главный<svg class="ic"><use href="#i-chevron-down"/></svg></button>
+        <div class="t-label">Метка «Демо» и плашки статуса</div>
+        <div class="rowx">
+          <span class="chip chip-demo">ДЕМО</span>
+          <span class="chip chip-good">в наличии <span class="num">3</span></span>
+          <span class="chip chip-bad">осталось <span class="num">1</span></span>
+          <span class="chip chip-neutral">в пути</span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="t-label">Карточка цифры (крупная)</div>
+        <div class="stat stat-hero">
+          <div class="t-label">Выручка сегодня</div>
+          <div class="t-hero">184 500 ₽</div>
+          <div class="delta good num">+12% к вчера</div>
+        </div>
+        <div class="t-label">Карточка цифры (малая)</div>
+        <div class="grid" style="grid-template-columns:1fr 1fr">
+          <div class="stat stat-small"><div class="t-label">Прибыль за месяц</div><div class="t-mid" style="white-space:nowrap">1 236 800 ₽</div></div>
+          <div class="stat stat-small"><div class="t-label">Долги поставщикам</div><div class="t-mid" style="white-space:nowrap">310 000 ₽</div></div>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="t-label">Строка товара</div>
+        <div class="item"><span class="name">Рубашка Oxford</span><span class="price">4 990 ₽</span><span class="meta"><span class="num">M</span> / рост <span class="num">182</span> / белый</span><span class="chip chip-good">в наличии <span class="num">3</span></span></div>
+        <div class="item"><span class="name">Брюки чинос</span><span class="price">5 490 ₽</span><span class="meta"><span class="num">50</span> / синий</span><span class="chip chip-bad">осталось <span class="num">1</span></span></div>
+        <div class="t-label">Уведомление (проблема / хорошо) и всплывашка</div>
+        <div class="alert alert-bad"><svg class="ic"><use href="#i-alert"/></svg><span>Касса Каспийск: не хватает <span class="num">1 200 ₽</span></span></div>
+        <div class="alert alert-good"><svg class="ic"><use href="#i-check"/></svg><span>План магазина выполнен: бонус <span class="num">5 000 ₽</span></span></div>
+        <div class="toast"><span>Продажа записана</span><svg class="ic"><use href="#i-close"/></svg></div>
+      </div>
+    </div>
+
+    <div class="stack" style="margin-top:var(--s5)">
+      <div class="t-label">Таблица (компьютер, отчёты)</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Магазин</th><th class="r">Продаж</th><th class="r">Выручка</th><th class="r">Прибыль</th></tr></thead>
+          <tbody>
+            <tr><td>Махачкала / Главный</td><td class="r">38</td><td class="r">184 500 ₽</td><td class="r">61 200 ₽</td></tr>
+            <tr><td>Каспийск</td><td class="r">14</td><td class="r">62 300 ₽</td><td class="r">19 800 ₽</td></tr>
+            <tr><td>Дербент</td><td class="r">12</td><td class="r">51 900 ₽</td><td class="r">16 100 ₽</td></tr>
+            <tr><td>Хасавюрт</td><td class="r">10</td><td class="r">44 700 ₽</td><td class="r">13 900 ₽</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="t-label">Пустое состояние</div>
+      <div class="box empty">
+        <svg class="ic"><use href="#i-box"/></svg>
+        <div class="t-h2">Бронь пуста</div>
+        <p>Отложенных вещей нет. Когда отложите вещь для клиента, она появится здесь.</p>
+        <button class="btn btn-second btn-small">Найти вещь</button>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:var(--s5)">
+      <div class="stack">
+        <div class="t-label">Нижнее меню (телефон)</div>
+        <div class="phone">
+          <div class="phone-body">
+            <div class="t-h1">Сегодня</div>
+            <div class="stat stat-small"><div class="t-label">Выручка</div><div class="t-big">184 500 ₽</div></div>
+          </div>
+          <nav class="tabbar">
+            <div class="tab" aria-current="page"><svg class="ic"><use href="#i-today"/></svg>Сегодня</div>
+            <div class="tab"><svg class="ic"><use href="#i-sale"/></svg>Продажа</div>
+            <div class="tab"><svg class="ic"><use href="#i-box"/></svg>Товар</div>
+            <div class="tab"><svg class="ic"><use href="#i-users"/></svg>Клиенты</div>
+            <div class="tab"><svg class="ic"><use href="#i-menu"/></svg>Ещё</div>
+          </nav>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="t-label">Лист снизу (подтверждение продажи)</div>
+        <div class="phone sheet-demo">
+          <div class="phone-body"><div class="t-h1">Продажа</div></div>
+          <div class="scrim"></div>
+          <div class="sheet">
+            <div class="grab"></div>
+            <div class="t-h2">Оформить продажу</div>
+            <div class="line"><span class="t-label">Рубашка Oxford, M</span><span class="t-mid">4 990 ₽</span></div>
+            <div class="line"><span class="t-label">Скидка <span class="num">5%</span></span><span class="t-mid">−250 ₽</span></div>
+            <div class="line"><span class="t-h2">Итого</span><span class="t-big">4 740 ₽</span></div>
+            <button class="btn btn-main">Продано</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+var root = document.documentElement, btn = document.getElementById('theme');
+btn.addEventListener('click', function () {
+  var dark = root.dataset.theme !== 'dark';
+  root.dataset.theme = dark ? 'dark' : 'light';
+  btn.textContent = dark ? 'Светлая тема' : 'Тёмная тема';
+});
+</script>
+</body>
+</html>

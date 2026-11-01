@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 1 CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-mid { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+.t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+.t-hero { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 48px; font-weight: 800; line-height: .9; letter-spacing: -0.03em; }
+
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.chip-demo { border: 1px solid var(--line-strong); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; border: 1px solid transparent; width: 100%; }
+.btn-main { background: var(--accent); color: var(--on-accent); }
+.btn-inv { background: var(--on-accent); color: var(--accent); }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 52px; padding: 0 var(--s4); color: var(--muted); }
+.field input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--text); outline: 0; }
+.field input::placeholder { color: var(--muted); }
+.switch { display: flex; align-items: center; gap: var(--s2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-btn); min-height: 44px; padding: 0 var(--s3) 0 var(--s4); font-weight: 700; font-size: 15px; }
+.switch .ic { width: 20px; height: 20px; color: var(--muted); }
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s2); }
+.seg button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.seg button[disabled] { color: var(--muted); text-decoration: line-through; cursor: not-allowed; background: var(--surface-2); }
+
+/* ===== Верхняя панель веера ===== */
+.fan { max-width: 1080px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { background: var(--bg); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
+@media (min-width: 700px) and (min-height: 700px) { .fan-bar { position: sticky; top: 0; z-index: 10; padding-top: var(--s3); } }
+.fan-row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.fan-row b { font-size: 12px; color: var(--muted); font-weight: 500; width: 64px; flex: none; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; }
+.about b { font-weight: 800; }
+
+/* ===== Рамка приложения ===== */
+.frame { container-type: inline-size; width: 100%; max-width: 375px; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; overflow: hidden; }
+.frame[data-w="wide"] { max-width: 1000px; border-radius: 20px; }
+.body { padding: var(--s4); display: grid; gap: var(--s5); min-height: 560px; align-content: start; }
+.scr { display: grid; gap: var(--s5); }
+.head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: var(--s3); }
+.tabbar { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s1); background: var(--surface); border-top: 1px solid var(--line); padding: var(--s2) var(--s2) var(--s3); }
+.tab { display: grid; justify-items: center; gap: 2px; padding: var(--s2) 0; border-radius: var(--r-btn); color: var(--muted); font-size: 11px; font-weight: 500; min-height: 52px; }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+@container (min-width: 700px) { .tabbar { display: none; } .body { padding: var(--s5); } }
+
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+.rowline .sub { display: block; font-size: 13px; color: var(--muted); }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.alert { display: flex; gap: var(--s3); align-items: flex-start; border-radius: var(--r-card); padding: var(--s3) var(--s4); font-size: 14px; font-weight: 700; }
+.alert-bad { background: var(--bad-bg); color: var(--bad); }
+.item { display: grid; grid-template-columns: 1fr auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.item:last-child { border-bottom: 0; }
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { font-size: 13px; color: var(--muted); }
+.cols { display: grid; gap: var(--s5); }
+.cols > * { min-width: 0; }
+@container (min-width: 700px) { .cols { grid-template-columns: 1.15fr 1fr; align-items: start; } }
+
+/* ===== ВАРИАНТ 1: Одно число ===== */
+.v1-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(52px, 19cqi, 128px); font-weight: 800; line-height: .88; letter-spacing: -0.04em; margin: var(--s3) 0 var(--s2); }
+.v1-cols { display: grid; gap: var(--s5); }
+@container (min-width: 700px) { .v1-cols { grid-template-columns: 1fr 1fr; } .v1-hero { padding: var(--s5) 0; } }
+
+/* ===== ВАРИАНТ 2: Ведомость ===== */
+.led { display: grid; }
+.led-row { display: grid; grid-template-columns: 1fr auto auto; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.led-row.h { font-size: 13px; color: var(--muted); padding-top: var(--s2); }
+.led-row .r { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; min-width: 84px; }
+.led-row.total { border-top: 2px solid var(--line-strong); border-bottom: 0; padding-top: var(--s3); }
+.led-row.total .r { font-size: 20px; font-weight: 800; }
+.led-row.one { grid-template-columns: 1fr auto; }
+.led-row .n { color: var(--muted); font-family: var(--font-num); font-variant-numeric: tabular-nums; width: 20px; display: inline-block; }
+.v2-grid { display: grid; gap: var(--s5); }
+@container (min-width: 700px) { .v2-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+/* ===== ВАРИАНТ 3: Сначала проблемы ===== */
+.att { display: grid; gap: var(--s2); }
+.att-i { display: flex; justify-content: space-between; gap: var(--s3); align-items: center; border-radius: var(--r-card); padding: var(--s3) var(--s4); font-size: 15px; font-weight: 700; }
+.att-i.bad { background: var(--bad-bg); color: var(--bad); }
+.att-i.neu { background: var(--surface-2); color: var(--text); }
+.att-i .num { font-weight: 800; white-space: nowrap; }
+.bars { display: grid; gap: var(--s3); }
+.bar-row { display: grid; grid-template-columns: 1fr auto; gap: var(--s1) var(--s3); align-items: baseline; }
+.bar-row .track { grid-column: 1 / -1; height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.bar-row .track i { display: block; height: 100%; background: var(--accent); }
+.v3-grid { display: grid; gap: var(--s5); }
+@container (min-width: 700px) { .v3-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+/* ===== ВАРИАНТ 4: Модульная сетка ===== */
+.tiles { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s2); }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s2); align-content: space-between; }
+.tile.s2 { grid-column: span 2; }
+.tile.inv { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tile.inv .t-label { color: inherit; opacity: .7; }
+.tile.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+.tile .t-mid { white-space: nowrap; }
+.tile-hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(44px, 15cqi, 84px); font-weight: 800; line-height: .9; letter-spacing: -0.035em; }
+@container (min-width: 700px) {
+  .tiles { grid-template-columns: repeat(4, 1fr); }
+  .tile.hero { grid-column: span 2; grid-row: span 2; }
+}
+
+.cols .tiles { grid-template-columns: repeat(2, 1fr); }
+
+/* ===== ВАРИАНТ 5: Утверждения ===== */
+.v5-lead { font-size: clamp(28px, 9cqi, 56px); font-weight: 800; line-height: 1.04; letter-spacing: -0.025em; }
+.v5-lead .num { font-weight: 800; }
+.v5-sec { display: grid; gap: var(--s2); padding-top: var(--s3); border-top: 1px solid var(--line-strong); }
+.v5-p { font-size: 22px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.v5-p .num { font-weight: 800; }
+.v5-grid { display: grid; gap: var(--s5); }
+@container (min-width: 700px) { .v5-grid { grid-template-columns: 1fr 1fr; } .v5-sec.full { grid-column: 1 / -1; } }
+
+/* Продажа: общие детали */
+.sale-total { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.plusbtn { width: 44px; height: 44px; border-radius: var(--r-btn); border: 1px solid var(--line-strong); background: transparent; display: grid; place-items: center; cursor: pointer; }
+.plusbtn.on { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.v3-bar { background: var(--accent); color: var(--on-accent); border-radius: var(--r-card); padding: var(--s3) var(--s3) var(--s3) var(--s4); display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.v3-bar .btn { width: auto; min-height: 48px; }
+.sizes { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s2); }
+.sizes button { min-height: 52px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-family: var(--font-num); font-weight: 800; cursor: pointer; }
+.sizes button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.sizes button[disabled] { color: var(--muted); text-decoration: line-through; background: var(--surface-2); cursor: not-allowed; }
+.step { display: grid; gap: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--line-strong); }
+.step-h { display: flex; justify-content: space-between; align-items: baseline; }
+
+/* Самые узкие экраны (около 320 px): стоит в конце, чтобы перебить основные правила */
+@container (max-width: 330px) {
+  .led-row .r { min-width: 0; font-size: 14px; }
+  .led-row.total .r { font-size: 16px; }
+  .tile-hero-num { font-size: 40px; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tile { padding: var(--s3); }
+  .tile .t-mid { font-size: 16px; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-sale" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2 .7 3.5 2.6 3.5 5.7"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5 22 20H2z"/><path d="M12 10v5M12 17.4h.01"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <div class="fan-row"><b>Вариант</b>
+      <button class="pick" data-k="v" data-val="1">1 Одно число</button>
+      <button class="pick" data-k="v" data-val="2">2 Ведомость</button>
+      <button class="pick" data-k="v" data-val="3">3 Сначала проблемы</button>
+      <button class="pick" data-k="v" data-val="4">4 Модульная сетка</button>
+      <button class="pick" data-k="v" data-val="5">5 Утверждения</button>
+    </div>
+    <div class="fan-row"><b>Экран</b>
+      <button class="pick" data-k="s" data-val="owner">Утро владельца</button>
+      <button class="pick" data-k="s" data-val="sale">Продажа</button>
+      <span style="width:12px"></span><b style="width:auto">Вид</b>
+      <button class="pick" data-k="w" data-val="phone">Телефон</button>
+      <button class="pick" data-k="w" data-val="wide">Компьютер</button>
+      <span style="width:12px"></span><b style="width:auto">Тема</b>
+      <button class="pick" data-k="t" data-val="light">Светлая</button>
+      <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+    </div>
+  </div>
+
+  <div class="about" id="about"></div>
+
+  <div class="frame" id="frame" data-w="phone">
+    <div class="body">
+
+<!-- ============ ВАРИАНТ 1: Одно число / УТРО ============ -->
+<section class="scr" data-v="1" data-s="owner">
+  <div class="head"><span class="switch">Все магазины<svg class="ic"><use href="#i-chevron-down"/></svg></span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="v1-hero">
+    <div class="t-label">Выручка сегодня / 4 магазина</div>
+    <div class="v1-num">343 400 ₽</div>
+    <div class="t-label"><span class="good num" style="font-weight:700">+7%</span> к вчера / <span class="num">320 200 ₽</span> вчера</div>
+  </div>
+  <div class="alert alert-bad"><svg class="ic"><use href="#i-alert"/></svg><span>Касса Каспийск: не хватает <span class="num">1 200 ₽</span></span></div>
+  <div class="v1-cols">
+    <div>
+      <div class="sec-h"><span class="t-h2">По магазинам</span><span class="t-label">сегодня</span></div>
+      <div class="rowline"><span>Махачкала<span class="sub"><span class="num">38</span> продаж</span></span><span class="t-mid">184 500 ₽</span></div>
+      <div class="rowline"><span>Каспийск<span class="sub"><span class="num">14</span> продаж</span></span><span class="t-mid">62 300 ₽</span></div>
+      <div class="rowline"><span>Дербент<span class="sub"><span class="num">12</span> продаж</span></span><span class="t-mid">51 900 ₽</span></div>
+      <div class="rowline"><span>Хасавюрт<span class="sub"><span class="num">10</span> продаж</span></span><span class="t-mid">44 700 ₽</span></div>
+    </div>
+    <div>
+      <div class="sec-h"><span class="t-h2">Деньги</span></div>
+      <div class="rowline"><span>Прибыль за месяц</span><span class="t-mid">1 236 800 ₽</span></div>
+      <div class="rowline"><span>Долги поставщикам</span><span class="t-mid">310 000 ₽</span></div>
+      <div class="rowline"><span>Аренда Дербент<span class="sub">до <span class="num">5</span> ноября</span></span><span class="t-mid">85 000 ₽</span></div>
+      <div class="rowline"><span>Лучший продавец<span class="sub">Руслан</span></span><span class="t-mid">71 200 ₽</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 1: Одно число / ПРОДАЖА ============ -->
+<section class="scr" data-v="1" data-s="sale">
+  <div class="head"><span class="switch">Махачкала / Главный<svg class="ic"><use href="#i-chevron-down"/></svg></span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="cols">
+    <div class="l">
+      <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+      <div class="sec-h" style="margin-top:var(--s5)"><span class="t-h2">Чек</span><span class="t-label"><span class="num">2</span> вещи</span></div>
+      <div class="item"><span class="name">Рубашка Oxford</span><span class="price">4 990 ₽</span><span class="meta"><span class="num">M</span> / рост <span class="num">182</span> / белый</span><span class="chip chip-good" style="justify-self:end">в наличии <span class="num">3</span></span></div>
+      <div class="item"><span class="name">Брюки чинос</span><span class="price">5 490 ₽</span><span class="meta"><span class="num">50</span> / синий</span><span class="chip chip-bad" style="justify-self:end">осталось <span class="num">1</span></span></div>
+    </div>
+    <div class="r" style="display:grid;gap:var(--s4)">
+      <div class="rowline" style="padding:0;border:0"><span class="t-label">Скидка <span class="num">5%</span> (максимум для вас)</span><span class="num bad" style="font-weight:700">−524 ₽</span></div>
+      <div class="seg"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div>
+      <div><div class="t-label">Итого</div><div class="t-hero" style="font-size:clamp(52px,17cqi,96px);margin-top:var(--s2)">9 956 ₽</div></div>
+      <button class="btn btn-main">Продано</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 2: Ведомость / УТРО ============ -->
+<section class="scr" data-v="2" data-s="owner">
+  <div class="head"><div><div class="t-h1">Сегодня</div><div class="t-label"><span class="num">31</span> октября / все магазины</div></div><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="v2-grid">
+    <div class="led">
+      <div class="sec-h"><span class="t-h2">Выручка</span></div>
+      <div class="led-row h"><span>Магазин</span><span class="r" style="font-weight:500">Вчера</span><span class="r" style="font-weight:500">Сегодня</span></div>
+      <div class="led-row"><span>Махачкала</span><span class="r muted">164 700 ₽</span><span class="r">184 500 ₽</span></div>
+      <div class="led-row"><span>Каспийск</span><span class="r muted">58 100 ₽</span><span class="r">62 300 ₽</span></div>
+      <div class="led-row"><span>Дербент</span><span class="r muted">49 800 ₽</span><span class="r">51 900 ₽</span></div>
+      <div class="led-row"><span>Хасавюрт</span><span class="r muted">47 600 ₽</span><span class="r">44 700 ₽</span></div>
+      <div class="led-row total"><span class="t-h2">Всего</span><span class="r muted">320 200 ₽</span><span class="r">343 400 ₽</span></div>
+    </div>
+    <div style="display:grid;gap:var(--s5)">
+      <div class="led">
+        <div class="sec-h"><span class="t-h2">Деньги</span></div>
+        <div class="led-row one"><span>Прибыль за месяц</span><span class="r">1 236 800 ₽</span></div>
+        <div class="led-row one"><span>Долги поставщикам</span><span class="r">310 000 ₽</span></div>
+        <div class="led-row one"><span>Аренда Дербент, до <span class="num">5</span> ноября</span><span class="r">85 000 ₽</span></div>
+      </div>
+      <div class="led">
+        <div class="sec-h"><span class="t-h2">Продавцы сегодня</span></div>
+        <div class="led-row one"><span><span class="n">1</span>Руслан</span><span class="r">71 200 ₽</span></div>
+        <div class="led-row one"><span><span class="n">2</span>Заур</span><span class="r">58 600 ₽</span></div>
+        <div class="led-row one"><span><span class="n">3</span>Али</span><span class="r">49 300 ₽</span></div>
+      </div>
+      <div class="led">
+        <div class="sec-h"><span class="t-h2">Внимание</span></div>
+        <div class="led-row one"><span>Касса Каспийск</span><span><span class="chip chip-bad">не хватает <span class="num">1 200 ₽</span></span></span></div>
+        <div class="led-row one"><span>Не продаётся <span class="num">60+</span> дней</span><span><span class="chip chip-neutral"><span class="num">14</span> позиций</span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 2: Ведомость / ПРОДАЖА ============ -->
+<section class="scr" data-v="2" data-s="sale">
+  <div class="head"><div><div class="t-h1">Продажа</div><div class="t-label">Махачкала / Главный / Заур</div></div><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="cols">
+    <div class="l" style="display:grid;gap:var(--s4)">
+      <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+      <div class="led">
+        <div class="led-row h" style="grid-template-columns:24px 1fr auto"><span>№</span><span>Позиция</span><span class="r" style="font-weight:500">Цена</span></div>
+        <div class="led-row" style="grid-template-columns:24px 1fr auto"><span class="n">1</span><span><b>Рубашка Oxford</b><span class="t-label" style="display:block"><span class="num">M</span> / <span class="num">182</span> / белый</span></span><span class="r">4 990 ₽</span></div>
+        <div class="led-row" style="grid-template-columns:24px 1fr auto"><span class="n">2</span><span><b>Брюки чинос</b><span class="t-label" style="display:block"><span class="num">50</span> / синий</span></span><span class="r">5 490 ₽</span></div>
+      </div>
+    </div>
+    <div class="r led">
+      <div class="led-row one" style="padding-top:0"><span>Сумма</span><span class="r">10 480 ₽</span></div>
+      <div class="led-row one"><span>Скидка <span class="num">5%</span></span><span class="r bad">−524 ₽</span></div>
+      <div class="led-row one total"><span class="t-h2">Итого</span><span class="r t-big" style="font-size:32px">9 956 ₽</span></div>
+      <div class="seg" style="margin:var(--s4) 0"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div>
+      <button class="btn btn-main">Продано</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 3: Сначала проблемы / УТРО ============ -->
+<section class="scr" data-v="3" data-s="owner">
+  <div class="head"><div><div class="t-h1">Утро</div><div class="t-label"><span class="num">31</span> октября</div></div><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="v3-grid">
+    <div style="display:grid;gap:var(--s3);align-content:start">
+      <div class="sec-h"><span class="t-h2">Требует внимания</span><span class="t-mid">4</span></div>
+      <div class="att">
+        <div class="att-i bad"><span>Касса Каспийск</span><span class="num">−1 200 ₽</span></div>
+        <div class="att-i bad"><span>Приёмка Хасавюрт: не хватает</span><span class="num">3 шт</span></div>
+        <div class="att-i neu"><span>Аренда Дербент до <span class="num">5</span> ноября</span><span class="num">85 000 ₽</span></div>
+        <div class="att-i neu"><span>Бронь истекает сегодня</span><span class="num">2 вещи</span></div>
+      </div>
+    </div>
+    <div style="display:grid;gap:var(--s5);align-content:start">
+      <div>
+        <div class="t-label">Выручка сегодня</div>
+        <div class="t-big" style="margin:var(--s2) 0">343 400 ₽</div>
+        <div class="t-label"><span class="good num" style="font-weight:700">+7%</span> к вчера</div>
+        <div class="rowline" style="margin-top:var(--s3)"><span>Прибыль за месяц</span><span class="t-mid">1 236 800 ₽</span></div>
+        <div class="rowline"><span>Долги поставщикам</span><span class="t-mid">310 000 ₽</span></div>
+      </div>
+      <div>
+        <div class="sec-h" style="margin-bottom:var(--s3)"><span class="t-h2">Доли магазинов</span><span class="t-label">от выручки</span></div>
+        <div class="bars">
+          <div class="bar-row"><span>Махачкала</span><span class="num" style="font-weight:700">54%</span><div class="track"><i style="width:54%"></i></div></div>
+          <div class="bar-row"><span>Каспийск</span><span class="num" style="font-weight:700">18%</span><div class="track"><i style="width:18%"></i></div></div>
+          <div class="bar-row"><span>Дербент</span><span class="num" style="font-weight:700">15%</span><div class="track"><i style="width:15%"></i></div></div>
+          <div class="bar-row"><span>Хасавюрт</span><span class="num" style="font-weight:700">13%</span><div class="track"><i style="width:13%"></i></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 3: Сначала проблемы / ПРОДАЖА ============ -->
+<section class="scr" data-v="3" data-s="sale">
+  <div class="head"><div class="t-h1">Продажа</div><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="cols">
+    <div class="l" style="display:grid;gap:var(--s4);align-content:start">
+      <label class="field" style="min-height:60px"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic" style="width:28px;height:28px;color:var(--text)"><use href="#i-scan"/></svg></label>
+      <div class="sec-h"><span class="t-h2">Часто берут вместе</span></div>
+      <div>
+        <div class="item" style="grid-template-columns:1fr auto auto;align-items:center"><span><span class="name">Рубашка Oxford</span><span class="meta" style="display:block"><span class="num">M</span> / белый</span></span><span class="price">4 990 ₽</span><button class="plusbtn on" aria-label="В чеке"><svg class="ic"><use href="#i-check"/></svg></button></div>
+        <div class="item" style="grid-template-columns:1fr auto auto;align-items:center"><span><span class="name">Брюки чинос</span><span class="meta" style="display:block"><span class="num">50</span> / синий</span></span><span class="price">5 490 ₽</span><button class="plusbtn on" aria-label="В чеке"><svg class="ic"><use href="#i-check"/></svg></button></div>
+        <div class="item" style="grid-template-columns:1fr auto auto;align-items:center"><span><span class="name">Ремень кожаный</span><span class="meta" style="display:block">чёрный</span></span><span class="price">1 990 ₽</span><button class="plusbtn" aria-label="Добавить"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+        <div class="item" style="grid-template-columns:1fr auto auto;align-items:center"><span><span class="name">Носки хлопок</span><span class="meta" style="display:block"><span class="num">41</span>–<span class="num">44</span></span></span><span class="price">390 ₽</span><button class="plusbtn" aria-label="Добавить"><svg class="ic"><use href="#i-plus"/></svg></button></div>
+      </div>
+    </div>
+    <div class="r" style="display:grid;gap:var(--s3);align-content:start">
+      <div class="seg"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div>
+      <div class="v3-bar"><span><span class="num" style="font-weight:700;font-size:13px;display:block;opacity:.7"><span class="num">2</span> вещи / скидка <span class="num">5%</span></span><span class="t-big" style="font-size:26px">9 956 ₽</span></span><button class="btn btn-inv">Продано</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 4: Модульная сетка / УТРО ============ -->
+<section class="scr" data-v="4" data-s="owner">
+  <div class="head"><span class="switch">Все магазины<svg class="ic"><use href="#i-chevron-down"/></svg></span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="tiles">
+    <div class="tile inv hero s2" style="min-height:150px"><span class="t-label">Выручка сегодня</span><span class="tile-hero-num">343 400 ₽</span><span class="t-label"><span class="num">+7%</span> к вчера</span></div>
+    <div class="tile"><span class="t-label">Прибыль за месяц</span><span class="t-mid">1 236 800 ₽</span></div>
+    <div class="tile"><span class="t-label">Долги поставщикам</span><span class="t-mid">310 000 ₽</span></div>
+    <div class="tile bad s2"><span class="t-label" style="color:inherit">Касса Каспийск</span><span class="t-big">−1 200 ₽</span></div>
+    <div class="tile"><span class="t-label">Возвраты</span><span class="t-mid">3 / 12 480 ₽</span></div>
+    <div class="tile"><span class="t-label">Обмены / брак</span><span class="t-mid">2 / 1</span></div>
+    <div class="tile s2">
+      <span class="t-label">Продавцы сегодня</span>
+      <div><div class="rowline" style="padding:var(--s2) 0"><span>Руслан</span><span class="t-mid" style="font-size:18px">71 200 ₽</span></div><div class="rowline" style="padding:var(--s2) 0"><span>Заур</span><span class="t-mid" style="font-size:18px">58 600 ₽</span></div><div class="rowline" style="padding:var(--s2) 0"><span>Али</span><span class="t-mid" style="font-size:18px">49 300 ₽</span></div></div>
+    </div>
+    <div class="tile s2"><span class="t-label">Не продаётся <span class="num">60+</span> дней</span><span class="t-big"><span class="num">14</span> позиций</span></div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 4: Модульная сетка / ПРОДАЖА ============ -->
+<section class="scr" data-v="4" data-s="sale">
+  <div class="head"><span class="switch">Махачкала / Главный<svg class="ic"><use href="#i-chevron-down"/></svg></span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="cols">
+    <div class="l" style="display:grid;gap:var(--s4);align-content:start">
+      <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+      <div class="tiles">
+        <div class="tile s2"><span class="t-label">Выбрано</span><span class="t-h2">Рубашка Oxford / белый</span><span class="t-mid">4 990 ₽</span></div>
+      </div>
+      <div><div class="t-label" style="margin-bottom:var(--s2)">Размер</div>
+        <div class="sizes"><button disabled>S</button><button aria-pressed="true">M</button><button>L</button><button disabled>XL</button><button disabled>XXL</button></div>
+        <div class="t-label" style="margin-top:var(--s2)">в наличии <span class="num">3</span> шт / соседние магазины: <span class="num">5</span> шт</div>
+      </div>
+    </div>
+    <div class="r tiles" style="align-content:start">
+      <div class="tile"><span class="t-label">В чеке</span><span class="t-mid">2 вещи</span></div>
+      <div class="tile"><span class="t-label">Скидка</span><span class="t-mid">5%</span></div>
+      <div class="tile s2" style="padding:var(--s3)"><div class="seg" style="grid-template-columns:repeat(3,1fr)"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div></div>
+      <div class="tile inv s2"><span class="t-label">Итого</span><span class="tile-hero-num">9 956 ₽</span><button class="btn btn-inv" style="margin-top:var(--s2)">Продано</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 5: Утверждения / УТРО ============ -->
+<section class="scr" data-v="5" data-s="owner">
+  <div class="head"><span class="t-label">Утро / <span class="num">31</span> октября</span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="v5-lead">Сегодня продано на <span class="num">343 400 ₽</span>, на <span class="num good">7%</span> больше, чем вчера.</div>
+  <div class="v5-grid">
+    <div class="v5-sec"><span class="t-label">1 / Магазины</span><p class="v5-p">Махачкала <span class="num">184 500 ₽</span>, Каспийск <span class="num">62 300 ₽</span>, Дербент <span class="num">51 900 ₽</span>, Хасавюрт <span class="num">44 700 ₽</span>.</p></div>
+    <div class="v5-sec"><span class="t-label">2 / Касса</span><p class="v5-p bad">В кассе Каспийска не хватает <span class="num">1 200 ₽</span>.</p></div>
+    <div class="v5-sec"><span class="t-label">3 / Деньги</span><p class="v5-p">Прибыль за месяц <span class="num">1 236 800 ₽</span>. Долги поставщикам <span class="num">310 000 ₽</span>, аренда в Дербенте <span class="num">85 000 ₽</span> до <span class="num">5</span> ноября.</p></div>
+    <div class="v5-sec"><span class="t-label">4 / Люди и товар</span><p class="v5-p">Больше всех продал Руслан, <span class="num">71 200 ₽</span>. Не продаётся <span class="num">60+</span> дней: <span class="num">14</span> позиций.</p></div>
+  </div>
+</section>
+
+<!-- ============ ВАРИАНТ 5: Утверждения / ПРОДАЖА ============ -->
+<section class="scr" data-v="5" data-s="sale">
+  <div class="head"><span class="t-label">Продажа / Махачкала</span><span class="chip chip-demo">ДЕМО</span></div>
+  <div class="cols">
+    <div class="l" style="display:grid;gap:var(--s5);align-content:start">
+      <div class="step">
+        <div class="step-h"><span class="t-h2">Вещи</span><span class="t-label"><span class="num">1</span> / <span class="num">3</span></span></div>
+        <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+        <div>
+          <div class="item"><span class="name">Рубашка Oxford</span><span class="price">4 990 ₽</span><span class="meta"><span class="num">M</span> / <span class="num">182</span> / белый</span></div>
+          <div class="item"><span class="name">Брюки чинос</span><span class="price">5 490 ₽</span><span class="meta"><span class="num">50</span> / синий</span></div>
+        </div>
+      </div>
+    </div>
+    <div class="r" style="display:grid;gap:var(--s5);align-content:start">
+      <div class="step">
+        <div class="step-h"><span class="t-h2">Скидка и оплата</span><span class="t-label"><span class="num">2</span> / <span class="num">3</span></span></div>
+        <div class="t-label">Скидка <span class="num">5%</span> / вам доступно до <span class="num">5%</span></div>
+        <div class="seg"><button aria-pressed="false">Наличные</button><button aria-pressed="true">Карта</button><button aria-pressed="false">Перевод</button></div>
+      </div>
+      <div class="step">
+        <div class="step-h"><span class="t-h2">Итого</span><span class="t-label"><span class="num">3</span> / <span class="num">3</span></span></div>
+        <div class="v5-lead" style="font-size:clamp(36px,12cqi,64px)"><span class="num">9 956 ₽</span></div>
+        <div class="t-label">сумма <span class="num">10 480 ₽</span> / скидка <span class="num bad">−524 ₽</span></div>
+        <button class="btn btn-main">Продано</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+    </div>
+    <nav class="tabbar">
+      <div class="tab" data-tab="owner"><svg class="ic"><use href="#i-today"/></svg>Сегодня</div>
+      <div class="tab" data-tab="sale"><svg class="ic"><use href="#i-sale"/></svg>Продажа</div>
+      <div class="tab"><svg class="ic"><use href="#i-box"/></svg>Товар</div>
+      <div class="tab"><svg class="ic"><use href="#i-users"/></svg>Клиенты</div>
+      <div class="tab"><svg class="ic"><use href="#i-menu"/></svg>Ещё</div>
+    </nav>
+  </div>
+</div>
+
+<script>
+var st = { v: '1', s: 'owner', w: 'phone', t: 'light' };
+var info = {
+  '1': ['Одно число', 'гигантское число, тишина вокруг, один главный блок, тонкие линии, списки вместо карточек, приглушённая вторая линия, воздух'],
+  '2': ['Ведомость', 'ведомость, ровные столбцы цифр, горизонтальные линии, итоговая строка, плотный ритм, нумерация строк, без карточек'],
+  '3': ['Сначала проблемы', 'срочное сверху, порядок как в списке дел, сигнальные плашки по смыслу, полосы долей, затем деньги'],
+  '4': ['Модульная сетка', 'модульная сетка, плитки разного размера, инверсный чёрный блок, строгие выравнивания, крупная метка, плотная упаковка'],
+  '5': ['Утверждения', 'заголовок-утверждение, цифры внутри предложения, крупный размер, разделы с номером и слэшем, текст как газетная колонка, почти без рамок']
+};
+function apply() {
+  document.documentElement.dataset.theme = st.t;
+  document.getElementById('frame').dataset.w = st.w;
+  document.querySelectorAll('.scr').forEach(function (e) { e.hidden = !(e.dataset.v === st.v && e.dataset.s === st.s); });
+  document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+  document.querySelectorAll('[data-tab]').forEach(function (t) { t.toggleAttribute('aria-current', t.dataset.tab === st.s); if (t.dataset.tab === st.s) t.setAttribute('aria-current', 'page'); });
+  var i = info[st.v];
+  document.getElementById('about').innerHTML = '<b>Вариант ' + st.v + ' / ' + i[0] + '.</b> Слова: ' + i[1] + '.<br><span style="color:var(--muted)">Смотри на первый экран и спроси себя: похоже на нейросеть? подходит делу? есть ли за что зацепиться глазу?</span>';
+}
+document.querySelectorAll('.pick').forEach(function (b) { b.addEventListener('click', function () { st[b.dataset.k] = b.dataset.val; apply(); }); });
+document.querySelectorAll('[data-tab]').forEach(function (t) { t.addEventListener('click', function () { st.s = t.dataset.tab; apply(); }); });
+document.querySelectorAll('.seg').forEach(function (g) {
+  g.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+  });
+});
+document.querySelectorAll('.sizes').forEach(function (g) {
+  g.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b || b.disabled) return;
+    g.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+  });
+});
+apply();
+</script>
+</body>
+</html>

@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 2 CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --scrim: rgba(14, 14, 14, .45);
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px; --r-sheet: 24px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px; --s7: 48px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+  --scrim: rgba(0, 0, 0, .6);
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); } .muted { color: var(--muted); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.t-mid { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 20px; font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+.t-big { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.025em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.chip-demo { border: 1px solid var(--line-strong); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s5); border-radius: var(--r-btn); font-weight: 700; cursor: pointer; border: 1px solid transparent; width: 100%; white-space: nowrap; }
+.btn-main { background: var(--accent); color: var(--on-accent); }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn-small { min-height: 40px; padding: 0 var(--s4); width: auto; font-size: 14px; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; flex: none; }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 52px; padding: 0 var(--s4); color: var(--muted); }
+.field input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; font: inherit; color: var(--text); outline: 0; }
+.field input::placeholder { color: var(--muted); }
+.switch { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-btn); min-height: 44px; padding: 0 var(--s3) 0 var(--s4); font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; text-align: left; }
+.switch .ic { width: 20px; height: 20px; color: var(--muted); }
+.switch.auto { width: auto; }
+
+/* ===== Панель веера ===== */
+.fan { max-width: 1080px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { background: var(--bg); border-bottom: 1px solid var(--line); padding-bottom: var(--s3); margin-bottom: var(--s4); display: grid; gap: var(--s2); }
+@media (min-width: 700px) and (min-height: 700px) { .fan-bar { position: sticky; top: 0; z-index: 30; padding-top: var(--s3); } }
+.fan-row { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+.fan-row b { font-size: 12px; color: var(--muted); font-weight: 500; width: 64px; flex: none; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; cursor: pointer; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; }
+
+/* ===== Рамка приложения ===== */
+.frame { container-type: inline-size; width: 100%; max-width: 375px; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; overflow: hidden; }
+.frame[data-w="wide"] { max-width: 1000px; border-radius: 20px; }
+
+/* ===== Общий каркас ===== */
+.shell { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr auto; min-height: 760px; }
+.main { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; min-width: 0; }
+.main > * { min-width: 0; }
+.side { display: none; }
+.top { display: flex; align-items: center; gap: var(--s3); padding: var(--s4); }
+.top .grow { flex: 1; min-width: 0; }
+.content { padding: 0 var(--s4) var(--s5); display: grid; gap: var(--s5); align-content: start; min-width: 0; }
+.scr { display: grid; gap: var(--s5); min-width: 0; }
+.tabbar { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--s1); background: var(--surface); border-top: 1px solid var(--line); padding: var(--s2) var(--s2) var(--s3); }
+.tab { display: grid; justify-items: center; gap: 2px; padding: var(--s2) 0; border-radius: var(--r-btn); color: var(--muted); font-size: 11px; font-weight: 500; min-height: 52px; cursor: pointer; }
+.tab[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.navv { display: grid; gap: var(--s1); }
+.nav-i { display: flex; align-items: center; gap: var(--s3); min-height: 48px; padding: 0 var(--s3); border-radius: var(--r-btn); color: var(--muted); font-weight: 500; cursor: pointer; }
+.nav-i[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 700; }
+.nav-g { font-size: 12px; color: var(--muted); padding: var(--s3) var(--s3) var(--s1); }
+.brand { display: flex; align-items: center; justify-content: space-between; font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+
+/* ===== Наложения: лист, шторка, всплывашка ===== */
+.ov { position: absolute; inset: 0; z-index: 5; display: none; }
+.shell[data-open] .ov { display: block; }
+.ov .scrim { position: absolute; inset: 0; background: var(--scrim); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow-y: auto; background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0; padding: var(--s3) var(--s4) var(--s5); display: grid; gap: var(--s3); box-shadow: 0 -1px 0 var(--line), 0 -10px 28px rgba(0,0,0,.10), 0 -2px 6px rgba(0,0,0,.06); }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center; }
+.opts { display: grid; }
+.opt { display: flex; justify-content: space-between; align-items: center; min-height: 48px; border-bottom: 1px solid var(--line); cursor: pointer; font-weight: 500; }
+.opt:last-child { border-bottom: 0; }
+.opt[aria-pressed="true"] { font-weight: 800; }
+.opt .ic { width: 20px; height: 20px; visibility: hidden; }
+.opt[aria-pressed="true"] .ic { visibility: visible; }
+.roles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s2); }
+.roles button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; cursor: pointer; padding: 0 var(--s2); }
+.roles button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* ===== Плитки утра (образец из веера 1, вариант 4) ===== */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s2); }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s2); align-content: space-between; }
+.tile.s2 { grid-column: span 2; }
+.tile.inv { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tile.inv .t-label { color: inherit; opacity: .7; }
+.tile.bad { background: var(--bad-bg); border-color: transparent; color: var(--bad); }
+.tile .t-mid { white-space: nowrap; }
+.tile-hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: clamp(44px, 15cqi, 84px); font-weight: 800; line-height: .9; letter-spacing: -0.035em; }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+
+/* ===== Фильтр-чипы ===== */
+.fchips { display: flex; gap: var(--s2); overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.fchips::-webkit-scrollbar { display: none; }
+.fchip { flex: none; min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); font-weight: 500; font-size: 14px; cursor: pointer; white-space: nowrap; }
+.fchip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 700; }
+
+/* ===== Список A: строки с шевроном ===== */
+.prow { display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; gap: var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.prow:last-child { border-bottom: 0; }
+.prow b { font-weight: 700; }
+.prow .sub { display: block; font-size: 13px; color: var(--muted); }
+.prow .r { display: grid; justify-items: end; gap: 4px; }
+.prow .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; }
+.prow .ic { width: 20px; height: 20px; color: var(--muted); }
+
+/* ===== Список B: ведомость ===== */
+.tb { display: grid; }
+.tb-r { display: grid; grid-template-columns: minmax(0, 1fr) 56px 96px; gap: var(--s3); padding: var(--s3) 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.tb-r.h { font-size: 13px; color: var(--muted); padding: var(--s2) 0; border-bottom: 1px solid var(--line-strong); }
+.tb-r .n { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; }
+.tb-r.h .n { font-family: var(--font-text); font-weight: 500; }
+.tb-r .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 400; }
+.tb-r .sc { display: none; }
+.tb-r .z { color: var(--muted); font-weight: 500; }
+
+/* ===== Список C: раскрывающиеся модели и матрица ===== */
+.mrow { width: 100%; text-align: left; display: grid; grid-template-columns: minmax(0, 1fr) auto 20px; gap: var(--s3); align-items: center; min-height: 64px; padding: var(--s3) 0; background: transparent; border: 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+.mrow b { font-weight: 700; display: block; }
+.mrow .sub { font-size: 13px; color: var(--muted); }
+.mrow .ic { width: 20px; height: 20px; color: var(--muted); transition: transform .15s; }
+.mrow[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.mx { padding: var(--s3) 0 var(--s4); border-bottom: 1px solid var(--line); display: grid; }
+.mx-r { display: grid; gap: var(--s1); padding: var(--s2) 0; align-items: baseline; border-bottom: 1px solid var(--line); font-size: 14px; }
+.mx-r:last-child { border-bottom: 0; }
+.mx-r.h { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--line-strong); }
+.mx-r.t { border-top: 1px solid var(--line-strong); font-weight: 800; }
+.mx-r span:not(:first-child) { text-align: right; font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 700; }
+.mx-r.h span:not(:first-child) { font-family: var(--font-text); font-weight: 500; }
+.mx-r .z { color: var(--muted); font-weight: 500; }
+
+/* ===== Вкладки сверху (C) ===== */
+.tabsC { display: flex; gap: var(--s5); overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid var(--line); padding: 0 var(--s4); }
+.tabsC::-webkit-scrollbar { display: none; }
+.tabC { flex: none; padding: var(--s3) 0; font-weight: 500; color: var(--muted); border-bottom: 2px solid transparent; margin-bottom: -1px; white-space: nowrap; cursor: pointer; min-height: 48px; display: flex; align-items: center; }
+.tabC[aria-current="page"] { color: var(--text); font-weight: 800; border-bottom-color: var(--text); }
+.pop { position: absolute; left: var(--s4); right: var(--s4); top: 64px; background: var(--surface); border: 1px solid var(--line-strong); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); box-shadow: 0 10px 28px rgba(0,0,0,.10), 0 2px 6px rgba(0,0,0,.06); }
+
+/* ===== Нижняя панель действия (B) ===== */
+.dock { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 52px; gap: var(--s2); padding: var(--s3) var(--s4) var(--s4); background: var(--bg); border-top: 1px solid var(--line); }
+.dock .iconbtn { width: 52px; height: 52px; border-color: var(--line-strong); background: transparent; }
+
+/* ===== B: шторка на телефоне ===== */
+.B .drawer-only { display: none; }
+.B[data-open] .side { display: flex; flex-direction: column; gap: var(--s4); position: absolute; z-index: 6; top: 0; bottom: 0; left: 0; width: 86%; background: var(--surface); border-right: 1px solid var(--line); padding: var(--s4); overflow-y: auto; }
+
+/* ===== Компьютер ===== */
+@container (min-width: 700px) {
+  .shell { grid-template-columns: 240px minmax(0, 1fr); grid-template-rows: 1fr; min-height: 720px; }
+  .side { display: flex; flex-direction: column; gap: var(--s4); padding: var(--s4); border-right: 1px solid var(--line); }
+  .tabbar, .dock, .top.phone-only { display: none; }
+  .content { padding: var(--s5); }
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .tile.hero { grid-column: span 2; grid-row: span 2; }
+  .B[data-open] .side { position: static; width: auto; z-index: auto; background: transparent; }
+  .B .ov { display: none !important; }
+  .A .sheet { left: var(--s4); right: auto; bottom: auto; top: 112px; width: 360px; border-radius: var(--r-card); border: 1px solid var(--line-strong); max-height: none; }
+  .A .sheet .grab { display: none; }
+  .A .ov .scrim { background: transparent; }
+  .tb-r { grid-template-columns: minmax(0, 1fr) repeat(4, 56px) 64px 96px; }
+  .tb-r .sc { display: block; }
+  .pop { left: auto; right: var(--s4); width: 360px; top: 72px; }
+  .drawer-only { display: none; }
+  .cols { display: grid; grid-template-columns: 1.1fr 1fr; gap: var(--s5); align-items: start; }
+}
+.cols { min-width: 0; }
+.cols > * { min-width: 0; }
+
+/* Телефон: при открытом листе или шторке рамка ограничена, чтобы наложение было на виду */
+@container (max-width: 699px) {
+  .shell[data-open] { max-height: 800px; overflow: hidden; }
+}
+
+/* Самые узкие экраны */
+@container (max-width: 330px) {
+  .tile-hero-num { font-size: 40px; }
+  .tile { padding: var(--s3); }
+  .tile .t-mid { font-size: 16px; }
+  .tb-r { grid-template-columns: minmax(0, 1fr) 48px 80px; }
+  .mx-r { font-size: 13px; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-today" viewBox="0 0 24 24"><path d="M4 11.5 12 4l8 7.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="i-sale" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"/><path d="M3 7.5 12 12l9-4.5M12 12v9"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.7a3.5 3.5 0 0 1 0 6.6M18 14.3c2 .7 3.5 2.6 3.5 5.7"/></symbol>
+  <symbol id="i-person" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6h11v10H3z"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="7" cy="18" r="1.8"/><circle cx="17" cy="18" r="1.8"/></symbol>
+  <symbol id="i-wallet" viewBox="0 0 24 24"><path d="M4 7h15a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 7l12-3v3"/><path d="M16 13.5h.01"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-chevron-right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m5 9 7 7 7-7"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+</svg>
+
+<template id="tpl-today">
+  <div class="tiles">
+    <div class="tile inv hero s2" style="min-height:150px"><span class="t-label">Выручка сегодня</span><span class="tile-hero-num">343 400 ₽</span><span class="t-label"><span class="num">+7%</span> к вчера</span></div>
+    <div class="tile"><span class="t-label">Прибыль за месяц</span><span class="t-mid">1 236 800 ₽</span></div>
+    <div class="tile"><span class="t-label">Долги поставщикам</span><span class="t-mid">310 000 ₽</span></div>
+    <div class="tile bad s2"><span class="t-label" style="color:inherit">Касса Каспийск</span><span class="t-big">−1 200 ₽</span></div>
+    <div class="tile"><span class="t-label">Возвраты</span><span class="t-mid">3 / 12 480 ₽</span></div>
+    <div class="tile"><span class="t-label">Обмены / брак</span><span class="t-mid">2 / 1</span></div>
+    <div class="tile s2">
+      <span class="t-label">Продавцы сегодня</span>
+      <div><div class="rowline"><span>Руслан</span><span class="t-mid" style="font-size:18px">71 200 ₽</span></div><div class="rowline"><span>Заур</span><span class="t-mid" style="font-size:18px">58 600 ₽</span></div><div class="rowline"><span>Али</span><span class="t-mid" style="font-size:18px">49 300 ₽</span></div></div>
+    </div>
+    <div class="tile s2"><span class="t-label">Не продаётся <span class="num">60+</span> дней</span><span class="t-big"><span class="num">14</span> позиций</span></div>
+  </div>
+</template>
+
+<div class="fan">
+  <div class="fan-bar">
+    <div class="fan-row"><b>Каркас</b>
+      <button class="pick" data-k="v" data-val="A">A Нижнее меню</button>
+      <button class="pick" data-k="v" data-val="B">B Шторка</button>
+      <button class="pick" data-k="v" data-val="C">C Разделы сверху</button>
+    </div>
+    <div class="fan-row"><b>Экран</b>
+      <button class="pick" data-k="s" data-val="today">Сегодня</button>
+      <button class="pick" data-k="s" data-val="products">Товар</button>
+      <button class="pick" data-k="s" data-val="switch">Магазин и роль</button>
+      <span style="width:12px"></span><b style="width:auto">Вид</b>
+      <button class="pick" data-k="w" data-val="phone">Телефон</button>
+      <button class="pick" data-k="w" data-val="wide">Компьютер</button>
+      <span style="width:12px"></span><b style="width:auto">Тема</b>
+      <button class="pick" data-k="t" data-val="light">Светлая</button>
+      <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+    </div>
+  </div>
+
+  <div class="about" id="about"></div>
+
+  <div class="frame" id="frame" data-w="phone">
+
+<!-- ================= КАРКАС A: Нижнее меню ================= -->
+<div class="shell A" data-v="A">
+  <aside class="side">
+    <div class="brand"><span>CRM</span><span class="chip chip-demo">ДЕМО</span></div>
+    <button class="switch" data-open-ov><span>Все магазины</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+    <nav class="navv" data-nav-list="A"></nav>
+    <div style="margin-top:auto"><button class="switch" data-open-ov><span>Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button></div>
+  </aside>
+  <div class="main">
+    <header class="top phone-only">
+      <button class="switch auto grow" data-open-ov><span>Все магазины</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+      <span class="chip chip-demo">ДЕМО</span>
+    </header>
+    <div class="content">
+      <section class="scr" data-s="today switch"><div class="t-h1">Сегодня</div><div class="slot-today"></div></section>
+      <section class="scr" data-s="products">
+        <div class="t-h1">Товар</div>
+        <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+        <div class="fchips" data-group><button class="fchip" aria-pressed="true">Все</button><button class="fchip" aria-pressed="false">Рубашки</button><button class="fchip" aria-pressed="false">Брюки</button><button class="fchip" aria-pressed="false">Куртки</button><button class="fchip" aria-pressed="false">Аксессуары</button></div>
+        <div id="listA"></div>
+      </section>
+    </div>
+  </div>
+  <nav class="tabbar" data-tabbar>
+    <div class="tab" data-nav="today"><svg class="ic"><use href="#i-today"/></svg>Сегодня</div>
+    <div class="tab" data-nav="sale"><svg class="ic"><use href="#i-sale"/></svg>Продажа</div>
+    <div class="tab" data-nav="products"><svg class="ic"><use href="#i-box"/></svg>Товар</div>
+    <div class="tab" data-nav="clients"><svg class="ic"><use href="#i-users"/></svg>Клиенты</div>
+    <div class="tab" data-nav="more"><svg class="ic"><use href="#i-menu"/></svg>Ещё</div>
+  </nav>
+  <div class="ov">
+    <div class="scrim"></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <div class="t-h2">Магазин</div>
+      <div class="opts" data-group="radio">
+        <div class="opt" role="button" aria-pressed="true">Все магазины<svg class="ic"><use href="#i-check"/></svg></div>
+        <div class="opt" role="button" aria-pressed="false">Махачкала / Главный<svg class="ic"><use href="#i-check"/></svg></div>
+        <div class="opt" role="button" aria-pressed="false">Каспийск<svg class="ic"><use href="#i-check"/></svg></div>
+        <div class="opt" role="button" aria-pressed="false">Дербент<svg class="ic"><use href="#i-check"/></svg></div>
+        <div class="opt" role="button" aria-pressed="false">Хасавюрт<svg class="ic"><use href="#i-check"/></svg></div>
+        <div class="opt" role="button" aria-pressed="false">Склад Махачкала<svg class="ic"><use href="#i-check"/></svg></div>
+      </div>
+      <div class="t-h2">Войти как (демо)</div>
+      <div class="roles" data-group="radio">
+        <button aria-pressed="true">Владелец</button><button aria-pressed="false">Старший продавец</button><button aria-pressed="false">Продавец</button><button aria-pressed="false">Онлайн-менеджер</button><button aria-pressed="false">Курьер</button><button aria-pressed="false">Бухгалтер</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= КАРКАС B: Шторка ================= -->
+<div class="shell B" data-v="B">
+  <aside class="side">
+    <div class="brand"><span>CRM</span><span class="chip chip-demo">ДЕМО</span></div>
+    <div style="display:grid;gap:var(--s2)">
+      <div class="t-label">Магазин</div>
+      <button class="switch"><span>Все магазины</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+      <div class="t-label" style="margin-top:var(--s2)">Войти как (демо)</div>
+      <button class="switch"><span>Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+    </div>
+    <nav class="navv" data-nav-groups="B"></nav>
+    <button class="btn btn-main" style="margin-top:auto"><svg class="ic"><use href="#i-sale"/></svg>Новая продажа</button>
+  </aside>
+  <div class="main">
+    <header class="top phone-only">
+      <button class="iconbtn" data-open-ov aria-label="Меню"><svg class="ic"><use href="#i-menu"/></svg></button>
+      <span class="grow t-h2" data-title>Сегодня</span>
+      <span class="chip chip-demo">ДЕМО</span>
+    </header>
+    <div class="content">
+      <section class="scr" data-s="today switch"><div class="slot-today"></div></section>
+      <section class="scr" data-s="products">
+        <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Название или артикул"><svg class="ic"><use href="#i-scan"/></svg></label>
+        <div class="tb" id="listB"></div>
+      </section>
+    </div>
+  </div>
+  <div class="dock"><button class="btn btn-main">Новая продажа</button><button class="iconbtn" aria-label="Сканировать"><svg class="ic"><use href="#i-scan"/></svg></button></div>
+  <div class="ov"><div class="scrim"></div></div>
+</div>
+
+<!-- ================= КАРКАС C: Разделы сверху ================= -->
+<div class="shell C" data-v="C">
+  <div class="main" style="grid-column:1 / -1">
+    <header class="top" style="padding-bottom:var(--s3)">
+      <span class="brand" style="font-size:20px">CRM</span>
+      <span class="grow"></span>
+      <span class="chip chip-demo">ДЕМО</span>
+      <button class="switch auto" data-open-ov><span>Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
+    </header>
+    <div>
+      <nav class="tabsC" data-tabs="C"></nav>
+      <div style="padding:var(--s3) var(--s4) 0;display:grid;gap:var(--s3)">
+        <label class="field"><svg class="ic"><use href="#i-search"/></svg><input placeholder="Поиск по всей CRM"><svg class="ic"><use href="#i-scan"/></svg></label>
+        <div class="fchips" data-group><button class="fchip" aria-pressed="true">Все</button><button class="fchip" aria-pressed="false">Махачкала</button><button class="fchip" aria-pressed="false">Каспийск</button><button class="fchip" aria-pressed="false">Дербент</button><button class="fchip" aria-pressed="false">Хасавюрт</button><button class="fchip" aria-pressed="false">Склад</button></div>
+      </div>
+    </div>
+    <div class="content" style="padding-top:var(--s5)">
+      <section class="scr" data-s="today switch"><div class="slot-today"></div></section>
+      <section class="scr" data-s="products"><div class="cols"><div id="listC"></div><div id="mxC"></div></div></section>
+    </div>
+  </div>
+  <div class="ov">
+    <div class="scrim"></div>
+    <div class="pop">
+      <div class="t-h2">Войти как (демо)</div>
+      <div class="roles" data-group="radio">
+        <button aria-pressed="true">Владелец</button><button aria-pressed="false">Старший продавец</button><button aria-pressed="false">Продавец</button><button aria-pressed="false">Онлайн-менеджер</button><button aria-pressed="false">Курьер</button><button aria-pressed="false">Бухгалтер</button>
+      </div>
+      <button class="btn btn-second btn-small" style="width:100%">Сбросить демо</button>
+    </div>
+  </div>
+</div>
+
+  </div>
+</div>
+
+<script>
+var nb = function (s) { return String(s).replace(/ /g, ' '); };
+var st = { v: 'A', s: 'today', w: 'phone', t: 'light' };
+var info = {
+  A: ['Нижнее меню', 'нижнее меню из 5 пунктов, магазин и роль в листе снизу, фильтр-чипы, список строками с шевроном, на компьютере боковая панель'],
+  B: ['Шторка', 'меню-шторка слева, одна большая кнопка «Новая продажа» внизу, профиль и роль в шторке, остатки ведомостью, на компьютере колонки магазинов'],
+  C: ['Разделы сверху', 'вкладки разделов сверху, поиск всегда на виду, магазины чипами всегда на виду, остатки матрицей «размер × магазин», роль во всплывашке']
+};
+var NAV = [
+  ['today', 'Сегодня', 'i-today', 'Работа'], ['sale', 'Продажа', 'i-sale', 'Работа'], ['products', 'Товар', 'i-box', 'Работа'],
+  ['clients', 'Клиенты', 'i-users', 'Работа'], ['orders', 'Заказы', 'i-truck', 'Работа'],
+  ['cash', 'Касса', 'i-wallet', 'Деньги'], ['reports', 'Отчёты', 'i-chart', 'Деньги'],
+  ['people', 'Люди', 'i-person', 'Команда'], ['settings', 'Настройки', 'i-gear', 'Команда']
+];
+var SHOPS = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
+var DATA = [
+  { n: 'Рубашка Oxford', meta: 'белый / S–XL', price: '4 990 ₽', sizes: ['S', 'M', 'L', 'XL'], rows: [[1, 3, 2, 0], [0, 1, 1, 0], [0, 2, 0, 1], [1, 0, 1, 0]], chip: ['good', 'в наличии'] },
+  { n: 'Брюки чинос', meta: 'синий / 48–52', price: '5 490 ₽', sizes: ['48', '50', '52'], rows: [[0, 1, 2], [1, 0, 0], [0, 2, 0], [0, 0, 1]], chip: ['bad', '50: осталось 1'] },
+  { n: 'Куртка зимняя', meta: 'серый / M–XL', price: '12 900 ₽', sizes: ['M', 'L', 'XL'], rows: [[1, 2, 1], [0, 1, 0], [0, 0, 1], [0, 0, 0]], chip: ['neutral', 'не продаётся 94 дня'] },
+  { n: 'Ремень кожаный', meta: 'чёрный / 90–110', price: '1 990 ₽', sizes: ['90', '100', '110'], rows: [[4, 5, 3], [2, 1, 0], [1, 2, 1], [1, 1, 1]], chip: ['good', 'в наличии'] },
+  { n: 'Носки хлопок', meta: 'хлопок / 39–46', price: '390 ₽', sizes: ['39–42', '43–46'], rows: [[40, 38], [10, 8], [12, 10], [12, 10]], chip: ['good', 'в наличии'] }
+];
+function sum(a) { return a.reduce(function (x, y) { return x + y; }, 0); }
+function totalOf(d) { return sum(d.rows.map(sum)); }
+function storeTotals(d) { return d.rows.map(sum); }
+function chipHtml(d) { var t = totalOf(d); return '<span class="chip chip-' + d.chip[0] + '">' + (d.chip[0] === 'good' ? 'в наличии <span class="num">' + t + '</span>' : d.chip[1]) + '</span>'; }
+function cell(v) { return '<span' + (v === 0 ? ' class="z"' : '') + '>' + v + '</span>'; }
+var chev = '<svg class="ic"><use href="#i-chevron-right"/></svg>';
+var chevd = '<svg class="ic"><use href="#i-chevron-down"/></svg>';
+
+function renderLists() {
+  document.getElementById('listA').innerHTML = DATA.map(function (d) {
+    return '<div class="prow"><span><b>' + d.n + '</b><span class="sub">' + d.meta + '</span></span><span class="r"><span class="price">' + nb(d.price) + '</span>' + chipHtml(d) + '</span>' + chev + '</div>';
+  }).join('');
+  var head = '<div class="tb-r h"><span>Название</span>' + SHOPS.map(function (s) { return '<span class="n sc">' + s.slice(0, 3) + '</span>'; }).join('') + '<span class="n">Всего</span><span class="n">Цена</span></div>';
+  document.getElementById('listB').innerHTML = head + DATA.map(function (d) {
+    var stt = storeTotals(d);
+    return '<div class="tb-r"><span><b style="font-weight:700">' + d.n + '</b><span class="sub">' + d.meta + '</span></span>' + stt.map(function (v) { return '<span class="n sc' + (v === 0 ? ' z' : '') + '">' + v + '</span>'; }).join('') + '<span class="n">' + totalOf(d) + '</span><span class="n">' + nb(d.price) + '</span></div>';
+  }).join('');
+  document.getElementById('listC').innerHTML = DATA.map(function (d, i) {
+    return '<button class="mrow" data-m="' + i + '" aria-expanded="' + (i === 0) + '"><span><b>' + d.n + '</b><span class="sub">' + d.meta + ' / ' + nb(d.price) + '</span></span>' + chipHtml(d) + chevd + '</button><div class="mx-slot" data-slot="' + i + '"></div>';
+  }).join('');
+  fillMatrix();
+}
+function matrixHtml(d) {
+  var w = d.sizes.some(function (s) { return s.length > 3; }) ? 46 : 30;
+  var cols = 'grid-template-columns:minmax(0,1fr) repeat(' + d.sizes.length + ',' + w + 'px) 44px';
+  var h = '<div class="mx-r h" style="' + cols + '"><span></span>' + d.sizes.map(function (s) { return '<span>' + s + '</span>'; }).join('') + '<span>Всего</span></div>';
+  var body = SHOPS.map(function (s, i) { return '<div class="mx-r" style="' + cols + '"><span>' + s + '</span>' + d.rows[i].map(cell).join('') + '<span>' + sum(d.rows[i]) + '</span></div>'; }).join('');
+  var tot = d.sizes.map(function (_, j) { return sum(d.rows.map(function (r) { return r[j]; })); });
+  return '<div class="mx">' + h + body + '<div class="mx-r t" style="' + cols + '"><span>Всего</span>' + tot.map(function (v) { return '<span>' + v + '</span>'; }).join('') + '<span>' + totalOf(d) + '</span></div></div>';
+}
+var openModel = 0;
+function fillMatrix() {
+  var wide = st.w === 'wide';
+  document.querySelectorAll('#listC .mx-slot').forEach(function (el) { el.innerHTML = ''; });
+  document.querySelectorAll('#listC .mrow').forEach(function (b) { b.setAttribute('aria-expanded', Number(b.dataset.m) === openModel); });
+  var mc = document.getElementById('mxC');
+  if (wide) {
+    mc.innerHTML = '<div class="t-h2" style="margin-bottom:var(--s2)">' + DATA[openModel].n + ': остатки</div>' + matrixHtml(DATA[openModel]);
+  } else {
+    mc.innerHTML = '';
+    document.querySelector('#listC .mx-slot[data-slot="' + openModel + '"]').innerHTML = matrixHtml(DATA[openModel]);
+  }
+}
+function renderNav() {
+  var cur = st.s === 'products' ? 'products' : 'today';
+  document.querySelectorAll('[data-nav-list="A"]').forEach(function (el) {
+    el.innerHTML = NAV.slice(0, 9).map(function (n) { return '<div class="nav-i" data-nav="' + n[0] + '"><svg class="ic"><use href="#' + n[2] + '"/></svg>' + n[1] + '</div>'; }).join('');
+  });
+  document.querySelectorAll('[data-nav-groups="B"]').forEach(function (el) {
+    var out = '', g = '';
+    NAV.forEach(function (n) { if (n[3] !== g) { g = n[3]; out += '<div class="nav-g">' + g + '</div>'; } out += '<div class="nav-i" data-nav="' + n[0] + '"><svg class="ic"><use href="#' + n[2] + '"/></svg>' + n[1] + '</div>'; });
+    el.innerHTML = out;
+  });
+  document.querySelectorAll('[data-tabs="C"]').forEach(function (el) {
+    el.innerHTML = NAV.map(function (n) { return '<div class="tabC" data-nav="' + n[0] + '">' + n[1] + '</div>'; }).join('');
+  });
+}
+function markNav() {
+  var cur = st.s === 'products' ? 'products' : 'today';
+  document.querySelectorAll('[data-nav]').forEach(function (e) {
+    if (e.dataset.nav === cur) e.setAttribute('aria-current', 'page'); else e.removeAttribute('aria-current');
+  });
+}
+function apply() {
+  document.documentElement.dataset.theme = st.t;
+  document.getElementById('frame').dataset.w = st.w;
+  document.querySelectorAll('.shell').forEach(function (sh) {
+    sh.hidden = sh.dataset.v !== st.v;
+    if (st.s === 'switch') sh.setAttribute('data-open', ''); else sh.removeAttribute('data-open');
+  });
+  document.querySelectorAll('.scr').forEach(function (e) { e.hidden = e.dataset.s.split(' ').indexOf(st.s) < 0; });
+  document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+  document.querySelectorAll('[data-title]').forEach(function (e) { e.textContent = st.s === 'products' ? 'Товар' : 'Сегодня'; });
+  markNav(); fillMatrix();
+  var i = info[st.v];
+  document.getElementById('about').innerHTML = '<b>Каркас ' + st.v + ' / ' + i[0] + '.</b> Слова: ' + i[1] + '.<br><span class="muted">Смотри: удобно ли одной рукой? понятно ли, где я и какой магазин выбран? есть ли за что зацепиться глазу?</span>';
+}
+document.querySelectorAll('.slot-today').forEach(function (el) { el.appendChild(document.getElementById('tpl-today').content.cloneNode(true)); });
+renderLists(); renderNav();
+document.querySelectorAll('.pick').forEach(function (b) { b.addEventListener('click', function () { st[b.dataset.k] = b.dataset.val; apply(); }); });
+document.addEventListener('click', function (e) {
+  var nv = e.target.closest('[data-nav]');
+  if (nv && (nv.dataset.nav === 'products' || nv.dataset.nav === 'today')) { st.s = nv.dataset.nav; apply(); return; }
+  var op = e.target.closest('[data-open-ov]');
+  if (op) { st.s = 'switch'; apply(); return; }
+  if (e.target.closest('.scrim')) { st.s = 'today'; apply(); return; }
+  var m = e.target.closest('.mrow');
+  if (m) { openModel = Number(m.dataset.m); fillMatrix(); return; }
+  var g = e.target.closest('[data-group] > button, [data-group] > .opt');
+  if (g) { g.parentElement.querySelectorAll('button, .opt').forEach(function (x) { x.setAttribute('aria-pressed', x === g); }); }
+});
+apply();
+</script>
+</body>
+</html>

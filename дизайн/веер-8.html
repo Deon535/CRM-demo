@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 8: Касса и смена</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-bad { background: var(--bad-bg); color: var(--bad); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--s2); min-height: 52px; padding: 0 var(--s4); border-radius: var(--r-btn); font-weight: 700; border: 1px solid transparent; width: 100%; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.off { opacity: .4; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.rowline { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); min-height: 44px; padding: var(--s2) 0; border-bottom: 1px solid var(--line); }
+.rowline:last-child { border-bottom: 0; }
+.rowline b { text-align: right; }
+.rowline .sub { display: block; font-size: 13px; color: var(--muted); font-weight: 500; }
+.scr { display: grid; gap: var(--s4); min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.top-row { display: flex; align-items: center; gap: var(--s3); }
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); background: var(--surface-2); border-radius: var(--r-field); font-size: 14px; }
+.notice .ic { width: 20px; height: 20px; margin-top: 1px; }
+.notice.good { background: var(--good-bg); color: var(--good); }
+.notice.bad { background: var(--bad-bg); color: var(--bad); }
+.linkbtn { min-height: 48px; background: transparent; border: 0; text-decoration: underline; text-underline-offset: 3px; font-weight: 500; justify-self: center; padding: 0 var(--s1); }
+.seg { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s2); }
+.seg button { min-height: 48px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; padding: 0 var(--s3); text-align: left; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+
+/* Ввод суммы */
+.big-in { display: flex; align-items: baseline; gap: var(--s2); border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-field); padding: var(--s3) var(--s4); }
+.big-in:focus-within { border-color: var(--line-strong); }
+.big-in input { flex: 1; width: 0; min-width: 0; border: 0; background: transparent; outline: 0; font-family: var(--font-num); font-weight: 800; font-size: 40px; letter-spacing: -0.03em; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.big-in input::placeholder { color: var(--muted); }
+.big-in .cur { font-family: var(--font-num); font-weight: 800; font-size: 28px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: center; padding: var(--s2) 0; border-bottom: 1px solid var(--line); min-height: 64px; }
+.ln:last-child { border-bottom: 0; }
+.ln .name { font-weight: 700; font-family: var(--font-num); font-size: 18px; }
+.ln .meta { font-size: 13px; color: var(--muted); }
+.stp { display: flex; align-items: center; grid-row: span 2; }
+.stp button { width: 44px; height: 48px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; }
+.stp button:first-child { border-radius: var(--r-btn) 0 0 var(--r-btn); }
+.stp button:last-child { border-radius: 0 var(--r-btn) var(--r-btn) 0; }
+.stp .v { min-width: 44px; height: 48px; display: grid; place-items: center; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); background: var(--surface); font-family: var(--font-num); font-weight: 800; font-size: 20px; }
+.hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .95; letter-spacing: -0.035em; font-size: 44px; white-space: nowrap; }
+.prog { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s1); }
+.prog i { height: 4px; border-radius: 2px; background: var(--line); }
+.prog i.on { background: var(--accent); }
+.done { display: grid; justify-items: center; gap: var(--s3); text-align: center; padding: var(--s5) var(--s2); }
+.done .okc { width: 64px; height: 64px; border-radius: 50%; background: var(--good-bg); color: var(--good); display: grid; place-items: center; }
+.done .okc .ic { width: 32px; height: 32px; stroke-width: 2.5; }
+
+/* Расхождение */
+.tilebad { background: var(--bad-bg); color: var(--bad); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s2); }
+.tilebad .t-label { color: inherit; }
+.formula { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s4); display: grid; gap: var(--s3); }
+.frow { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s3); }
+.frow .v { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; font-size: 28px; letter-spacing: -0.02em; white-space: nowrap; }
+.frow.res { border-top: 1px solid var(--line-strong); padding-top: var(--s3); }
+.led { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; border-bottom: 1px solid var(--line); }
+.led:last-child { border-bottom: 0; }
+.led .tm { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-size: 13px; color: var(--muted); font-weight: 500; }
+.led .tx { font-weight: 500; }
+.led .tx .sub { display: block; font-size: 13px; color: var(--muted); }
+.led .amt { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; white-space: nowrap; }
+.led .bal { grid-column: 3; text-align: right; font-size: 12px; color: var(--muted); font-family: var(--font-num); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.led.end { border-top: 1px solid var(--line-strong); }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s3); }
+.note { font-size: 13px; color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.col { width: 375px; max-width: 100%; }
+.col > .t-h2 { margin-bottom: var(--s3); }
+.ph { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; grid-template-columns: minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-chevron-left" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Раздел</b>
+    <button class="pick" data-k="sec" data-val="close">Закрытие смены (продавец)</button>
+    <button class="pick" data-k="sec" data-val="diff">Расхождение (старший, владелец)</button>
+    <span style="width:12px"></span><b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1</button>
+    <button class="pick" data-k="v" data-val="2">2</button>
+    <button class="pick" data-k="v" data-val="3">3</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+    <span style="width:12px"></span>
+    <button class="pick" data-reset>Сбросить</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var fmt = function (n) { return (n < 0 ? '−' : '') + String(Math.abs(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; };
+var plus = function (n) { return (n > 0 ? '+' : '') + fmt(n); };
+var digits = function (s) { return String(s || '').replace(/\D/g, ''); };
+var spaced = function (s) { var d = digits(s); return d ? d.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') : ''; };
+
+/* ===== Данные: смена Каспийска сегодня (сходится с «Сегодня»: касса Каспийск −1 200 ₽) ===== */
+var START = 20000, SALES = 31800, OUT = [['Хозрасходы', 500, '10:40', 'Заур'], ['Передано Руслану', 4500, '15:30', 'Заур']];
+var OUT_SUM = OUT.reduce(function (a, o) { return a + o[1]; }, 0);
+var EXPECT = START + SALES - OUT_SUM, COUNTED = 45600, DIFF = COUNTED - EXPECT;   // 46 800, 45 600, −1 200
+var DEN = [5000, 2000, 1000, 500, 200, 100, 50];
+var REASONS = ['Ошиблись со сдачей', 'Выдача не записана', 'Причина неизвестна'];
+
+var VC = {
+  '1': { name: '1. Одна сумма', how: 'Одно большое поле «Сколько наличных в кассе» и кнопка «Закрыть смену». Результата продавец не видит.', plus: 'Быстрее всего, всё на одном экране.', minus: 'Вводить сумму целиком легко ошибиться на лишний ноль или цифру, исправить потом трудно.' },
+  '2': { name: '2. Пересчёт по купюрам', how: 'Строки по номиналу (5 000, 2 000 и так далее), у каждой «минус» и «плюс»; сумма складывается сама.', plus: 'Меньше ошибок ввода, продавец сам видит, из чего сложена сумма.', minus: 'Дольше: купюры нужно считать и вносить по номиналам.' },
+  '3': { name: '3. Пошагово', how: 'Шаг 1: сверить выдачи из кассы за смену («всё записано?»). Шаг 2: ввести наличные.', plus: 'Чаще всего касса не сходится из-за невнесённых выдач: этот вариант ловит их до подсчёта.', minus: 'Два экрана вместо одного, чуть дольше каждый вечер.' }
+};
+var VD = {
+  '1': { name: '1. Разница крупно, разбивка ниже', how: 'Красная плитка с недостачей и подписью «ожидали / насчитали», ниже разбивка: начало, продажи, выдачи.', plus: 'Главное (есть ли проблема и насколько) видно за секунду.', minus: 'Не видно, в какой момент дня деньги разошлись.' },
+  '2': { name: '2. Формула', how: 'Три строки крупно: «Ожидали», «Насчитали», «Разница», как в чеке. Ниже пояснение, из чего собрано ожидаемое.', plus: 'Объясняет, откуда взялось число; быстро проверить глазами.', minus: 'Тоже не показывает, где потеряли; больше цифр на экране.' },
+  '3': { name: '3. Хронология', how: 'Лента движений денег за смену со временем и остатком после каждого, внизу итог с разницей.', plus: 'Единственный, где видно, где остаток разошёлся с жизнью (например, после передачи Руслану). Отвечает на вопрос «куда делись деньги».', minus: 'Длиннее, цифры мельче; разница уходит вниз (поэтому наверху одна красная строка).' }
+};
+
+var st;
+function init() { return { sec: st ? st.sec : 'close', v: st ? st.v : 'all', t: st ? st.t : 'light', c1: { amt: '', done: false }, c2: { n: { 5000: 0, 2000: 0, 1000: 0, 500: 0, 200: 0, 100: 0, 50: 0 }, coins: '', done: false }, c3: { step: 1, amt: '', done: false }, d: { 1: { reason: null, res: false }, 2: { reason: null, res: false }, 3: { reason: null, res: false } } }; }
+st = init();
+
+function head(t) { return '<div class="top-row"><span class="iconbtn"><svg class="ic"><use href="#i-chevron-left"/></svg></span><span class="t-label">Касса</span></div><div><div class="t-h1">' + t + '</div><div class="t-label" style="margin-top:6px">Каспийск / смена с <span class="num">09:00</span></div></div>'; }
+function doneBlock() { return '<div class="scr">' + head('Смена закрыта') + '<div class="done"><span class="okc"><svg class="ic"><use href="#i-check"/></svg></span><div class="t-h2">Спасибо, смена закрыта</div><div class="t-label">Наличные записаны. Результат увидит старший продавец.</div></div></div>'; }
+
+/* ---- закрытие ---- */
+function c1() {
+  var c = st.c1; if (c.done) return doneBlock();
+  var ok = +digits(c.amt) > 0;
+  return '<div class="scr">' + head('Закрытие смены') + '<div style="display:grid;gap:var(--s2)"><span class="t-label">Сколько наличных в кассе</span><label class="big-in"><input id="in1" data-in="c1" inputmode="numeric" placeholder="0" value="' + spaced(c.amt) + '" autocomplete="off"><span class="cur">₽</span></label></div>' +
+    '<div class="t-label">Пересчитайте всё, вместе с мелочью. Результат увидит старший продавец.</div><button class="btn' + (ok ? '' : ' off') + '" data-close="c1">Закрыть смену</button></div>';
+}
+function c2() {
+  var c = st.c2; if (c.done) return doneBlock();
+  var total = DEN.reduce(function (a, d) { return a + d * c.n[d]; }, 0) + (+digits(c.coins));
+  return '<div class="scr">' + head('Пересчёт кассы') + '<div>' + DEN.map(function (d) {
+    return '<div class="ln"><span class="name">' + spaced(d) + ' ₽</span><span class="stp"><button data-dec="' + d + '" aria-label="Меньше"><svg class="ic"><use href="#i-minus"/></svg></button><span class="v">' + c.n[d] + '</span><button data-inc="' + d + '" aria-label="Больше"><svg class="ic"><use href="#i-plus"/></svg></button></span><span class="meta">' + fmt(d * c.n[d]) + '</span></div>';
+  }).join('') + '<div class="ln"><span class="name">Монеты</span><label class="big-in" style="padding:var(--s2) var(--s3);grid-row:span 2;width:120px"><input id="in2" data-in="c2coins" inputmode="numeric" placeholder="0" value="' + spaced(c.coins) + '" style="font-size:20px" autocomplete="off"><span class="cur" style="font-size:16px">₽</span></label><span class="meta">сумма монетами</span></div></div>' +
+    '<div class="sec-h"><span class="t-h2">В кассе</span><span class="hero-num" style="font-size:32px">' + fmt(total) + '</span></div>' +
+    '<button class="btn' + (total > 0 ? '' : ' off') + '" data-close="c2">Закрыть смену</button></div>';
+}
+function c3() {
+  var c = st.c3; if (c.done) return doneBlock();
+  var bar = '<div class="prog">' + [1, 2].map(function (i) { return '<i class="' + (i <= c.step ? 'on' : '') + '"></i>'; }).join('') + '</div><div class="t-label">Шаг <span class="num">' + c.step + '</span> из <span class="num">2</span></div>';
+  if (c.step === 1) return '<div class="scr">' + head('Закрытие смены') + bar + '<div class="t-h2">Выдачи из кассы за смену</div><div>' +
+    OUT.map(function (o) { return '<div class="rowline"><span><b>' + o[0] + '</b><span class="sub"><span class="num">' + o[2] + '</span> / ' + o[3] + '</span></span><b class="num bad">' + fmt(-o[1]) + '</b></div>'; }).join('') + '</div>' +
+    '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>Всё, что вы брали из кассы сегодня, записано? Неучтённая выдача даст расхождение.</span></div>' +
+    '<button class="btn" data-step="1">Да, всё записано</button><button class="btn btn-second">Добавить выдачу</button></div>';
+  var ok = +digits(c.amt) > 0;
+  return '<div class="scr">' + head('Закрытие смены') + bar + '<div class="t-h2">Наличные в кассе</div><div style="display:grid;gap:var(--s2)"><label class="big-in"><input id="in3" data-in="c3" inputmode="numeric" placeholder="0" value="' + spaced(c.amt) + '" autocomplete="off"><span class="cur">₽</span></label></div>' +
+    '<div class="t-label">Пересчитайте всё, вместе с мелочью. Результат увидит старший продавец.</div><button class="btn' + (ok ? '' : ' off') + '" data-close="c3">Закрыть смену</button><button class="linkbtn" data-step="-1">Назад</button></div>';
+}
+
+/* ---- расхождение ---- */
+function resolve(k) {
+  var d = st.d[k];
+  if (d.res) return '<div class="notice good"><svg class="ic"><use href="#i-check"/></svg><span>Разобрано: ' + d.reason.toLowerCase() + '. Запись в журнале.</span></div>';
+  return '<div style="display:grid;gap:var(--s2)"><div class="t-h2">Причина расхождения</div><div class="seg">' + REASONS.map(function (r) { return '<button data-reason="' + k + ':' + r + '" aria-pressed="' + (d.reason === r) + '">' + r + '</button>'; }).join('') + '</div></div>' +
+    '<button class="btn' + (d.reason ? '' : ' off') + '" data-resolve="' + k + '">Закрыть расхождение</button>';
+}
+function dhead() { return '<div class="top-row"><span class="iconbtn"><svg class="ic"><use href="#i-chevron-left"/></svg></span><span class="t-label">Касса</span></div>'; }
+function breakdown() {
+  return '<div><div class="sec-h"><span class="t-h2">Из чего собрано ожидаемое</span></div>' +
+    '<div class="rowline"><span class="t-label">Остаток на начало</span><b class="num">' + fmt(START) + '</b></div>' +
+    '<div class="rowline"><span><span class="t-label">Наличные продажи</span><span class="sub"><span class="num">14</span> чеков</span></span><b class="num">' + plus(SALES) + '</b></div>' +
+    '<div class="rowline"><span><span class="t-label">Выдано из кассы</span><span class="sub">хозрасходы <span class="num">500</span>, передано Руслану <span class="num">4 500</span></span></span><b class="num">' + fmt(-OUT_SUM) + '</b></div>' +
+    '<div class="rowline"><span class="t-label">Ожидали</span><b class="num" style="font-size:20px">' + fmt(EXPECT) + '</b></div></div>';
+}
+function d1() {
+  return '<div class="scr">' + dhead() + '<div><div class="t-h1">Каспийск</div><div class="t-label" style="margin-top:6px">Смена закрыта в <span class="num">21:00</span>, Заур</div></div>' +
+    '<div class="tilebad"><span class="t-label">Недостача в кассе</span><span class="hero-num">' + fmt(DIFF) + '</span><span class="t-label">Ожидали <span class="num">' + fmt(EXPECT) + '</span>, насчитали <span class="num">' + fmt(COUNTED) + '</span></span></div>' +
+    breakdown() + resolve(1) + '</div>';
+}
+function d2() {
+  return '<div class="scr">' + dhead() + '<div><div class="t-h1">Каспийск</div><div class="t-label" style="margin-top:6px">Смена закрыта в <span class="num">21:00</span>, Заур</div></div>' +
+    '<div class="formula"><div class="frow"><span class="t-label">Ожидали</span><span class="v">' + fmt(EXPECT) + '</span></div><div class="frow"><span class="t-label">Насчитали</span><span class="v">' + fmt(COUNTED) + '</span></div><div class="frow res"><span class="t-label">Разница</span><span class="v bad">' + fmt(DIFF) + '</span></div></div>' +
+    breakdown() + resolve(2) + '</div>';
+}
+function d3() {
+  var bal = START, rows = [['09:00', 'Начало смены', 'остаток в кассе', START, START]];
+  bal = START - 500; rows.push(['10:40', 'Выдано: хозрасходы', 'Заур', -500, bal]);
+  bal += 12400; rows.push(['13:00', 'Продажи наличными до 13:00', '<span class="num">6</span> чеков', 12400, bal]);
+  bal -= 4500; rows.push(['15:30', 'Передано Руслану', 'Заур отдал, Руслан принял', -4500, bal]);
+  bal += 19400; rows.push(['21:00', 'Продажи наличными после 13:00', '<span class="num">8</span> чеков', 19400, bal]);
+  return '<div class="scr">' + dhead() + '<div><div class="t-h1">Каспийск</div><div class="t-label" style="margin-top:6px">Смена закрыта в <span class="num">21:00</span>, Заур</div></div>' +
+    '<div class="notice bad"><svg class="ic"><use href="#i-alert"/></svg><span>Недостача <b class="num">' + fmt(DIFF) + '</b>. Ниже движение денег за смену.</span></div><div>' +
+    rows.map(function (r) { return '<div class="led"><span class="tm">' + r[0] + '</span><span class="tx">' + r[1] + '<span class="sub">' + r[2] + '</span></span><span class="amt ' + (r[3] < 0 ? 'bad' : '') + '">' + (r === rows[0] ? fmt(r[3]) : plus(r[3])) + '</span><span class="bal">остаток ' + fmt(r[4]) + '</span></div>'; }).join('') +
+    '<div class="led end"><span class="tm"><span class="num">21:00</span></span><span class="tx"><b>Насчитано при закрытии</b><span class="sub">ожидали ' + fmt(EXPECT) + '</span></span><span class="amt">' + fmt(COUNTED) + '</span><span class="bal bad">разница ' + fmt(DIFF) + '</span></div></div>' + resolve(3) + '</div>';
+}
+var VIEW = { close: { '1': c1, '2': c2, '3': c3 }, diff: { '1': d1, '2': d2, '3': d3 } };
+
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var V = st.sec === 'close' ? VC : VD, list = st.v === 'all' ? ['1', '2', '3'] : [st.v];
+  document.getElementById('stage').innerHTML = '<div class="pair">' + list.map(function (v) { return '<div class="col"><div class="t-h2">' + V[v].name + '</div><div class="ph">' + VIEW[st.sec][v]() + '</div></div>'; }).join('') + '</div>';
+  document.getElementById('about').innerHTML = list.map(function (v) { return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="note">Плюс:</span> ' + V[v].plus + '<br><span class="note">Минус:</span> ' + V[v].minus + '</div>'; }).join('') +
+    '<div class="note">' + (st.sec === 'close' ?
+      'Образец: смена Каспийска, продавец Заур. Продавец <b>не видит</b>, сколько должно быть в кассе (ТЗ 7.3: расхождение видят старший продавец и владелец). Вводить можно по-настоящему.' :
+      'Образец: старший продавец или владелец открывает закрытую смену Каспийска. Ожидали <span class="num">' + fmt(EXPECT) + '</span> = начало <span class="num">' + fmt(START) + '</span> + наличные продажи <span class="num">' + fmt(SALES) + '</span> − выдано <span class="num">' + fmt(OUT_SUM) + '</span>; насчитали <span class="num">' + fmt(COUNTED) + '</span>; разница <span class="num">' + fmt(DIFF) + '</span> (как плитка «Касса Каспийск» на «Сегодня» владельца). Статей «от курьеров» и «возвраты наличными» в этой смене нет. Нажимаются причина и «Закрыть расхождение».') + '</div>';
+  document.querySelectorAll('.pick[data-k]').forEach(function (b) { b.setAttribute('aria-pressed', st[b.dataset.k] === b.dataset.val); });
+}
+function renderKeep(id) { render(); var el = document.getElementById(id); if (el) { el.focus(); var n = el.value.length; el.setSelectionRange(n, n); } }
+document.addEventListener('input', function (e) {
+  var k = e.target.dataset && e.target.dataset.in; if (!k) return;
+  var v = digits(e.target.value).slice(0, 9);
+  if (k === 'c1') st.c1.amt = v; else if (k === 'c3') st.c3.amt = v; else if (k === 'c2coins') st.c2.coins = v;
+  renderKeep(e.target.id);
+});
+document.addEventListener('click', function (e) {
+  var t = e.target, p = t.closest('.pick[data-k]');
+  if (p) { st[p.dataset.k] = p.dataset.val; render(); return; }
+  if (t.closest('[data-reset]')) { st = init(); render(); return; }
+  var m = t.closest('[data-dec],[data-inc]');
+  if (m) { var d = +(m.dataset.dec || m.dataset.inc); st.c2.n[d] = Math.max(0, Math.min(99, st.c2.n[d] + (m.dataset.inc ? 1 : -1))); render(); return; }
+  var c = t.closest('[data-close]');
+  if (c) { var k = c.dataset.close; if (c.classList.contains('off')) return; st[k].done = true; render(); return; }
+  var s = t.closest('[data-step]'); if (s) { st.c3.step = Math.max(1, Math.min(2, st.c3.step + +s.dataset.step)); render(); return; }
+  var r = t.closest('[data-reason]'); if (r) { var q = r.dataset.reason.split(':'); st.d[q[0]].reason = q[1]; render(); return; }
+  var rs = t.closest('[data-resolve]'); if (rs) { var dd = st.d[rs.dataset.resolve]; if (dd.reason) { dd.res = true; render(); } }
+});
+render();
+</script>
+</body>
+</html>

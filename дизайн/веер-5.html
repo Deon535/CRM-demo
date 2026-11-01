@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Веер 5: Возврат</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;700;800&family=Onest:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* Токены из design-system.md */
+:root {
+  --bg: #F6F6F4; --surface: #FFFFFF; --surface-2: #EEEEEA;
+  --text: #0E0E0E; --muted: #6B6B66; --line: #E2E2DE; --line-strong: #0E0E0E;
+  --accent: #0E0E0E; --on-accent: #FFFFFF;
+  --bad: #B3361F; --bad-bg: #F8E6E2; --good: #1A6D43; --good-bg: #E1F1E8;
+  --font-text: "Onest", sans-serif; --font-num: "Inter Tight", sans-serif;
+  --r-chip: 6px; --r-field: 10px; --r-btn: 12px; --r-card: 16px;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+}
+:root[data-theme="dark"] {
+  --bg: #0D0D0C; --surface: #171716; --surface-2: #222220;
+  --text: #F2F2EE; --muted: #98988F; --line: #2A2A27; --line-strong: #F2F2EE;
+  --accent: #F2F2EE; --on-accent: #0D0D0C;
+  --bad: #EE7A66; --bad-bg: #2E1A16; --good: #5CC38C; --good-bg: #14261C;
+}
+* { box-sizing: border-box; margin: 0; }
+[hidden] { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: var(--font-text); font-size: 16px; line-height: 1.4; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.num { font-family: var(--font-num); font-variant-numeric: tabular-nums; }
+.good { color: var(--good); } .bad { color: var(--bad); }
+.t-label { font-size: 13px; font-weight: 500; color: var(--muted); }
+.t-h1 { font-size: 28px; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; }
+.t-h2 { font-size: 18px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.chip { display: inline-block; font-size: 12px; font-weight: 700; border-radius: var(--r-chip); padding: 2px var(--s2); white-space: nowrap; }
+.chip-good { background: var(--good-bg); color: var(--good); }
+.chip-neutral { background: var(--surface-2); color: var(--muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; min-height: 52px; padding: 0 var(--s4); border-radius: var(--r-btn); font-weight: 700; border: 1px solid transparent; width: 100%; background: var(--accent); color: var(--on-accent); white-space: nowrap; }
+.btn-second { background: transparent; color: var(--text); border-color: var(--line-strong); }
+.btn.off { opacity: .4; }
+.iconbtn { width: 48px; height: 48px; border-radius: var(--r-btn); border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; flex: none; }
+.field { display: flex; align-items: center; gap: var(--s3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-field); min-height: 48px; padding: 0 var(--s4); color: var(--muted); }
+.field .val { color: var(--text); font-weight: 500; flex: 1; }
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: var(--s2); border-bottom: 1px solid var(--line-strong); }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px var(--s3); align-items: baseline; padding: var(--s3) 0; }
+.item .name { font-weight: 700; }
+.item .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; }
+.item .meta { font-size: 13px; color: var(--muted); }
+.scr { display: grid; gap: var(--s4); min-width: 0; grid-template-columns: minmax(0, 1fr); }
+.sale-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); }
+.hero-sum { container-type: inline-size; }
+.hero-num { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; line-height: .9; letter-spacing: -0.04em; font-size: clamp(44px, 22cqi, 96px); margin-top: var(--s2); white-space: nowrap; }
+
+/* Элементы возврата */
+.rs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.rs button { min-height: 56px; border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-btn); font-weight: 700; font-size: 14px; line-height: 1.2; padding: 0 6px; }
+.rs button[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
+.tog { display: flex; align-items: center; gap: var(--s3); width: 100%; min-height: 56px; padding: 0 var(--s4); border: 1px solid var(--line); border-radius: var(--r-field); background: var(--surface); text-align: left; font-weight: 500; }
+.tog .box { width: 24px; height: 24px; border-radius: var(--r-chip); border: 1.5px solid var(--line-strong); display: grid; place-items: center; flex: none; }
+.tog[aria-pressed="true"] .box { background: var(--accent); color: var(--on-accent); }
+.tog .box .ic { width: 16px; height: 16px; stroke-width: 2.5; visibility: hidden; }
+.tog[aria-pressed="true"] .box .ic { visibility: visible; }
+.notice { display: flex; gap: var(--s3); align-items: flex-start; padding: var(--s3) var(--s4); background: var(--surface-2); border-radius: var(--r-field); font-size: 14px; }
+.notice .ic { width: 20px; height: 20px; margin-top: 1px; }
+.rowline { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); min-height: 40px; border-bottom: 1px solid var(--line); }
+.prog { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s1); }
+.prog i { height: 4px; border-radius: 2px; background: var(--line); }
+.prog i.on { background: var(--accent); }
+.nav2 { display: grid; grid-template-columns: 1fr 2fr; gap: var(--s2); }
+.nav2.one { grid-template-columns: 1fr; }
+.chk { border: 1px solid var(--line); background: var(--surface); border-radius: var(--r-card); padding: var(--s3) var(--s4); display: grid; gap: var(--s1); }
+.chk-h { display: flex; justify-content: space-between; align-items: center; gap: var(--s3); }
+.cl { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: 0 var(--s3); align-items: center; width: 100%; min-height: 64px; padding: var(--s2) 0; border: 0; border-top: 1px solid var(--line); background: transparent; text-align: left; }
+.cl .rad { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--line-strong); display: grid; place-items: center; grid-row: span 2; }
+.cl[aria-pressed="true"] .rad::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
+.cl .name { font-weight: 700; }
+.cl .price { font-family: var(--font-num); font-variant-numeric: tabular-nums; font-weight: 800; grid-row: span 2; }
+.cl .meta { font-size: 13px; color: var(--muted); }
+
+/* Страница веера */
+.fan { max-width: 1280px; margin: 0 auto; padding: var(--s4); }
+.fan-bar { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; padding-bottom: var(--s3); margin-bottom: var(--s4); border-bottom: 1px solid var(--line); }
+.fan-bar b { font-size: 12px; color: var(--muted); font-weight: 500; }
+.pick { font-size: 14px; background: transparent; border: 1px solid var(--line); border-radius: 8px; padding: 6px 12px; min-height: 40px; }
+.pick[aria-pressed="true"] { background: var(--text); color: var(--bg); border-color: var(--text); }
+.about { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card); padding: var(--s3) var(--s4); margin-bottom: var(--s4); font-size: 14px; display: grid; gap: var(--s3); }
+.note { font-size: 13px; color: var(--muted); }
+.pair { display: flex; flex-wrap: wrap; gap: var(--s5); align-items: flex-start; }
+.col { width: 375px; max-width: 100%; }
+.col > .t-h2 { margin-bottom: var(--s3); }
+.ph { width: 100%; background: var(--bg); border: 1px solid var(--line); border-radius: 28px; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; grid-template-columns: minmax(0, 1fr); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4.5 4.5"/></symbol>
+  <symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M8 9v6M12 9v6M16 9v6"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12.5 5 5L20 6.5"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17h.01"/></symbol>
+</svg>
+
+<div class="fan">
+  <div class="fan-bar">
+    <b>Вариант</b>
+    <button class="pick" data-k="v" data-val="1">1 Как продажа</button>
+    <button class="pick" data-k="v" data-val="2">2 Пошагово</button>
+    <button class="pick" data-k="v" data-val="3">3 Из чека</button>
+    <button class="pick" data-k="v" data-val="all">Все три</button>
+    <span style="width:12px"></span><b>Роль</b>
+    <button class="pick" data-k="r" data-val="Продавец">Продавец</button>
+    <button class="pick" data-k="r" data-val="Старший продавец">Старший продавец</button>
+    <span style="width:12px"></span><b>Вещь</b>
+    <button class="pick" data-k="item" data-val="0">Рубашка 4 990</button>
+    <button class="pick" data-k="item" data-val="1">Брюки 5 490</button>
+    <button class="pick" data-k="item" data-val="2">Носки 390</button>
+    <span style="width:12px"></span><b>Тема</b>
+    <button class="pick" data-k="t" data-val="light">Светлая</button>
+    <button class="pick" data-k="t" data-val="dark">Тёмная</button>
+  </div>
+  <div class="about" id="about"></div>
+  <div id="stage"></div>
+</div>
+
+<script>
+var fmt = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₽'; };
+var ITEMS = [
+  { n: 'Рубашка Oxford', meta: 'M / рост 182 / белый', p: 4990 },
+  { n: 'Брюки чинос', meta: '50 / синий', p: 5490 },
+  { n: 'Носки хлопок', meta: '39–42 / хлопок', p: 390 }
+];
+var REASONS = ['Не подошёл размер', 'Передумал', 'Брак'];
+var DAYS = 9;   // с покупки прошло 9 дней
+var V = {
+  '1': { name: '1. Как продажа', how: 'Один экран в том же порядке, что «Продажа»: вещь, причина, итог числом, кнопка.', plus: 'Знакомо, меньше всего нажатий, всё видно сразу.', minus: 'Код на вещи один на размер, а не на каждую штуку, поэтому дату покупки система не знает: срок проверяем со слов клиента.' },
+  '2': { name: '2. Пошагово', how: 'Три шага, на каждом один вопрос: вещь, причина и условия, деньги.', plus: 'Проще всего для новичка, ничего не пропустишь.', minus: 'Больше нажатий; в потоке клиентов будет медленнее.' },
+  '3': { name: '3. Из чека', how: 'Сначала находим чек (по номеру или телефону клиента), вещь выбираем из него.', plus: 'Срок и сумма считаются сами по чеку, ошибиться трудно.', minus: 'Нужен чек или телефон клиента; если клиент ничего не помнит, придётся искать по вещи (ссылка «Чека нет» в образец не вошла).' }
+};
+var st = { v: 'all', t: 'light', r: 'Продавец', item: 1, reason: 0, tag: true, step: 1 };
+
+var it = function () { return ITEMS[st.item]; };
+var shop = function () { return st.r === 'Продавец' ? 'Дербент' : 'Каспийск'; };
+var term = function () { return st.reason === 2 ? 30 : 14; };
+var selfOk = function () { return st.r === 'Старший продавец' || it().p <= 3000; };
+
+function head() { return '<div class="sale-head"><div class="t-h1">Возврат</div><span class="iconbtn"><svg class="ic"><use href="#i-close"/></svg></span></div>'; }
+function itemRow() {
+  return '<div class="item"><span class="name">' + it().n + '</span><span class="price">' + fmt(it().p) + '</span><span class="meta">' + it().meta + '</span></div>';
+}
+function termRow() {
+  return '<div class="rowline"><span class="t-label">Куплено <span class="num">' + DAYS + '</span> дней назад</span><span class="chip chip-good">осталось <span class="num">' + (term() - DAYS) + '</span> из <span class="num">' + term() + '</span></span></div>';
+}
+function reasonSeg() { return '<div class="rs">' + REASONS.map(function (r, i) { return '<button data-reason="' + i + '" aria-pressed="' + (i === st.reason) + '">' + r + '</button>'; }).join('') + '</div>'; }
+function tagRow() { return '<button class="tog" data-tag aria-pressed="' + st.tag + '"><span class="box"><svg class="ic"><use href="#i-check"/></svg></span>С биркой и не ношена</button>'; }
+function outcome() { return '<div class="t-label">' + (st.reason === 2 ? 'Вещь пойдёт в списание.' : 'Вещь вернётся в остатки: ' + shop() + '.') + '</div>'; }
+function notice() {
+  var t = st.r === 'Старший продавец' ? 'Возврат подтверждаете вы. Запись попадёт в журнал.' :
+    selfOk() ? 'До <span class="num">3 000 ₽</span> можно оформить самому, если старшего продавца нет в смене. Запись попадёт в журнал.' :
+    'Больше <span class="num">3 000 ₽</span>: возврат подтверждает старший продавец. Вы отправляете ему заявку.';
+  return '<div class="notice"><svg class="ic"><use href="#i-alert"/></svg><span>' + t + '</span></div>';
+}
+function hero() { return '<div class="hero-sum"><div class="t-label">Вернуть клиенту</div><div class="hero-num">' + fmt(it().p) + '</div><div class="t-label" style="margin-top:var(--s2)">на карту, так клиент платил</div></div>'; }
+function finalBtn() {
+  return '<button class="btn' + (st.tag ? '' : ' off') + '">' + (selfOk() ? 'Оформить возврат' : 'Отправить старшему') + '</button>' +
+    (st.tag ? '' : '<div class="t-label bad" style="text-align:center">Без бирки и после носки возврат не принимается</div>');
+}
+function search(text) { return '<label class="field"><svg class="ic"><use href="#i-search"/></svg><span class="val">' + text + '</span><svg class="ic"><use href="#i-scan"/></svg></label>'; }
+var sh = function (t) { return '<div class="sec-h"><span class="t-h2">' + t + '</span></div>'; };
+
+function v1() {
+  return '<div class="scr">' + head() + search('Название, артикул или код') +
+    '<div>' + sh('Вещь') + itemRow() + termRow() + '</div>' +
+    '<div style="display:grid;gap:var(--s2)">' + sh('Причина') + reasonSeg() + '</div>' +
+    tagRow() + outcome() + notice() + hero() + finalBtn() + '</div>';
+}
+function v2() {
+  var s = st.step, titles = ['Вещь', 'Причина и условия', 'Деньги'], body;
+  if (s === 1) body = search('Название, артикул или код') + '<div>' + itemRow() + termRow() + '</div>';
+  else if (s === 2) body = '<div style="display:grid;gap:var(--s2)">' + reasonSeg() + '</div>' + tagRow() + outcome();
+  else body = notice() + hero() + finalBtn();
+  var nav = s === 1 ? '<div class="nav2 one"><button class="btn" data-step="1">Дальше</button></div>' :
+    s === 2 ? '<div class="nav2"><button class="btn btn-second" data-step="-1">Назад</button><button class="btn" data-step="1">Дальше</button></div>' :
+    '<div class="nav2 one"><button class="btn btn-second" data-step="-1">Назад</button></div>';
+  return '<div class="scr">' + head() + '<div class="prog">' + [1, 2, 3].map(function (i) { return '<i class="' + (i <= s ? 'on' : '') + '"></i>'; }).join('') + '</div>' +
+    '<div class="t-label">Шаг <span class="num">' + s + '</span> из <span class="num">3</span></div><div class="t-h2">' + titles[s - 1] + '</div>' + body + nav + '</div>';
+}
+function v3() {
+  var lines = ITEMS.map(function (x, i) {
+    return '<button class="cl" data-item="' + i + '" aria-pressed="' + (i === st.item) + '"><span class="rad"></span><span class="name">' + x.n + '</span><span class="price">' + fmt(x.p) + '</span><span class="meta">' + x.meta + '</span></button>';
+  }).join('');
+  return '<div class="scr">' + head() + search('№ 2418') +
+    '<div class="chk"><div class="chk-h"><span class="t-h2">Чек № <span class="num">2418</span></span><span class="chip chip-neutral"><span class="num">' + DAYS + '</span> дней назад</span></div><div class="t-label">Оплата: карта / без скидки</div>' + lines + '</div>' +
+    termRow() +
+    '<div style="display:grid;gap:var(--s2)">' + sh('Причина') + reasonSeg() + '</div>' +
+    tagRow() + outcome() + notice() + hero() + finalBtn() + '</div>';
+}
+var VIEW = { '1': v1, '2': v2, '3': v3 };
+
+function render() {
+  document.documentElement.dataset.theme = st.t;
+  var list = st.v === 'all' ? ['1', '2', '3'] : [st.v];
+  document.getElementById('stage').innerHTML = '<div class="pair">' + list.map(function (v) {
+    return '<div class="col"><div class="t-h2">' + V[v].name + '</div><div class="ph">' + VIEW[v]() + '</div></div>';
+  }).join('') + '</div>';
+  document.getElementById('about').innerHTML = list.map(function (v) {
+    return '<div><b>' + V[v].name + '.</b> ' + V[v].how + '<br><span class="note">Плюс:</span> ' + V[v].plus + '<br><span class="note">Минус:</span> ' + V[v].minus + '</div>';
+  }).join('') + '<div class="note">Образец: нажимаются причина, бирка, шаги и вещи в чеке. Считаем, что покупка была <span class="num">9</span> дней назад без скидки; «старший в смене» в образец не вошло и станет настройкой на этапе 2.</div>';
+  document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', String(st[b.dataset.k]) === b.dataset.val); });
+}
+document.addEventListener('click', function (e) {
+  var t = e.target, p = t.closest('.pick');
+  if (p) { var k = p.dataset.k; st[k] = (k === 'item') ? +p.dataset.val : p.dataset.val; render(); return; }
+  var r = t.closest('[data-reason]'); if (r) { st.reason = +r.dataset.reason; render(); return; }
+  if (t.closest('[data-tag]')) { st.tag = !st.tag; render(); return; }
+  var s = t.closest('[data-step]'); if (s) { st.step = Math.max(1, Math.min(3, st.step + +s.dataset.step)); render(); return; }
+  var i = t.closest('[data-item]'); if (i) { st.item = +i.dataset.item; render(); }
+});
+render();
+</script>
+</body>
+</html>
