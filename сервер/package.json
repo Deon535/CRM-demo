@@ -11,7 +11,8 @@
     "start": "node src/app.js",
     "dev": "node --watch src/app.js",
     "db:migrate": "node scripts/db.js migrate",
-    "db:reset": "node scripts/db.js reset"
+    "db:reset": "node scripts/db.js reset",
+    "test": "node --test"
   },
   "dependencies": {
     "@fastify/static": "^10.1.10",

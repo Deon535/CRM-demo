@@ -9,7 +9,7 @@ const MIGRATIONS_DIR = path.join(import.meta.dirname, 'migrations');
 
 // Открывает файл базы (создаёт, если его нет) и включает нужные режимы
 export function openDb(file = DB_FILE) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
+  if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });   // ':memory:' = база в памяти, для проверок
   const db = new DatabaseSync(file);
   db.exec('PRAGMA journal_mode = WAL');   // запись не мешает чтению
   db.exec('PRAGMA foreign_keys = ON');    // база следит, чтобы ссылки между таблицами не вели в пустоту

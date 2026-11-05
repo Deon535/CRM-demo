@@ -1,12 +1,11 @@
 // ▪ Файл сервер/scripts/db.js: команды для базы. `migrate` применяет новые миграции, `reset` удаляет базу и создаёт заново с демо-данными.
 import fs from 'node:fs';
-import path from 'node:path';
 import readline from 'node:readline/promises';
 import { openDb, migrate, schemaVersion, DB_FILE } from '../src/db/db.js';
+import { seedDemo } from '../src/db/seed-demo.js';
 
 const command = process.argv[2];
 const yes = process.argv.includes('--yes');
-const SEED_FILE = path.join(import.meta.dirname, '..', 'src', 'db', 'seed-demo.sql');
 
 function showResult(db, applied) {
   console.log(applied.length ? `Применены миграции: ${applied.join(', ')}` : 'Новых миграций нет.');
@@ -31,9 +30,7 @@ if (command === 'migrate') {
   for (const suffix of ['', '-wal', '-shm']) fs.rmSync(DB_FILE + suffix, { force: true });
   const db = openDb();
   const applied = migrate(db);
-  db.exec('BEGIN');
-  db.exec(fs.readFileSync(SEED_FILE, 'utf8'));
-  db.exec('COMMIT');
+  seedDemo(db);
   showResult(db, applied);
   console.log('Демо-данные загружены.');
   db.close();
