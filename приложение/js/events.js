@@ -139,17 +139,20 @@ document.addEventListener('click', function (e) {
   var sh = t.closest('[data-shop]'); if (sh) { st.shop = sh.dataset.shop; if (st.screen !== 'products' && st.screen !== 'cash') st.screen = 'products'; render(); return; }
   var ct = t.closest('[data-cat]'); if (ct) { st.cat = ct.dataset.cat; render(); return; }
   if (t.closest('#userBtn')) { openLogin(true); return; }
-  if (t.closest('#loginBack') || t.closest('#loginX')) { openLogin(false); return; }
+  if (t.closest('#loginBack') || t.closest('#loginX')) { if (loginClosable()) openLogin(false); return; }
   if (t.closest('#rpBtn')) { var o = $('rpList').classList.toggle('open'); $('rpBtn').setAttribute('aria-expanded', o); return; }
   var ro = t.closest('[data-role]'); if (ro) { pendingRole = ro.dataset.role; renderRoles(); $('rpList').classList.remove('open'); $('rpBtn').setAttribute('aria-expanded', 'false'); return; }
   if (t.closest('[data-login]')) { openLogin(true); return; }
+  if (t.closest('#doLogout')) { doLogout(); return; }
+  if (t.closest('#doLogin') && SERVER.on) { submitLogin(); return; }
   if (t.closest('#doLogin')) { st.role = pendingRole; st.screen = cfg().home; st.prev = st.screen; st.shop = 'Все'; openLogin(false); render(); return; }
   if (t.closest('#reset')) { var keep = { w: st.w, t: st.t, sb: st.sb }; st = init(); st.w = keep.w; st.t = keep.t; st.sb = keep.sb; $('q').value = ''; render(); return; }
   var sg = t.closest('.seg button'); if (sg) { sg.parentElement.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === sg); }); }
 });
 document.addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.closest('#login')) { e.preventDefault(); $('doLogin').click(); return; }
   if (e.key !== 'Escape') return;
-  if ($('login').classList.contains('open')) openLogin(false);
+  if ($('login').classList.contains('open')) { if (loginClosable()) openLogin(false); }
   else if (st.peek) setPeek(false);
 });
 document.addEventListener('input', function (e) {

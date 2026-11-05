@@ -91,15 +91,20 @@
       <div class="back" id="loginBack"></div>
       <div class="card">
         <div class="card-h"><span class="t-h2" id="loginT">Вход</span><button class="iconbtn" id="loginX" aria-label="Закрыть"><svg class="ic"><use href="#i-close"/></svg></button></div>
-        <p class="t-label">В демо пароль не нужен, роль можно сменить без выхода.</p>
-        <label class="lbl">Логин<input class="inp" placeholder="Например, ruslan" autocomplete="off"></label>
-        <label class="lbl">Пароль<input class="inp" type="password" placeholder="В демо не нужен" autocomplete="off"></label>
-        <div>
+        <p class="t-label" id="loginHint">В демо пароль не нужен, роль можно сменить без выхода.</p>
+        <p class="t-label" id="loginWho" hidden><b id="whoName"></b><br><span id="whoRole"></span></p>
+        <label class="lbl" id="lblLogin"><span>Логин</span><input class="inp" id="inLogin" placeholder="Например, ruslan" autocomplete="off" autocapitalize="off"></label>
+        <label class="lbl" id="lblPinOld" hidden><span>Временный ПИН</span><input class="inp" id="inPinOld" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
+        <label class="lbl" id="lblPin"><span id="lblPinText">Пароль</span><input class="inp" id="inPin" type="password" inputmode="numeric" placeholder="В демо не нужен" autocomplete="off"></label>
+        <label class="lbl" id="lblPin2" hidden><span>Повторите новый ПИН</span><input class="inp" id="inPin2" type="password" inputmode="numeric" maxlength="6" autocomplete="off"></label>
+        <p class="t-label t-err" id="loginErr" role="alert" hidden></p>
+        <div id="rpBox">
           <button class="rp-btn" id="rpBtn" aria-expanded="false"><span class="t-label">Войти как</span><span class="rp-val" id="rpVal">Владелец</span><svg class="ic"><use href="#i-chevron-down"/></svg></button>
           <div class="rp-list" id="rpList"><div class="rp-inner" id="rpInner"></div></div>
         </div>
         <div class="lbl">Тема<div class="seg" style="grid-template-columns:repeat(2,minmax(0,1fr))"><button class="pick" data-k="t" data-val="light">Светлая</button><button class="pick" data-k="t" data-val="dark">Тёмная</button></div></div>
         <button class="btn btn-main" id="doLogin">Войти</button>
+        <button class="btn btn-second" id="doLogout" hidden>Выйти</button>
       </div>
     </div>
   </div>
@@ -125,6 +130,8 @@
 <script src="js/data.js"></script>
 <script src="js/state.js"></script>
 <script src="js/helpers.js"></script>
+<script src="js/api.js"></script>
+<script src="js/login.js"></script>
 <script src="js/screens/today.js"></script>
 <script src="js/screens/more.js"></script>
 <script src="js/screens/products.js"></script>

@@ -12,4 +12,7 @@ if (!SHOWCASE) {
   st.t = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   window.addEventListener('resize', function () { var w = layoutByWidth(); if (st.w !== w) { st.w = w; render(); } });   // окно изменили, и вид сменился сам
 }
+// Открыто с сервера (http): пока не узнали, вошёл ли человек (serverInit), содержимое скрыто, чтобы оно не мелькнуло
+if (/^https?:$/.test(location.protocol)) document.documentElement.classList.add('locked');
 render(); renderRoles();
+serverInit();

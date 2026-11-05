@@ -23,3 +23,7 @@
 .opt[aria-pressed="true"] { font-weight: 800; }
 .opt .ic { width: 20px; height: 20px; visibility: hidden; }
 .opt[aria-pressed="true"] .ic { visibility: visible; }
+/* ===== Вход через сервер ===== */
+#login [hidden] { display: none !important; }   /* скрытые элементы окна входа прячутся, даже если у них задан display */
+.t-err { color: var(--bad); font-weight: 500; }
+html.locked #frame .app { visibility: hidden; }  /* пока не вошли через сервер, за окном входа ничего не видно */

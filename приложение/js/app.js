@@ -71,7 +71,7 @@ function renderRoles() {
 }
 function openLogin(open) {
   $('login').classList.toggle('open', open);
-  if (open) { pendingRole = st.role; renderRoles(); $('rpList').classList.remove('open'); $('rpBtn').setAttribute('aria-expanded', 'false'); setTimeout(function () { $('login').querySelector('.inp').focus(); }, 60); }
+  if (open) { pendingRole = st.role; renderRoles(); if (SERVER.on) renderLoginMode(); $('rpList').classList.remove('open'); $('rpBtn').setAttribute('aria-expanded', 'false'); setTimeout(function () { $('login').querySelector('.inp').focus(); }, 60); }
   else $('userBtn').focus();
 }
 function goTo(name) { if ((name === 'sale' || name === 'return') && st.screen !== name && st.screen !== 'client-new') st.prev = st.screen; if (name === 'sale' && st.screen !== 'sale' && st.screen !== 'client-new' && st.sale.done) st.sale = newSale(); if (name === 'return' && st.screen !== 'return') st.ret = initRet(); if (name === 'transfer-new' && st.screen !== 'transfer-new') st.nt = newNt(); if (name === 'shift-close' && st.screen !== 'shift-close') st.sc = newSc(); if (name === 'expense-new' && st.screen !== 'expense-new') st.expNew = { cat: null, amt: '', note: '' }; if (!/^(transfer|order|shift|cash|expenses|client|pers)/.test(name)) st.flash = ''; st.screen = name; render(); $('content').scrollTop = 0; }
