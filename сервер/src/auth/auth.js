@@ -127,6 +127,28 @@ export function createStaff(db, actor, { login: loginName, fullName, phone, role
   }
 }
 
+// Первый владелец при установке на новый сервер. Работает только пока в базе нет ни одного владельца.
+// Возвращает временный ПИН (показывается один раз; при первом входе его надо сменить). В журнал пишется «owner_bootstrap»,
+// по этой записи db:reset понимает, что база настоящая, и отказывается её стирать.
+export function createFirstOwner(db, { login: loginName, fullName }) {
+  if (typeof loginName !== 'string' || !/^[a-z0-9._-]{3,32}$/i.test(loginName)) return { ok: false, code: 'bad_login' };
+  if (typeof fullName !== 'string' || !fullName.trim() || fullName.length > 100) return { ok: false, code: 'bad_name' };
+  const owner = db.prepare("SELECT id FROM roles WHERE code = 'owner'").get();
+  if (!owner) return { ok: false, code: 'no_roles' };   // миграции не применялись
+  if (db.prepare('SELECT 1 FROM staff WHERE role_id = ?').get(owner.id)) return { ok: false, code: 'owner_exists' };
+  const tempPin = randomPin();
+  const res = db.prepare('INSERT INTO staff (login, full_name, role_id, shop_id, pin_hash, must_change_pin) VALUES (?, ?, ?, NULL, ?, 1)')
+    .run(loginName, fullName.trim(), owner.id, hashPin(tempPin));
+  const id = Number(res.lastInsertRowid);
+  audit(db, id, 'owner_bootstrap', `staff:${id}`, { login: loginName });
+  return { ok: true, id, login: loginName, tempPin };
+}
+
+// Настоящая ли это база (в ней создавали первого владельца)? Для защиты от случайного db:reset.
+export function isRealInstall(db) {
+  return Boolean(db.prepare("SELECT 1 FROM audit_log WHERE action = 'owner_bootstrap'").get());
+}
+
 // «Уволить»: не удаляем, а помечаем; все его пропуска удаляются, телефон сразу выбрасывает его из системы.
 export function dismissStaff(db, actor, staffId) {
   const target = db.prepare('SELECT s.id, s.is_active, r.code AS role_code FROM staff s JOIN roles r ON r.id = s.role_id WHERE s.id = ?').get(staffId);

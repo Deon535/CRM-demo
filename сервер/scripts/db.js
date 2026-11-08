@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import readline from 'node:readline/promises';
 import { openDb, migrate, schemaVersion, DB_FILE } from '../src/db/db.js';
 import { seedDemo } from '../src/db/seed-demo.js';
+import { isRealInstall } from '../src/auth/auth.js';
 
 const command = process.argv[2];
 const yes = process.argv.includes('--yes');
@@ -18,6 +19,17 @@ if (command === 'migrate') {
   showResult(db, migrate(db));
   db.close();
 } else if (command === 'reset') {
+  // «Замок»: если в базе создавали настоящего владельца, сброс отказывает (даже с --yes)
+  if (fs.existsSync(DB_FILE)) {
+    const check = openDb();
+    migrate(check);
+    const real = isRealInstall(check);
+    check.close();
+    if (real) {
+      console.log('ОТКАЗ. Это настоящая база (в ней создан первый владелец), сброс запрещён. Если точно нужно стереть, удалите файл базы вручную.');
+      process.exit(1);
+    }
+  }
   if (!yes) {
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
     const answer = await rl.question(`Это УДАЛИТ базу ${DB_FILE} и создаст заново с демо-данными. Напишите «да» для продолжения: `);
