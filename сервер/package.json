@@ -14,6 +14,7 @@
     "db:reset": "node scripts/db.js reset",
     "owner:create": "node scripts/create-owner.js",
     "db:backup": "node scripts/backup.js",
+    "deploy": "bash scripts/deploy.sh",
     "test": "node --test"
   },
   "dependencies": {
