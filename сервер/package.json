@@ -13,6 +13,7 @@
     "db:migrate": "node scripts/db.js migrate",
     "db:reset": "node scripts/db.js reset",
     "owner:create": "node scripts/create-owner.js",
+    "db:backup": "node scripts/backup.js",
     "test": "node --test"
   },
   "dependencies": {
