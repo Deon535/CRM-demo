@@ -1,4 +1,4 @@
-// ▪ Файл сервер/src/db/seed-demo.js: демо-данные для «сбросить демо»: магазины (seed-demo.sql) и сотрудники. На настоящую базу клиента не применяются.
+// ▪ Файл сервер/src/db/seed-demo.js: демо-данные для «сбросить демо»: магазины (seed-demo.sql), сотрудники и товары. На настоящую базу клиента не применяются.
 import fs from 'node:fs';
 import path from 'node:path';
 import { hashPin } from '../auth/crypto.js';
@@ -22,6 +22,45 @@ const DEMO_STAFF = [
   [11, 'zarema',  'Зарема Гаджиева',  'accountant',     null,        '+7 928 555-02-11'],
 ];
 
+// Товары демо (js/data.js, DATA и EXTRA). rows: «доступно» по магазинам (порядок SHOP_NAMES) и размерам (порядок sizes).
+// hold: бронь, она вычитается из «доступно», поэтому «на полке» записываем на столько же больше.
+const SHOP_NAMES = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
+const DEMO_PRODUCTS = [
+  { art: 'OX-WH', name: 'Рубашка Oxford', cat: 'Рубашки', color: 'белый', price: 4990, cost: 2600, sizes: ['S', 'M', 'L', 'XL'], rows: [[1, 3, 2, 0], [0, 1, 1, 0], [0, 2, 0, 1], [1, 0, 1, 0]], hold: { shop: 0, size: 1, n: 1 } },
+  { art: 'CH-BL', name: 'Брюки чинос', cat: 'Брюки', color: 'синий', price: 5490, cost: 2800, sizes: ['48', '50', '52'], rows: [[0, 1, 2], [1, 0, 0], [0, 2, 0], [0, 0, 1]] },
+  { art: 'JK-GR', name: 'Куртка зимняя', cat: 'Куртки', color: 'серый', price: 12900, cost: 6500, sizes: ['M', 'L', 'XL'], rows: [[1, 2, 1], [0, 1, 0], [0, 0, 1], [0, 0, 0]] },
+  { art: 'BL-BK', name: 'Ремень кожаный', cat: 'Аксессуары', color: 'чёрный', price: 1990, cost: 800, sizes: ['90', '100', '110'], rows: [[4, 5, 3], [2, 1, 0], [1, 2, 1], [1, 1, 1]] },
+  { art: 'SK-CT', name: 'Носки хлопок', cat: 'Аксессуары', color: 'хлопок', price: 390, cost: 150, sizes: ['39–42', '43–46'], rows: [[40, 38], [10, 8], [12, 10], [12, 10]] },
+];
+const DEMO_CATEGORIES = ['Рубашки', 'Брюки', 'Куртки', 'Аксессуары'];   // порядок как в чипах фильтра на экране
+const DEMO_BATCH_DATE = '2026-10-01T09:00:00.000Z';
+
+function seedProducts(db) {
+  const shopId = db.prepare('SELECT id FROM shops WHERE name = ?');
+  const addCat = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)');
+  DEMO_CATEGORIES.forEach((name, i) => addCat.run(name, i));
+  const catId = db.prepare('SELECT id FROM categories WHERE name = ?');
+  const addProduct = db.prepare('INSERT INTO products (article, name, category_id, color, price_kopecks) VALUES (?, ?, ?, ?, ?)');
+  const addVariant = db.prepare('INSERT INTO variants (product_id, size, sort_order) VALUES (?, ?, ?)');
+  const addStock = db.prepare('INSERT INTO stock (variant_id, shop_id, qty) VALUES (?, ?, ?)');
+  const addBatch = db.prepare('INSERT INTO batches (product_id, cost_kopecks, received_at) VALUES (?, ?, ?)');
+  const addHold = db.prepare('INSERT INTO holds (variant_id, shop_id, qty, expires_at, staff_id) VALUES (?, ?, ?, ?, ?)');
+  for (const p of DEMO_PRODUCTS) {
+    const productId = Number(addProduct.run(p.art, p.name, catId.get(p.cat).id, p.color, p.price * 100).lastInsertRowid);
+    addBatch.run(productId, p.cost * 100, DEMO_BATCH_DATE);
+    p.sizes.forEach((size, j) => {
+      const variantId = Number(addVariant.run(productId, size, j).lastInsertRowid);
+      SHOP_NAMES.forEach((shop, i) => {
+        const held = p.hold && p.hold.shop === i && p.hold.size === j ? p.hold.n : 0;
+        const qty = p.rows[i][j] + held;
+        if (qty > 0) addStock.run(variantId, shopId.get(shop).id, qty);
+        // демо-бронь на 3 дня от момента сброса; оформил её Камиль (id 7, Махачкала)
+        if (held) addHold.run(variantId, shopId.get(shop).id, held, new Date(Date.now() + 3 * 86400000).toISOString(), 7);
+      });
+    });
+  }
+}
+
 export function seedDemo(db) {
   db.exec('BEGIN');
   try {
@@ -32,6 +71,7 @@ export function seedDemo(db) {
     for (const [id, login, name, role, shop, phone] of DEMO_STAFF) {
       insert.run(id, login, name, phone, roleId.get(role).id, shop ? shopId.get(shop).id : null, hashPin(DEMO_PIN));
     }
+    seedProducts(db);   // после сотрудников: бронь ссылается на сотрудника
     db.exec('COMMIT');
   } catch (err) {
     db.exec('ROLLBACK');

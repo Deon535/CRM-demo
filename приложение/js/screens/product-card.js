@@ -8,9 +8,11 @@ function productHtml() {
     return '<div class="shop' + (i === own ? ' own' : '') + '"><div class="shop-h"><b>' + s + '</b>' + (i === own ? '<span class="chip chip-neutral">ваш магазин</span>' : '<span class="t-label"><span class="num">' + n + '</span> шт</span>') + '</div>' +
       '<div class="pills" style="grid-template-columns:repeat(' + x.sizes.length + ',minmax(0,1fr))">' + d.rows[i].map(function (v, j) { return '<div class="pill' + (v ? '' : ' z') + '"><span class="t-label">' + x.sizes[j] + '</span><span class="num">' + (v || '&ndash;') + '</span></div>'; }).join('') + '</div></div>';
   }).join('');
-  var hold = x.hold ? ' В брони <span class="num">' + x.hold.n + '</span> шт (' + x.sizes[x.hold.size] + ', ' + SHOPS[x.hold.shop] + ').' : '';
+  var hl = x.holds || (x.hold ? [x.hold] : []);   // с сервера приходит список броней (holds), в демо-данных одна (hold)
+  var hold = hl.length ? ' В брони <span class="num">' + sum(hl.map(function (h) { return h.n; })) + '</span> шт (' + hl.map(function (h) { return x.sizes[h.size] + ', ' + SHOPS[h.shop]; }).join('; ') + ').' : '';
   var legend = '<div class="t-label">Числа это «доступно»: на полке минус бронь.' + hold + (own >= 0 ? ' Ваш магазин выделен.' : '') + '</div>';
-  var costBlock = st.role === 'Владелец' ?
+  // С сервером закупка показывается, если сервер её прислал (есть право «cost»); без сервера, как раньше, только владельцу
+  var costBlock = (SERVER.on ? x.cost != null : st.role === 'Владелец') ?
     '<div><div class="sec-h"><span class="t-h2">Закупка и прибыль</span></div>' +
     '<div class="rowline"><span class="t-label">Закупка, последняя партия</span><span class="num" style="font-weight:700">' + money(x.cost) + '</span></div>' +
     '<div class="rowline"><span class="t-label">Прибыль с вещи</span><span class="num good" style="font-weight:800">' + money(x.price - x.cost) + '</span></div></div>' : '';

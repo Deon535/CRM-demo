@@ -3,6 +3,7 @@ import path from 'node:path';
 import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import { registerAuth } from './auth/routes.js';
+import { registerProducts } from './modules/products.js';
 import { schemaVersion } from './db/db.js';
 
 const SCREEN_DIR = path.join(import.meta.dirname, '..', '..', 'приложение');
@@ -12,6 +13,7 @@ export async function buildApp(db, { logger = true, secureCookies = process.env.
   const app = Fastify({ logger, trustProxy: process.env.TRUST_PROXY === '1' });
 
   registerAuth(app, { db, secureCookies });
+  registerProducts(app, { db });
 
   // Адрес проверки: «сервер жив?» и какая версия базы
   app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString(), schema: schemaVersion(db) }));

@@ -52,9 +52,16 @@ function enterAs(user) {
   var keep = { w: st.w, t: st.t, sb: st.sb };
   st = init(); st.w = keep.w; st.t = keep.t; st.sb = keep.sb;   // чистое состояние для нового человека
   st.role = user.role.name; st.screen = cfg().home; st.prev = st.screen;
-  document.documentElement.classList.remove('locked');
-  openLogin(false);
-  render();
+  // Магазин берём из карточки сотрудника, а не демо-магазин роли («Дербент» у продавца). «в Дербенте»: к названию на «а» меняем «а» на «е», иначе добавляем «е».
+  if (user.shop && ROLE[st.role].shop) { ROLE[st.role].shop = user.shop.name; ROLE[st.role].shopIn = user.shop.name.slice(-1) === 'а' ? user.shop.name.slice(0, -1) + 'е' : user.shop.name + 'е'; }
+  var show = function () { document.documentElement.classList.remove('locked'); openLogin(false); render(); };
+  if (!user.permissions.stock) { clearCatalog(); show(); return; }   // роли без права «Остатки» (курьер, бухгалтер) каталог не получают
+  loadCatalog().then(show).catch(function () {
+    apiCall('POST', '/api/logout').then(function () {
+      SERVER.user = null; renderLoginMode(); openLogin(true);
+      loginError('Не удалось загрузить товары. Попробуйте войти ещё раз.');
+    });
+  });
 }
 
 // Кнопка «Войти» (или «Сохранить ПИН») при работе с сервером
@@ -89,6 +96,7 @@ function submitLogin() {
 function doLogout() {
   apiCall('POST', '/api/logout').then(function () {
     SERVER.user = null;
+    clearCatalog();   // товар (и закупочные цены) прежнего сотрудника из памяти убираем
     var keep = { w: st.w, t: st.t, sb: st.sb };
     st = init(); st.w = keep.w; st.t = keep.t; st.sb = keep.sb;
     clearLoginFields();

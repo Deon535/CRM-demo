@@ -133,6 +133,7 @@ document.addEventListener('click', function (e) {
   if (t.closest('[data-rulesreset]')) { st.rules = cloneRules(); render(); return; }
   var xRs = t.closest('[data-rolesel]'); if (xRs) { st.roleSel = xRs.dataset.rolesel; render(); return; }
   var xTg = t.closest('[data-tog]'); if (xTg) { var xt = xTg.dataset.tog.split(':'); st[xt[0]][+xt[1]] = !st[xt[0]][+xt[1]]; render(); return; }
+  if (t.closest('[data-more]')) { st.pLim += PROD_PAGE; render(); return; }
   var pr = t.closest('[data-product]'); if (pr) { st.product = +pr.dataset.product; goTo('product'); return; }
   var go = t.closest('[data-go]'); if (go) { goTo(go.dataset.go); return; }
   if (t.closest('[data-back]')) { goTo(st.prev || 'today'); return; }
