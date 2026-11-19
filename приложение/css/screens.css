@@ -168,6 +168,7 @@ a.btn { text-decoration: none; }
 .dtwo.even { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .dtwo.even .btn { padding: 0 var(--s3); }
 a.iconbtn { color: var(--text); }
+.btn[disabled], .fchip[disabled] { opacity: .4; cursor: default; }
 @container c (max-width: 440px) { .fchips.eq.t4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .callrow { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); min-height: 64px; border-bottom: 1px solid var(--line); }
 .callrow:last-child { border-bottom: 0; }

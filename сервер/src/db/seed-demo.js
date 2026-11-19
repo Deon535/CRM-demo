@@ -24,7 +24,7 @@ const DEMO_STAFF = [
 
 // Товары демо (js/data.js, DATA и EXTRA). rows: «доступно» по магазинам (порядок SHOP_NAMES) и размерам (порядок sizes).
 // hold: бронь, она вычитается из «доступно», поэтому «на полке» записываем на столько же больше.
-const SHOP_NAMES = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
+export const SHOP_NAMES = ['Махачкала', 'Каспийск', 'Дербент', 'Хасавюрт'];
 const DEMO_PRODUCTS = [
   { art: 'OX-WH', name: 'Рубашка Oxford', cat: 'Рубашки', color: 'белый', price: 4990, cost: 2600, sizes: ['S', 'M', 'L', 'XL'], rows: [[1, 3, 2, 0], [0, 1, 1, 0], [0, 2, 0, 1], [1, 0, 1, 0]], hold: { shop: 0, size: 1, n: 1 } },
   { art: 'CH-BL', name: 'Брюки чинос', cat: 'Брюки', color: 'синий', price: 5490, cost: 2800, sizes: ['48', '50', '52'], rows: [[0, 1, 2], [1, 0, 0], [0, 2, 0], [0, 0, 1]] },
@@ -35,7 +35,8 @@ const DEMO_PRODUCTS = [
 const DEMO_CATEGORIES = ['Рубашки', 'Брюки', 'Куртки', 'Аксессуары'];   // порядок как в чипах фильтра на экране
 const DEMO_BATCH_DATE = '2026-10-01T09:00:00.000Z';
 
-function seedProducts(db) {
+// withHolds: класть ли демо-бронь (она ссылается на демо-сотрудника Камиля, на настоящей базе его нет)
+export function seedProducts(db, { withHolds = true } = {}) {
   const shopId = db.prepare('SELECT id FROM shops WHERE name = ?');
   const addCat = db.prepare('INSERT INTO categories (name, sort_order) VALUES (?, ?)');
   DEMO_CATEGORIES.forEach((name, i) => addCat.run(name, i));
@@ -51,7 +52,7 @@ function seedProducts(db) {
     p.sizes.forEach((size, j) => {
       const variantId = Number(addVariant.run(productId, size, j).lastInsertRowid);
       SHOP_NAMES.forEach((shop, i) => {
-        const held = p.hold && p.hold.shop === i && p.hold.size === j ? p.hold.n : 0;
+        const held = withHolds && p.hold && p.hold.shop === i && p.hold.size === j ? p.hold.n : 0;
         const qty = p.rows[i][j] + held;
         if (qty > 0) addStock.run(variantId, shopId.get(shop).id, qty);
         // демо-бронь на 3 дня от момента сброса; оформил её Камиль (id 7, Махачкала)

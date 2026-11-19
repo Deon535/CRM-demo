@@ -149,7 +149,9 @@ function cloneClients() { return JSON.parse(JSON.stringify(CLIENTS)); }
 var SEASONS = [['Все', 'Все'], ['Зима', 'Зима'], ['Весна', 'Весна'], ['Лето', 'Лето'], ['Осень', 'Осень']];
 var seasonOf = function (ago) { var m = new Date(2026, 10, 1 - ago).getMonth(); return m === 11 || m < 2 ? 'Зима' : m < 5 ? 'Весна' : m < 8 ? 'Лето' : 'Осень'; };
 var CLOTH_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
-var newSale = function () { return { q: '', cid: null, done: false }; };
+// Чек: q клиент (поиск), cid клиент, items корзина [{i номер товара в DATA, j номер размера, n штук}], pq поиск товара, pick товар, у которого выбираем размер,
+// pct скидка %, pay способ оплаты, shop магазин (только у владельца), uid номер чека для защиты от дублей, busy идёт отправка, err ошибка, res итог после «Продано»
+var newSale = function () { return { q: '', cid: null, done: false, items: [], pq: '', pick: null, pct: 0, pay: 'card', shop: null, uid: null, busy: false, err: '', res: null }; };
 // Журнал действий (ТЗ 8.9): [день, время, кто, тип, что]; новые записи добавляются сверху
 var LOG = [
   [0, '16:05', 'Заур', 'disc', 'Скидка 10% на чек № 2431, минус 1 290 ₽'],
@@ -167,7 +169,7 @@ var LOG = [
 function cloneLog() { return JSON.parse(JSON.stringify(LOG)); }
 var LOG_TYPES = [['Все', 'Все'], ['disc', 'Скидки'], ['ret', 'Возвраты'], ['stock', 'Остатки'], ['cash', 'Касса'], ['hr', 'Сотрудники']];
 // Поля ввода с перерисовкой экрана: ключ → [объект состояния или null для самого st, поле, длина для цифровых]
-var TEXT_IN = { expnote: ['expNew', 'note'], cliq: [null, 'cliQ'], setname: [null, 'shopName'], saleq: ['sale', 'q'], cname: ['cNew', 'n'], cphone: ['cNew', 'phone'], ccity: ['cNew', 'city'], cnote: ['cNew', 'note'], pname: ['pEdit', 'n'], pphone: ['pEdit', 'phone'] };
+var TEXT_IN = { expnote: ['expNew', 'note'], cliq: [null, 'cliQ'], setname: [null, 'shopName'], saleq: ['sale', 'q'], salepq: ['sale', 'pq'], cname: ['cNew', 'n'], cphone: ['cNew', 'phone'], ccity: ['cNew', 'city'], cnote: ['cNew', 'note'], pname: ['pEdit', 'n'], pphone: ['pEdit', 'phone'] };
 var NUM_IN = { expamt: ['expNew', 'amt', 7], cage: ['cNew', 'age', 3], cshoe: ['cNew', 'shoe', 2], ch: ['cNew', 'h', 3], page: ['pEdit', 'age', 2], psal: ['pEdit', 'salary', 6], pmamt: ['pMoney', 'amt', 7] };
 // Настройки (ТЗ 12.2, 12.3, 12.4). Значения правил по умолчанию это решения Магомеда (ТЗ 11), магазин ставит свои.
 var RULES_BASE = { discSeller: 5, discSenior: 10, retDays: 14, retDefect: 30, hold: 3, pct: 2, bonus: 5000, prepay: 10000 };

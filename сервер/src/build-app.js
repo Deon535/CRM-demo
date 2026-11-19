@@ -4,6 +4,7 @@ import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
 import { registerAuth } from './auth/routes.js';
 import { registerProducts } from './modules/products.js';
+import { registerSales } from './modules/sales.js';
 import { schemaVersion } from './db/db.js';
 
 const SCREEN_DIR = path.join(import.meta.dirname, '..', '..', 'приложение');
@@ -14,6 +15,7 @@ export async function buildApp(db, { logger = true, secureCookies = process.env.
 
   registerAuth(app, { db, secureCookies });
   registerProducts(app, { db });
+  registerSales(app, { db });
 
   // Адрес проверки: «сервер жив?» и какая версия базы
   app.get('/api/health', async () => ({ ok: true, time: new Date().toISOString(), schema: schemaVersion(db) }));

@@ -96,8 +96,16 @@ document.addEventListener('click', function (e) {
   var xMn = t.closest('[data-mseason]'); if (xMn) { st.cliSeason = xMn.dataset.mseason; st.flash = ''; render(); return; }
   var xSc = t.closest('[data-salecli]'); if (xSc) { st.sale.cid = +xSc.dataset.salecli; st.sale.q = ''; render(); return; }
   if (t.closest('[data-saleunlink]')) { st.sale.cid = null; render(); return; }
-  if (t.closest('[data-saledone]')) { if (st.sale.cid) { var sc0 = clientById(st.sale.cid), si = Math.max(0, SHOPS.indexOf(cfg().shop)); sc0.buys.push([0, 0, 'M', si, 1], [0, 1, '50', si, 1]); } st.sale.done = true; render(); $('content').scrollTop = 0; return; }
+  if (t.closest('[data-saledone]')) { saleFinish(); return; }
   if (t.closest('[data-salenew]')) { st.sale = newSale(); render(); return; }
+  var xSp = t.closest('[data-saleprod]'); if (xSp) { st.sale.pick = +xSp.dataset.saleprod; st.sale.err = ''; render(); return; }
+  var xSz = t.closest('[data-salesize]'); if (xSz) { saleAdd(st.sale.pick, +xSz.dataset.salesize); return; }
+  if (t.closest('[data-salepickx]')) { st.sale.pick = null; render(); return; }
+  var xSl = t.closest('[data-saleline]'); if (xSl) { saleQty(+xSl.dataset.saleline, +xSl.dataset.saledelta); return; }
+  var xSpc = t.closest('[data-salepct]'); if (xSpc) { salePct(+xSpc.dataset.salepct); return; }
+  var xSpy = t.closest('[data-salepay]'); if (xSpy) { st.sale.pay = xSpy.dataset.salepay; saleTouch(); render(); return; }
+  var xSsh = t.closest('[data-saleshop]'); if (xSsh) { st.sale.shop = xSsh.dataset.saleshop; st.sale.items = []; st.sale.pick = null; saleTouch(); render(); return; }
+  if (t.closest('[data-tosale]')) { if (st.sale.done) st.sale = newSale(); st.sale.pick = st.product; goTo('sale'); return; }
   if (t.closest('[data-pnew]')) { st.pEdit = { id: null, n: '', phone: '', role: 'Продавец', shop: 'Махачкала', salary: '', pct: st.rules.pct, age: '' }; goTo('person-edit'); return; }
   var xPd = t.closest('[data-pedit]'); if (xPd) { var p0 = st.staff.filter(function (p) { return p.id === +xPd.dataset.pedit; })[0]; st.pEdit = { id: p0.id, n: p0.n, phone: p0.phone, role: p0.role, shop: p0.shop, salary: String(p0.salary), pct: rateOf(p0), age: p0.age ? String(p0.age) : '' }; goTo('person-edit'); return; }
   var xPr = t.closest('[data-prole]'); if (xPr) { st.pEdit.role = xPr.dataset.prole; render(); return; }

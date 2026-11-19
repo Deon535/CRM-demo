@@ -16,7 +16,7 @@ function productHtml() {
     '<div><div class="sec-h"><span class="t-h2">Закупка и прибыль</span></div>' +
     '<div class="rowline"><span class="t-label">Закупка, последняя партия</span><span class="num" style="font-weight:700">' + money(x.cost) + '</span></div>' +
     '<div class="rowline"><span class="t-label">Прибыль с вещи</span><span class="num good" style="font-weight:800">' + money(x.price - x.cost) + '</span></div></div>' : '';
-  var btns = c.bar ? '<button class="btn btn-main" data-go="sale">Положить в чек</button><button class="btn btn-second" data-hold>Забронировать</button>' :
+  var btns = c.bar ? '<button class="btn btn-main" data-tosale>Положить в чек</button><button class="btn btn-second" data-hold>Забронировать</button>' :
     st.role === 'Владелец' ? '<button class="btn btn-second" data-go="transfer-new">Переместить товар</button>' : '<button class="btn btn-main">Добавить в заказ</button>';
   return '<section class="scr">' +
     '<div class="top-row"><button class="iconbtn" data-go="products" aria-label="Назад к списку"><svg class="ic"><use href="#i-chevron-left"/></svg></button><span class="t-label">Товар / ' + d.cat + '</span></div>' +

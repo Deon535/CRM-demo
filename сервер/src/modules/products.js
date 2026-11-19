@@ -55,11 +55,11 @@ export function catalogFor(db, user) {
         if (h) holds.push({ shop: i, size: j, n: h });
       });
     });
-    const item = { id: p.id, article: p.article, name: p.name, category: p.category, color: p.color, priceKopecks: p.price_kopecks, sizes: vs.map((v) => v.size), rows, holds };
+    const item = { id: p.id, article: p.article, name: p.name, category: p.category, color: p.color, priceKopecks: p.price_kopecks, sizes: vs.map((v) => v.size), variantIds: vs.map((v) => v.id), rows, holds };
     if (showCost) item.costKopecks = cost.get(p.id) ?? null;
     return item;
   });
-  return { shops: shops.map((s) => s.name), categories: cats, items };
+  return { shops: shops.map((s) => s.name), shopIds: shops.map((s) => s.id), categories: cats, items };
 }
 
 export function registerProducts(app, { db }) {
