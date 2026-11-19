@@ -144,6 +144,19 @@ export function createFirstOwner(db, { login: loginName, fullName }) {
   return { ok: true, id, login: loginName, tempPin };
 }
 
+// «Забыл ПИН»: ставит человеку новый временный ПИН (показывается один раз), снимает блокировку входа, выкидывает все его пропуска.
+// При следующем входе ПИН надо сменить. Запускается командой npm run pin:reset на самом сервере (кто туда попал по SSH, тому доверяем).
+export function resetPin(db, loginName) {
+  const staff = db.prepare('SELECT id, login, is_active FROM staff WHERE login = ?').get(String(loginName ?? ''));
+  if (!staff) return { ok: false, code: 'not_found' };
+  if (!staff.is_active) return { ok: false, code: 'inactive' };
+  const tempPin = randomPin();
+  db.prepare('UPDATE staff SET pin_hash = ?, must_change_pin = 1, failed_attempts = 0, locked_until = NULL WHERE id = ?').run(hashPin(tempPin), staff.id);
+  db.prepare('DELETE FROM sessions WHERE staff_id = ?').run(staff.id);
+  audit(db, staff.id, 'pin_reset', `staff:${staff.id}`, { by: 'server_command' });
+  return { ok: true, login: staff.login, tempPin };
+}
+
 // Настоящая ли это база (в ней создавали первого владельца)? Для защиты от случайного db:reset.
 export function isRealInstall(db) {
   return Boolean(db.prepare("SELECT 1 FROM audit_log WHERE action = 'owner_bootstrap'").get());
